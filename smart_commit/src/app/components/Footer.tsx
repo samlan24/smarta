@@ -45,7 +45,7 @@ const Footer = () => {
               <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
                 <Terminal className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="text-xl font-bold">Smart Commit</span>
+              <span className="text-xl font-bold">Smarta</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
               AI-powered commit message generator for developers who want
@@ -91,7 +91,7 @@ const Footer = () => {
         <div className="pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-muted-foreground text-center md:text-left">
-              © 2024 Smart Commit. All rights reserved.
+              © 2024 Smarta. All rights reserved.
             </div>
 
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm text-muted-foreground text-center md:text-right">

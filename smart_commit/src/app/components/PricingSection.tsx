@@ -8,7 +8,7 @@ const PricingSection = () => {
       icon: Zap,
       price: "$0",
       period: "/month",
-      description: "Perfect for trying Smart Commit",
+      description: "Perfect for trying Smarta",
       features: [
         "50 commits/month",
         "AI-powered messages",
