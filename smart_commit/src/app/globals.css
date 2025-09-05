@@ -148,7 +148,7 @@ body {
   transition-timing-function: var(--transition-spring);
 }
 @utility bg-gradient-primary {
-  background: var(--gradient-primary);
+  background-image: var(--gradient-primary);
 }
 @utility bg-gradient-hero {
   background: var(--gradient-hero);

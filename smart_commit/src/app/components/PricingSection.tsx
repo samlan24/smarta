@@ -13,10 +13,10 @@ const PricingSection = () => {
         "50 commits/month",
         "AI-powered messages",
         "Conventional commit format",
-        "No setup required"
+        "No setup required",
       ],
       cta: "Get Started Free",
-      popular: false
+      popular: false,
     },
     {
       name: "Pro",
@@ -30,11 +30,11 @@ const PricingSection = () => {
         "Custom templates",
         "Priority support",
         "Team collaboration",
-        "Analytics dashboard"
+        "Analytics dashboard",
       ],
       cta: "Upgrade to Pro",
-      popular: true
-    }
+      popular: true,
+    },
   ];
 
   return (
@@ -45,7 +45,8 @@ const PricingSection = () => {
             Simple, Developer-Friendly Pricing
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start free, upgrade when you need more. No hidden fees, cancel anytime.
+            Start free, upgrade when you need more. No hidden fees, cancel
+            anytime.
           </p>
         </div>
 
@@ -54,7 +55,9 @@ const PricingSection = () => {
             <div
               key={index}
               className={`card-gradient p-8 relative hover-lift ${
-                plan.popular ? 'ring-2 ring-primary shadow-glow' : ''
+                plan.popular
+                  ? "ring-2 ring-blue-500/60 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                  : ""
               }`}
             >
               {plan.popular && (
@@ -75,13 +78,18 @@ const PricingSection = () => {
 
                 <div className="flex items-baseline justify-center">
                   <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground ml-1">{plan.period}</span>
+                  <span className="text-muted-foreground ml-1">
+                    {plan.period}
+                  </span>
                 </div>
               </div>
 
               <div className="space-y-4 mb-8">
                 {plan.features.map((feature, featureIndex) => (
-                  <div key={featureIndex} className="flex items-center space-x-3">
+                  <div
+                    key={featureIndex}
+                    className="flex items-center space-x-3"
+                  >
                     <Check className="w-5 h-5 text-accent flex-shrink-0" />
                     <span className="text-muted-foreground">{feature}</span>
                   </div>
@@ -89,7 +97,9 @@ const PricingSection = () => {
               </div>
 
               <Button
-                className={plan.popular ? "btn-hero w-full" : "btn-outline-hero w-full"}
+                className={
+                  plan.popular ? "btn-hero w-full" : "btn-outline-hero w-full"
+                }
               >
                 {plan.cta}
               </Button>
@@ -100,7 +110,7 @@ const PricingSection = () => {
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground">
             All plans include our core AI technology and 24/7 support.
-            <br />Enterprise solutions available for teams of 50+.
+
           </p>
         </div>
       </div>

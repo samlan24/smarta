@@ -6,37 +6,37 @@ const Footer = () => {
       { label: "Features", href: "#features" },
       { label: "Pricing", href: "#pricing" },
       { label: "Documentation", href: "#docs" },
-      { label: "API Reference", href: "#api" }
+      { label: "API Reference", href: "#api" },
     ],
     Company: [
       { label: "About", href: "#about" },
       { label: "Blog", href: "#blog" },
       { label: "Careers", href: "#careers" },
-      { label: "Contact", href: "#contact" }
+      { label: "Contact", href: "#contact" },
     ],
     Support: [
       { label: "Help Center", href: "#help" },
       { label: "Community", href: "#community" },
       { label: "Status", href: "#status" },
-      { label: "Bug Reports", href: "#bugs" }
+      { label: "Bug Reports", href: "#bugs" },
     ],
     Legal: [
       { label: "Privacy Policy", href: "#privacy" },
       { label: "Terms of Service", href: "#terms" },
       { label: "Security", href: "#security" },
-      { label: "GDPR", href: "#gdpr" }
-    ]
+      { label: "GDPR", href: "#gdpr" },
+    ],
   };
 
   const socialLinks = [
     { icon: Github, href: "#github", label: "GitHub" },
     { icon: Twitter, href: "#twitter", label: "Twitter" },
-    { icon: Mail, href: "#email", label: "Email" }
+    { icon: Mail, href: "#email", label: "Email" },
   ];
 
   return (
-    <footer className="bg-card border-t border-border px-24">
-      <div className="container mx-auto px-6 py-16">
+    <footer className="bg-card border-t border-border px-6 sm:px-12 lg:px-24">
+      <div className="container mx-auto py-16">
         {/* Main footer content */}
         <div className="grid lg:grid-cols-5 gap-8 mb-12">
           {/* Brand column */}
@@ -48,8 +48,8 @@ const Footer = () => {
               <span className="text-xl font-bold">Smart Commit</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-              AI-powered commit message generator for developers who want consistent,
-              professional git history without the manual effort.
+              AI-powered commit message generator for developers who want
+              consistent, professional git history without the manual effort.
             </p>
 
             {/* Social links */}
@@ -90,13 +90,13 @@ const Footer = () => {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground text-center md:text-left">
               © 2024 Smart Commit. All rights reserved.
             </div>
 
-            <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm text-muted-foreground text-center md:text-right">
               <span>Made for developers, by developers</span>
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-1 justify-center sm:justify-end">
                 <span>Built with</span>
                 <span className="text-red-500">♥</span>
                 <span>and AI</span>

@@ -5,26 +5,29 @@ const OutcomeSection = () => {
     {
       icon: GitBranch,
       title: "Consistent Format",
-      description: "Every commit explains exactly what changed and why, making code reviews and debugging easier.",
+      description:
+        "Every commit explains exactly what changed and why, making code reviews and debugging easier.",
       terminalExample: `git log --oneline
 <span class="code-string">feat:</span> add user authentication middleware
 <span class="code-string">fix:</span> resolve password validation edge case
-<span class="code-string">refactor:</span> simplify database connection logic`
+<span class="code-string">refactor:</span> simplify database connection logic`,
     },
     {
       icon: CheckCircle,
       title: "Clear Documentation",
-      description: "AI analyzes your actual code changes to generate meaningful, contextual commit messages.",
+      description:
+        "AI analyzes your actual code changes to generate meaningful, contextual commit messages.",
       terminalExample: `<span class="code-comment"># Before: git commit -m "auth stuff"</span>
 <span class="code-comment"># After: AI-generated message</span>
 <span class="code-string">feat(auth):</span> implement JWT middleware with refresh tokens
 
-<span class="code-comment"># Includes proper scope and detailed description</span>`
+<span class="code-comment"># Includes proper scope and detailed description</span>`,
     },
     {
       title: "Time Saved",
       icon: Clock,
-      description: "Generate descriptive commit messages in 3 seconds instead of thinking for minutes.",
+      description:
+        "Generate descriptive commit messages in 3 seconds instead of thinking for minutes.",
       terminalExample: `<span class="code-comment"># Traditional workflow</span>
 git add src/auth.js
 <span class="code-comment"># 2-3 minutes thinking...</span>
@@ -33,40 +36,52 @@ git commit -m "add auth"
 <span class="code-comment"># Smart Commit workflow</span>
 git add src/auth.js
 smart-commit <span class="code-comment"># 3 seconds</span>
-<span class="code-string">✅ feat: add user authentication middleware</span>`
-    }
+<span class="code-string">✅ feat: add user authentication middleware</span>`,
+    },
   ];
 
   return (
-    <section className="py-20 bg-card/50 px-24">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-6">
+    <section className="py-16 sm:py-20 bg-card/50 px-6 sm:px-12 lg:px-24">
+      <div className="container mx-auto">
+        {/* Section Header */}
+        <div className="text-center mb-12 sm:mb-16 space-y-4 sm:space-y-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-4xl font-bold mb-2 sm:mb-6">
             Clean, Meaningful Git History
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            AI can analyze your code changes and write better commit messages than manual effort.
+          <p className="text-base sm:text-lg text-muted-foreground max-w-full sm:max-w-3xl mx-auto leading-relaxed">
+            AI can analyze your code changes and write better commit messages
+            than manual effort.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* Outcomes Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           {outcomes.map((outcome, index) => (
-            <div key={index} className="card-gradient p-8 hover-lift">
-              <div className="mb-6">
-                <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center mb-4">
-                  <outcome.icon className="w-6 h-6 text-primary-foreground" />
+            <div
+              key={index}
+              className="card-gradient p-6 sm:p-8 hover-lift flex flex-col"
+            >
+              {/* Icon and Description */}
+              <div className="mb-4 sm:mb-6">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-primary rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+                  <outcome.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
                 </div>
-                <h3 className="text-2xl font-semibold mb-4 text-foreground">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 text-foreground">
                   {outcome.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {outcome.description}
                 </p>
               </div>
 
-              <div className="code-block">
-                <pre className="text-sm">
-                  <code dangerouslySetInnerHTML={{ __html: outcome.terminalExample }}></code>
+              {/* Code Example */}
+              <div className="code-block mt-auto overflow-x-auto">
+                <pre className="text-xs sm:text-sm whitespace-pre-wrap break-words">
+                  <code
+                    dangerouslySetInnerHTML={{
+                      __html: outcome.terminalExample,
+                    }}
+                  />
                 </pre>
               </div>
             </div>
