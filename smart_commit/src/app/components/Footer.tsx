@@ -6,30 +6,25 @@ const Footer = () => {
       { label: "Features", href: "#features" },
       { label: "Pricing", href: "#pricing" },
       { label: "Documentation", href: "#docs" },
-      { label: "API Reference", href: "#api" },
+
     ],
     Company: [
       { label: "About", href: "#about" },
       { label: "Blog", href: "#blog" },
-      { label: "Careers", href: "#careers" },
-      { label: "Contact", href: "#contact" },
+
     ],
     Support: [
       { label: "Help Center", href: "#help" },
-      { label: "Community", href: "#community" },
-      { label: "Status", href: "#status" },
-      { label: "Bug Reports", href: "#bugs" },
     ],
     Legal: [
       { label: "Privacy Policy", href: "#privacy" },
       { label: "Terms of Service", href: "#terms" },
-      { label: "Security", href: "#security" },
-      { label: "GDPR", href: "#gdpr" },
+
     ],
   };
 
   const socialLinks = [
-    { icon: Github, href: "#github", label: "GitHub" },
+
     { icon: Twitter, href: "#twitter", label: "Twitter" },
     { icon: Mail, href: "#email", label: "Email" },
   ];
@@ -91,7 +86,7 @@ const Footer = () => {
         <div className="pt-8 border-t border-border">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-sm text-muted-foreground text-center md:text-left">
-              © 2024 Smarta. All rights reserved.
+              © 2025 Smarta. All rights reserved.
             </div>
 
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm text-muted-foreground text-center md:text-right">
