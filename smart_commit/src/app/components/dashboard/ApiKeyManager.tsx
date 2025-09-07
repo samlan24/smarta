@@ -72,7 +72,7 @@ export function ApiKeyManager() {
         <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
           <h4 className="font-semibold text-green-800 mb-2">New API Key Generated!</h4>
           <div className="flex items-center gap-2">
-            <code className="flex-1 p-2 bg-white border rounded font-mono text-sm">
+            <code className="flex-1 p-2 bg-white border rounded font-mono text-sm text-gray-800">
               {showNewKey}
             </code>
             <button

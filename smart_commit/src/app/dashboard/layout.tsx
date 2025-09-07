@@ -18,7 +18,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-900">My Dashboard</h1>
         {user && (
