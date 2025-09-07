@@ -14,6 +14,7 @@ export default async function DashboardPage() {
         Welcome, {user?.user_metadata.full_name || "Google User"} 👋
       </h2>
       <p className="text-gray-600">{user?.email}</p>
+      <p className="text-gray-600">enjoy</p>
       <SignOutButton />
     </div>
   );
