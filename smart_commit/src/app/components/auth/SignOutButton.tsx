@@ -31,7 +31,7 @@ export default function SignOutButton() {
     <button
       onClick={handleSignOut}
       disabled={loading}
-      className="btn btn-primary text-gray-900 mt-4"
+      className="btn btn-primary text-gray-200 mt-4"
     >
       {loading ? 'Signing Out...' : 'Sign Out'}
     </button>

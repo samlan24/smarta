@@ -58,7 +58,7 @@ export function ApiKeyManager() {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">API Keys</h3>
+        <h3 className="text-lg font-semibold text-gray-800">API Keys</h3>
         <button
           onClick={generateNewKey}
           disabled={isLoading}
