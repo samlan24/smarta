@@ -2,6 +2,7 @@
 import { Button } from "../components/ui/button";
 import { Terminal, Menu, X } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -41,12 +42,14 @@ const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="flex items-center space-x-4">
+            <Link href="/auth/signin">
             <Button
               variant="ghost"
               className="text-muted-foreground hover:text-foreground"
             >
               Login
             </Button>
+            </Link>
             <Button className="btn-hero">Install Now</Button>
           </div>
         </div>
@@ -79,10 +82,13 @@ const Navbar = () => {
               </a>
             ))}
             <div className="flex flex-col space-y-2 px-4 pt-4">
+              <Link href="/auth/signin">
               <Button variant="ghost" className="justify-start">
                 Login
               </Button>
+              </Link>
               <Button className="btn-hero justify-start">Install Now</Button>
+
             </div>
           </div>
         </div>
