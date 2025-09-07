@@ -78,7 +78,7 @@ export function UsageChart({ className = "" }: UsageChartProps) {
   return (
     <div className={`bg-white rounded-xl shadow p-6 ${className}`}>
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-800">Usage Trends (Last 14 Days)</h3>
+        <h3 className="text-lg font-semibold text-black">Usage Trends (Last 14 Days)</h3>
 
         <div className="flex bg-gray-100 rounded-lg p-1">
           <button
