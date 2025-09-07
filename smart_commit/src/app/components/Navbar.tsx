@@ -47,7 +47,7 @@ const Navbar = () => {
               variant="ghost"
               className="text-muted-foreground hover:text-foreground"
             >
-              Login
+              Sign in
             </Button>
             </Link>
             <Button className="btn-hero">Install Now</Button>
@@ -84,7 +84,7 @@ const Navbar = () => {
             <div className="flex flex-col space-y-2 px-4 pt-4">
               <Link href="/auth/signin">
               <Button variant="ghost" className="justify-start">
-                Login
+                Sign in
               </Button>
               </Link>
               <Button className="btn-hero justify-start">Install Now</Button>
