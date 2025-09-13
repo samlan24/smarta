@@ -1,5 +1,9 @@
-import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
-import DiffAnalyzer, { DiffAnalysis, FileCategories, ProjectContext } from './DiffAnalyzer';
+import { GoogleGenerativeAI, GenerativeModel } from "@google/generative-ai";
+import DiffAnalyzer, {
+  DiffAnalysis,
+  FileCategories,
+  ProjectContext,
+} from "./DiffAnalyzer";
 
 export interface GenerateContentResponse {
   response: {
@@ -20,14 +24,21 @@ class GeminiClient {
 
   constructor(apiKey: string) {
     if (!apiKey) {
-      throw new Error('Gemini API key is required. Get one from https://makersuite.google.com/app/apikey');
+      throw new Error(
+        "Gemini API key is required. Get one from https://makersuite.google.com/app/apikey"
+      );
     }
     this.genAI = new GoogleGenerativeAI(apiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
+    this.model = this.genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-exp",
+    });
     this.analyzer = new DiffAnalyzer();
   }
 
-  async generateCommitMessage(gitDiff: string, options: CommitMessageOptions = {}): Promise<string> {
+  async generateCommitMessage(
+    gitDiff: string,
+    options: CommitMessageOptions = {}
+  ): Promise<string> {
     // Analyze the diff for context
     const analysis = this.analyzer.analyze(gitDiff);
 
@@ -44,11 +55,19 @@ class GeminiClient {
 
       return message;
     } catch (error) {
-      throw new Error(`Failed to generate commit message: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to generate commit message: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   }
 
-  private buildPrompt(gitDiff: string, analysis: DiffAnalysis, options: CommitMessageOptions): string {
+  private buildPrompt(
+    gitDiff: string,
+    analysis: DiffAnalysis,
+    options: CommitMessageOptions
+  ): string {
     const {
       stats,
       categories,
@@ -56,34 +75,41 @@ class GeminiClient {
       suggestedScope,
       isBreakingChange,
       changePatterns,
-      projectContext
+      projectContext,
     } = analysis;
 
     let prompt = `You are an expert at writing conventional commit messages. Analyze this git diff and generate a single, precise commit message.
 
 ## Project Context:
 - Type: ${projectContext.type}
-- Language: ${projectContext.language || 'mixed'}
-- Framework: ${projectContext.framework || 'none'}
+- Language: ${projectContext.language || "mixed"}
+- Framework: ${projectContext.framework || "none"}
 
 ## Change Analysis:
 - Files changed: ${stats.totalFiles}
 - Additions: ${stats.totalAdditions}, Deletions: ${stats.totalDeletions}
 - Suggested type: ${suggestedType}
-- Suggested scope: ${suggestedScope || 'none'}
-- Breaking change: ${isBreakingChange ? 'YES' : 'no'}
+- Suggested scope: ${suggestedScope || "none"}
+- Breaking change: ${isBreakingChange ? "YES" : "no"}
 
 ## File Categories Affected:`;
 
     // Add file categories
     Object.entries(categories).forEach(([category, files]) => {
-  if ((files as { name: string }[]).length > 0) {
-    prompt += `\n- ${category}: ${(files as { name: string }[]).length} files (${(files as { name: string }[]).map((f) => f.name).slice(0, 3).join(', ')})`;
-  }
-});
+      if ((files as { name: string }[]).length > 0) {
+        prompt += `\n- ${category}: ${
+          (files as { name: string }[]).length
+        } files (${(files as { name: string }[])
+          .map((f) => f.name)
+          .slice(0, 3)
+          .join(", ")})`;
+      }
+    });
 
     if (changePatterns.length > 0) {
-      prompt += `\n\n## Change Patterns:\n${changePatterns.map(p => `- ${p}`).join('\n')}`;
+      prompt += `\n\n## Change Patterns:\n${changePatterns
+        .map((p) => `- ${p}`)
+        .join("\n")}`;
     }
 
     // Add specific examples based on context
@@ -92,10 +118,11 @@ class GeminiClient {
     // Add the rules
     prompt += `\n\n## Conventional Commit Rules:
 - Format: type(scope): description
-- Available types: feat, fix, chore, refactor, docs, style, test, perf, ci, build
-- Keep description under ${options.maxLength || 50} characters
-- Use lowercase, imperative mood
-- No period at the end
+- For complex changes, add a body after a blank line
+- Subject line (first line): under ${options.maxLength || 50} characters
+- Body lines (if needed): wrap at 72 characters
+- Use lowercase, imperative mood for subject
+- No period at end of subject line
 - Add '!' after type/scope for breaking changes
 - Scope should be specific and relevant
 
@@ -107,7 +134,9 @@ class GeminiClient {
     // Truncate diff if too large
     let diffToAnalyze = gitDiff;
     if (gitDiff.length > 8000) {
-      diffToAnalyze = gitDiff.substring(0, 8000) + '\n\n[... diff truncated for analysis ...]';
+      diffToAnalyze =
+        gitDiff.substring(0, 8000) +
+        "\n\n[... diff truncated for analysis ...]";
     }
 
     prompt += `\n\nGit diff to analyze:
@@ -123,20 +152,20 @@ Generate only the commit message, nothing else:`;
   private getContextSpecificExamples(analysis: DiffAnalysis): string {
     const { suggestedType, projectContext, categories } = analysis;
 
-    let examples = '\n\n## Relevant Examples:';
+    let examples = "\n\n## Relevant Examples:";
 
     // Framework-specific examples
-    if (projectContext.framework === 'react') {
+    if (projectContext.framework === "react") {
       examples += `
 - feat(auth): add login form validation
 - fix(ui): resolve button hover state issue
 - refactor(hooks): simplify useAuth implementation`;
-    } else if (projectContext.framework === 'nextjs') {
+    } else if (projectContext.framework === "nextjs") {
       examples += `
 - feat(api): add user profile endpoints
 - fix(ssr): resolve hydration mismatch error
 - chore(deps): upgrade next to 15.0.0`;
-    } else if (projectContext.framework === 'express') {
+    } else if (projectContext.framework === "express") {
       examples += `
 - feat(auth): implement JWT middleware
 - fix(api): handle null response in user routes
@@ -145,25 +174,25 @@ Generate only the commit message, nothing else:`;
 
     // Type-specific examples
     switch (suggestedType) {
-      case 'feat':
+      case "feat":
         examples += `
 - feat(auth): implement two-factor authentication
 - feat(api): add user profile management
 - feat(ui): create responsive navigation menu`;
         break;
-      case 'fix':
+      case "fix":
         examples += `
 - fix(auth): resolve token expiration handling
 - fix(api): handle edge case in validation
 - fix(ui): correct mobile layout issues`;
         break;
-      case 'test':
+      case "test":
         examples += `
 - test(auth): add integration tests for login
 - test(api): increase coverage for user endpoints
 - test(utils): add unit tests for validation`;
         break;
-      case 'docs':
+      case "docs":
         examples += `
 - docs: update installation instructions
 - docs(api): add endpoint documentation
@@ -192,27 +221,33 @@ Generate only the commit message, nothing else:`;
   private getContextSpecificInstructions(analysis: DiffAnalysis): string {
     const { stats, suggestedType, isBreakingChange, categories } = analysis;
 
-    let instructions = '';
+    let instructions = "";
 
     // Large change instructions
     if (stats.totalFiles > 10) {
-      instructions += '\n- Focus on the primary purpose, not individual files';
+      instructions += "\n- Focus on the primary purpose, not individual files";
     }
 
     // Breaking change instructions
     if (isBreakingChange) {
-      instructions += '\n- Add "!" after type/scope to indicate breaking change';
-      instructions += '\n- Focus on what functionality changed, not implementation';
+      instructions +=
+        '\n- Add "!" after type/scope to indicate breaking change';
+      instructions +=
+        "\n- Focus on what functionality changed, not implementation";
     }
 
     // Single file change
     if (stats.totalFiles === 1) {
-      instructions += '\n- Be specific about what changed in this file';
+      instructions += "\n- Be specific about what changed in this file";
     }
 
     // Dependency updates
-    if (categories.config && categories.config.some(f => f.name === 'package.json')) {
-      instructions += '\n- For dependency updates, mention the key package if obvious';
+    if (
+      categories.config &&
+      categories.config.some((f) => f.name === "package.json")
+    ) {
+      instructions +=
+        "\n- For dependency updates, mention the key package if obvious";
     }
 
     // Test-only changes
@@ -221,70 +256,106 @@ Generate only the commit message, nothing else:`;
     }
 
     // New feature detection
-    if (stats.netChange > 100 && stats.totalAdditions > stats.totalDeletions * 3) {
+    if (
+      stats.netChange > 100 &&
+      stats.totalAdditions > stats.totalDeletions * 3
+    ) {
       instructions += '\n- This appears to be a new feature, use "feat" type';
     }
 
     // Refactor detection
-    if (stats.totalAdditions > 0 && stats.totalDeletions > 0 &&
-        Math.abs(stats.totalAdditions - stats.totalDeletions) < 20) {
-      instructions += '\n- Similar additions/deletions suggest refactoring';
+    if (
+      stats.totalAdditions > 0 &&
+      stats.totalDeletions > 0 &&
+      Math.abs(stats.totalAdditions - stats.totalDeletions) < 20
+    ) {
+      instructions += "\n- Similar additions/deletions suggest refactoring";
     }
 
-    return instructions || '\n- Follow conventional commit best practices';
+    return instructions || "\n- Follow conventional commit best practices";
   }
 
-  private cleanupMessage(message: string, analysis: DiffAnalysis, options: CommitMessageOptions): string {
+  private cleanupMessage(
+    message: string,
+    analysis: DiffAnalysis,
+    options: CommitMessageOptions
+  ): string {
     // Remove quotes if present
-    message = message.replace(/^["']|["']$/g, '');
+    message = message.replace(/^["']|["']$/g, "");
 
     // Remove any markdown formatting
-    message = message.replace(/`/g, '');
+    message = message.replace(/`/g, "");
 
     // Ensure lowercase description (but preserve proper nouns)
-    const parts = message.split(': ');
+    const parts = message.split(": ");
     if (parts.length === 2) {
       let [typeScope, description] = parts;
 
       // Don't lowercase the first word if it's a proper noun (like API, JWT, etc.)
-      const properNouns = ['API', 'JWT', 'OAuth', 'HTTP', 'CSS', 'HTML', 'JSON', 'XML', 'SQL', 'UI', 'UX'];
-      const words = description.split(' ');
+      const properNouns = [
+        "API",
+        "JWT",
+        "OAuth",
+        "HTTP",
+        "CSS",
+        "HTML",
+        "JSON",
+        "XML",
+        "SQL",
+        "UI",
+        "UX",
+      ];
+      const words = description.split(" ");
       if (words.length > 0 && !properNouns.includes(words[0])) {
         words[0] = words[0].toLowerCase();
-        description = words.join(' ');
+        description = words.join(" ");
       }
 
       message = `${typeScope}: ${description}`;
     }
 
     // Remove trailing period
-    message = message.replace(/\.$/, '');
+    message = message.replace(/\.$/, "");
 
     // Add breaking change indicator if detected and not present
-    if ((options.includeBreakingChange !== false) && analysis.isBreakingChange && !message.includes('!')) {
-      const colonIndex = message.indexOf('):');
+    if (
+      options.includeBreakingChange !== false &&
+      analysis.isBreakingChange &&
+      !message.includes("!")
+    ) {
+      const colonIndex = message.indexOf("):");
       if (colonIndex !== -1) {
-        message = message.substring(0, colonIndex) + '!' + message.substring(colonIndex);
+        message =
+          message.substring(0, colonIndex) +
+          "!" +
+          message.substring(colonIndex);
       } else {
-        const typeEnd = message.indexOf(':');
+        const typeEnd = message.indexOf(":");
         if (typeEnd !== -1) {
-          message = message.substring(0, typeEnd) + '!' + message.substring(typeEnd);
+          message =
+            message.substring(0, typeEnd) + "!" + message.substring(typeEnd);
         }
       }
     }
 
     // Ensure reasonable length (truncate if too long)
+    // Replace the entire length enforcement section (around line 280-295):
+    // Ensure reasonable subject line length (truncate if too long)
     const maxLength = options.maxLength || 50;
-    if (message.length > maxLength) {
-      const colonIndex = message.indexOf(': ');
+    const lines = message.split("\n");
+    const subjectLine = lines[0];
+
+    if (subjectLine.length > maxLength) {
+      const colonIndex = subjectLine.indexOf(": ");
       if (colonIndex !== -1) {
-        const prefix = message.substring(0, colonIndex + 2);
-        const description = message.substring(colonIndex + 2);
+        const prefix = subjectLine.substring(0, colonIndex + 2);
+        const description = subjectLine.substring(colonIndex + 2);
         const maxDescLength = maxLength - prefix.length;
 
         if (description.length > maxDescLength) {
-          const truncated = description.substring(0, maxDescLength - 3) + '...';
-          message = prefix + truncated;
+          const truncated = description.substring(0, maxDescLength - 3) + "...";
+          lines[0] = prefix + truncated;
+          message = lines.join("\n");
         }
       }
     }
@@ -293,7 +364,11 @@ Generate only the commit message, nothing else:`;
   }
 
   // Method to get multiple suggestions
-  async generateMultipleCommitMessages(gitDiff: string, count: number = 3, options: CommitMessageOptions = {}): Promise<string[]> {
+  async generateMultipleCommitMessages(
+    gitDiff: string,
+    count: number = 3,
+    options: CommitMessageOptions = {}
+  ): Promise<string[]> {
     const analysis = this.analyzer.analyze(gitDiff);
     const messages: string[] = [];
 
@@ -311,21 +386,32 @@ Generate only the commit message, nothing else:`;
           messages.push(message);
         }
       } catch (error) {
-        console.warn(`Failed to generate variation ${i + 1}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        console.warn(
+          `Failed to generate variation ${i + 1}: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
       }
     }
 
-    return messages.length > 0 ? messages : [await this.generateCommitMessage(gitDiff, options)];
+    return messages.length > 0
+      ? messages
+      : [await this.generateCommitMessage(gitDiff, options)];
   }
 
-  private buildVariationPrompt(gitDiff: string, analysis: DiffAnalysis, variation: number, options: CommitMessageOptions): string {
+  private buildVariationPrompt(
+    gitDiff: string,
+    analysis: DiffAnalysis,
+    variation: number,
+    options: CommitMessageOptions
+  ): string {
     let basePrompt = this.buildPrompt(gitDiff, analysis, options);
 
     // Add variation-specific instructions
     const variations = [
-      'Focus on the primary business value of this change.',
-      'Emphasize the technical implementation aspects.',
-      'Highlight the user-facing impact of this change.'
+      "Focus on the primary business value of this change.",
+      "Emphasize the technical implementation aspects.",
+      "Highlight the user-facing impact of this change.",
     ];
 
     if (variation < variations.length) {

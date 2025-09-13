@@ -45,10 +45,10 @@ export async function POST(request: NextRequest) {
     }
 
     const geminiClient = new GeminiClient(process.env.GEMINI_API_KEY!);
-    const commitMessage = await geminiClient.generateCommitMessage(
-      diff,
-      options
-    );
+    const commitMessage = await geminiClient.generateCommitMessage(diff, {
+      ...options,
+      maxLength: options.maxLength || 72,
+    });
 
     const analysis = geminiClient.analyzeChanges(diff);
 
