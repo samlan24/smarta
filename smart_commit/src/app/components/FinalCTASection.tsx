@@ -19,7 +19,7 @@ const FinalCTASection = () => {
       <div className="container mx-auto relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
-            Get Started with Smarta
+            Get Started with Cmarta
           </h2>
 
           <p className="text-base sm:text-lg text-muted-foreground mb-6 sm:mb-8 max-w-full sm:max-w-2xl mx-auto leading-relaxed">
@@ -32,7 +32,7 @@ const FinalCTASection = () => {
             <pre className="whitespace-pre-wrap break-words text-sm sm:text-base">
               <code>
                 <span className="code-comment">
-                  # Install Smarta globally
+                  # Install Cmarta globally
                 </span>
                 {"\n"}
                 <span className="code-keyword">npm install</span>{" "}

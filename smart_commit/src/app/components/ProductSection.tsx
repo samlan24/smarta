@@ -28,7 +28,7 @@ const ProductSection = () => {
           <div className="inline-flex items-center space-x-2 sm:space-x-3 bg-card rounded-full px-3 sm:px-4 py-1.5 sm:py-2 mx-auto mb-4 sm:mb-6">
             <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
             <span className="text-sm sm:text-base font-medium text-muted-foreground">
-              Introducing Smarta
+              Introducing Cmarta
             </span>
           </div>
 
