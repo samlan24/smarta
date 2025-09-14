@@ -2,11 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "../../../../lib/auth";
 import { createClient } from "../../../../lib/supabase/server";
 
+interface RouteParams {
+  params: Promise<{ name: string }>;
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  context: RouteParams
 ) {
   try {
+    const { name } = await context.params;
+
     // Get API key from Authorization header
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -38,7 +44,7 @@ export async function GET(
       .from('user_templates')
       .select('*')
       .eq('user_id', userId)
-      .eq('name', decodeURIComponent(params.name))
+      .eq('name', decodeURIComponent(name))
       .single();
 
     if (error || !template) {
@@ -53,9 +59,11 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  context: RouteParams
 ) {
   try {
+    const { name } = await context.params;
+
     // Get API key from Authorization header
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -87,7 +95,7 @@ export async function DELETE(
       .from('user_templates')
       .delete()
       .eq('user_id', userId)
-      .eq('name', decodeURIComponent(params.name));
+      .eq('name', decodeURIComponent(name));
 
     if (error) {
       return NextResponse.json({ error: "Failed to delete template" }, { status: 500 });
