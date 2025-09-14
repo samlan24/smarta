@@ -3,9 +3,10 @@ import { createClient } from "../../../../lib/supabase/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  { params }: { params: Promise<{ name: string }> }
 ) {
   try {
+    const resolvedParams = await params;
     const supabase = await createClient();
     const {
       data: { user },
@@ -20,7 +21,7 @@ export async function GET(
       .from("user_templates")
       .select("*")
       .eq("user_id", user.id)
-      .eq("name", decodeURIComponent(params.name))
+      .eq("name", decodeURIComponent(resolvedParams.name))
       .single();
 
     if (error || !template) {
@@ -38,9 +39,10 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  { params }: { params: Promise<{ name: string }> }
 ) {
   try {
+    const resolvedParams = await params;
     const supabase = await createClient();
     const {
       data: { user },
@@ -55,7 +57,7 @@ export async function DELETE(
       .from("user_templates")
       .delete()
       .eq("user_id", user.id)
-      .eq("name", decodeURIComponent(params.name));
+      .eq("name", decodeURIComponent(resolvedParams.name));
 
     if (error) {
       return NextResponse.json(
