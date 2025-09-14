@@ -4,6 +4,7 @@ import { ApiKeyManager } from "../components/dashboard/ApiKeyManager";
 import { UsageStats } from "../components/dashboard/UsageStats";
 import { RecentCalls } from "../components/dashboard/RecentCalls";
 import { UsageChart } from "../components/dashboard/UsageChart";
+import { TemplateManager } from "../components/dashboard/TemplateManager";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -19,7 +20,9 @@ export default async function DashboardPage() {
           <div className="flex justify-between items-center py-6">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600 mt-1">Welcome back, {user?.user_metadata.full_name || "User"}</p>
+              <p className="text-gray-600 mt-1">
+                Welcome back, {user?.user_metadata.full_name || "User"}
+              </p>
             </div>
             <SignOutButton />
           </div>
@@ -33,12 +36,13 @@ export default async function DashboardPage() {
           <UsageStats />
 
           {/* Chart and API Keys Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="lg:col-span-2">
               <UsageChart />
             </div>
-            <div className="lg:col-span-1">
+            <div className="space-y-8">
               <ApiKeyManager />
+              <TemplateManager />
             </div>
           </div>
 
