@@ -120,11 +120,13 @@ class GeminiClient {
 - Format: type(scope): description
 - For complex changes, add a body after a blank line
 - Subject line (first line): under ${options.maxLength || 50} characters
-- Body lines (if needed): wrap at 72 characters
+- Body lines: wrap at exactly 72 characters per line
 - Use lowercase, imperative mood for subject
 - No period at end of subject line
 - Add '!' after type/scope for breaking changes
 - Scope should be specific and relevant
+- Body should explain what and why, not how
+- Keep body concise - maximum 3-4 lines total
 
 ## Special Instructions:`;
 
@@ -275,6 +277,50 @@ Generate only the commit message, nothing else:`;
     return instructions || "\n- Follow conventional commit best practices";
   }
 
+  private wrapBodyLines(text: string, maxLength: number = 72): string {
+  const lines = text.split('\n');
+  const wrappedLines: string[] = [];
+
+  for (const line of lines) {
+    if (line.trim() === '') {
+      wrappedLines.push('');
+      continue;
+    }
+
+    if (line.length <= maxLength) {
+      wrappedLines.push(line);
+      continue;
+    }
+
+    // Wrap long lines
+    const words = line.split(' ');
+    let currentLine = '';
+
+    for (const word of words) {
+      if (currentLine.length + word.length + 1 <= maxLength) {
+        currentLine += (currentLine ? ' ' : '') + word;
+      } else {
+        if (currentLine) {
+          wrappedLines.push(currentLine);
+        }
+        currentLine = word;
+
+        // If single word is longer than maxLength, break it
+        while (currentLine.length > maxLength) {
+          wrappedLines.push(currentLine.substring(0, maxLength));
+          currentLine = currentLine.substring(maxLength);
+        }
+      }
+    }
+
+    if (currentLine) {
+      wrappedLines.push(currentLine);
+    }
+  }
+
+  return wrappedLines.join('\n');
+}
+
   private cleanupMessage(
     message: string,
     analysis: DiffAnalysis,
@@ -338,27 +384,36 @@ Generate only the commit message, nothing else:`;
       }
     }
 
-    // Ensure reasonable length (truncate if too long)
-    // Replace the entire length enforcement section (around line 280-295):
     // Ensure reasonable subject line length (truncate if too long)
-    const maxLength = options.maxLength || 50;
-    const lines = message.split("\n");
-    const subjectLine = lines[0];
+const maxLength = options.maxLength || 50;
+const lines = message.split("\n");
+const subjectLine = lines[0];
 
-    if (subjectLine.length > maxLength) {
-      const colonIndex = subjectLine.indexOf(": ");
-      if (colonIndex !== -1) {
-        const prefix = subjectLine.substring(0, colonIndex + 2);
-        const description = subjectLine.substring(colonIndex + 2);
-        const maxDescLength = maxLength - prefix.length;
+if (subjectLine.length > maxLength) {
+  const colonIndex = subjectLine.indexOf(": ");
+  if (colonIndex !== -1) {
+    const prefix = subjectLine.substring(0, colonIndex + 2);
+    const description = subjectLine.substring(colonIndex + 2);
+    const maxDescLength = maxLength - prefix.length;
 
-        if (description.length > maxDescLength) {
-          const truncated = description.substring(0, maxDescLength - 3) + "...";
-          lines[0] = prefix + truncated;
-          message = lines.join("\n");
-        }
-      }
+    if (description.length > maxDescLength) {
+      const truncated = description.substring(0, maxDescLength - 3) + "...";
+      lines[0] = prefix + truncated;
     }
+  }
+}
+
+// Wrap body lines at 72 characters
+if (lines.length > 1) {
+  const subjectAndEmptyLine = lines.slice(0, 2); // Keep subject + empty line
+  const bodyLines = lines.slice(2); // Get body lines
+  const bodyText = bodyLines.join('\n');
+  const wrappedBody = this.wrapBodyLines(bodyText, 72);
+
+  message = [...subjectAndEmptyLine, wrappedBody].join('\n');
+} else {
+  message = lines.join('\n');
+}
 
     return message;
   }
