@@ -3,7 +3,7 @@ import { createClient } from "../../../../lib/supabase/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  context: Promise<{ params: { name: string } }>
 ) {
   try {
     const supabase = await createClient();
@@ -13,6 +13,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { params } = await context;
     const { data: template, error } = await supabase
       .from('user_templates')
       .select('*')
@@ -32,7 +33,7 @@ export async function GET(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { name: string } }
+  context: Promise<{ params: { name: string } }>
 ) {
   try {
     const supabase = await createClient();
@@ -42,6 +43,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { params } = await context;
     const { error } = await supabase
       .from('user_templates')
       .delete()
