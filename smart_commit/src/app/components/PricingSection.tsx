@@ -21,7 +21,7 @@ const PricingSection = () => {
     {
       name: "Pro",
       icon: Crown,
-      price: "$9",
+      price: "$9.99",
       period: "/month",
       description: "For professional developers",
       features: [
