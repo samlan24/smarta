@@ -36,7 +36,7 @@ export function RecentCalls() {
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
-      <h3 className="text-lg font-semibold mb-4">Recent API Calls</h3>
+      <h3 className="text-lg text-gray-900 font-semibold mb-4">Recent API Calls</h3>
       {calls.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-gray-500">No API calls yet</p>
