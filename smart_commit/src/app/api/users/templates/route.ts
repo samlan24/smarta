@@ -1,19 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
+import { validateApiKey } from "../../../lib/auth";
 import { createClient } from "../../../lib/supabase/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Get API key from Authorization header
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Missing or invalid Authorization header" },
+        { status: 401 }
+      );
     }
+
+    const apiKey = authHeader.replace("Bearer ", "");
+
+    // Validate API key
+    const authResult = await validateApiKey(apiKey);
+    if (!authResult.valid) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 });
+    }
+
+    if (!authResult.userId) {
+      return NextResponse.json(
+        { error: "Invalid authentication" },
+        { status: 401 }
+      );
+    }
+
+    const userId = authResult.userId;
+    const supabase = await createClient();
 
     const { data: templates, error } = await supabase
       .from('user_templates')
       .select('id, name, message, created_at')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -28,13 +49,31 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Get API key from Authorization header
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Missing or invalid Authorization header" },
+        { status: 401 }
+      );
     }
 
+    const apiKey = authHeader.replace("Bearer ", "");
+
+    // Validate API key
+    const authResult = await validateApiKey(apiKey);
+    if (!authResult.valid) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 });
+    }
+
+    if (!authResult.userId) {
+      return NextResponse.json(
+        { error: "Invalid authentication" },
+        { status: 401 }
+      );
+    }
+
+    const userId = authResult.userId;
     const { name, message } = await request.json();
 
     // Validation
@@ -50,11 +89,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Template message too long (max 500 characters)" }, { status: 400 });
     }
 
+    const supabase = await createClient();
+
     // Check template count limit
     const { count } = await supabase
       .from('user_templates')
       .select('*', { count: 'exact' })
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
 
     if (count && count >= 20) {
       return NextResponse.json({ error: "Maximum 20 templates allowed" }, { status: 400 });
@@ -63,7 +104,7 @@ export async function POST(request: NextRequest) {
     const { data: template, error } = await supabase
       .from('user_templates')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         name: name.trim(),
         message: message.trim()
       })
