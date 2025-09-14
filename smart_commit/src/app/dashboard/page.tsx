@@ -12,21 +12,39 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-xl bg-white shadow p-6">
-        <h2 className="text-2xl font-bold mb-2 text-gray-800">
-          Welcome, {user?.user_metadata.full_name || "User"} 👋
-        </h2>
-        <p className="text-gray-600">{user?.email}</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 mt-1">Welcome back, {user?.user_metadata.full_name || "User"}</p>
+            </div>
+            <SignOutButton />
+          </div>
+        </div>
       </div>
 
-      <UsageStats />
-      <UsageChart />
-      <ApiKeyManager />
-      <RecentCalls />
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Usage Overview */}
+          <UsageStats />
 
-      <div className="flex justify-end">
-        <SignOutButton />
+          {/* Chart and API Keys Row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+              <UsageChart />
+            </div>
+            <div className="lg:col-span-1">
+              <ApiKeyManager />
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <RecentCalls />
+        </div>
       </div>
     </div>
   );

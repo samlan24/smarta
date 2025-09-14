@@ -33,7 +33,7 @@ export function RecentCalls() {
   if (loading) return <div className="animate-pulse bg-gray-200 h-48 rounded"></div>;
 
   return (
-    <div className="bg-white rounded-xl shadow p-6">
+    <div className="bg-white rounded-xl shadow-sm p-6">
       <h3 className="text-lg font-semibold mb-4">Recent API Calls</h3>
       {calls.length === 0 ? (
         <div className="text-center py-8">
