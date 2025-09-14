@@ -17,7 +17,7 @@ export function TemplateManager() {
 
   const fetchTemplates = async () => {
     try {
-      const response = await fetch('/api/users/templates');
+      const response = await fetch('/api/dashboard/templates');
       const data = await response.json();
       if (data.templates) {
         setTemplates(data.templates);
@@ -38,7 +38,7 @@ export function TemplateManager() {
     setError(null);
 
     try {
-      const response = await fetch('/api/users/templates', {
+      const response = await fetch('/api/dashboard/templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTemplate),
@@ -64,7 +64,7 @@ export function TemplateManager() {
     if (!confirm(`Delete template "${name}"?`)) return;
 
     try {
-      const response = await fetch(`/api/users/templates/${encodeURIComponent(name)}`, {
+      const response = await fetch(`/api/dashboard/templates/${encodeURIComponent(name)}`, {
         method: 'DELETE',
       });
 
