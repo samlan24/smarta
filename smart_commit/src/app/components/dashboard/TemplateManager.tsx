@@ -126,7 +126,7 @@ export function TemplateManager() {
                 onChange={(e) => setNewTemplate(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., api-fix, feature-add"
                 maxLength={100}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full text-gray-900 p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
 
@@ -140,7 +140,7 @@ export function TemplateManager() {
                 placeholder="fix: resolve API validation error"
                 maxLength={500}
                 rows={3}
-                className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <div className="text-xs text-gray-500 mt-1">
                 {newTemplate.message.length}/500 characters
