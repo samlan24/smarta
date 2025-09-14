@@ -138,12 +138,12 @@ export function TemplateManager() {
                 value={newTemplate.message}
                 onChange={(e) => setNewTemplate(prev => ({ ...prev, message: e.target.value }))}
                 placeholder="fix: resolve API validation error"
-                maxLength={500}
+                maxLength={100}
                 rows={3}
                 className="w-full p-2 text-gray-900 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <div className="text-xs text-gray-500 mt-1">
-                {newTemplate.message.length}/500 characters
+                {newTemplate.message.length}/100 characters
               </div>
             </div>
           </div>
