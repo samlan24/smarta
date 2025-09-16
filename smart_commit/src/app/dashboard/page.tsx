@@ -1,5 +1,5 @@
 "use client";
-import { createClient } from "../lib/supabase/server";
+import { createClient } from "../lib/supabase/client";
 import SignOutButton from "../components/auth/SignOutButton";
 import { ApiKeyManager } from "../components/dashboard/ApiKeyManager";
 import { UsageStats } from "../components/dashboard/UsageStats";
@@ -9,7 +9,7 @@ import { TemplateManager } from "../components/dashboard/TemplateManager";
 import SettingsButton from "../components/dashboard/SettingsButton";
 import { SettingsModal } from "../components/dashboard/SettingsModal";
 import { useState, useEffect } from "react";
-import type { User } from "@supabase/supabase-js";
+import { User } from "@supabase/supabase-js";
 
 export default function DashboardPage() {
   const [showSettings, setShowSettings] = useState(false);
