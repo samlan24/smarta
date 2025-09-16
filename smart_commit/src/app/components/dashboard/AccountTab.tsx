@@ -1,15 +1,49 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { User, Mail, Calendar, Trash2, AlertTriangle } from 'lucide-react';
 
 interface AccountTabProps {
   user: any; // Replace with your User type
 }
 
+interface UserProfile {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+  company: string | null;
+  job_title: string | null;
+  preferred_commit_style: string;
+  timezone: string;
+  email_notifications: boolean;
+  created_at: string;
+  updated_at: string;
+  email: string; // From auth.users
+}
+
 export function AccountTab({ user }: AccountTabProps) {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('/api/user/profile');
+        if (response.ok) {
+          const data = await response.json();
+          setProfile(data.profile);
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE') {
@@ -39,6 +73,31 @@ export function AccountTab({ user }: AccountTabProps) {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gray-50 rounded-lg p-4 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-red-50 rounded-lg p-4">
+          <p className="text-red-600">Failed to load profile information</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Account Information */}
@@ -53,7 +112,7 @@ export function AccountTab({ user }: AccountTabProps) {
             <Mail size={16} className="text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Email</p>
-              <p className="font-medium">{user?.email || 'Not available'}</p>
+              <p className="font-medium">{profile.email || 'Not available'}</p>
             </div>
           </div>
 
@@ -62,7 +121,7 @@ export function AccountTab({ user }: AccountTabProps) {
             <div>
               <p className="text-sm text-gray-600">Full Name</p>
               <p className="font-medium">
-                {user?.user_metadata?.full_name || 'Not set'}
+                {profile.full_name || 'Not set'}
               </p>
             </div>
           </div>
@@ -72,8 +131,8 @@ export function AccountTab({ user }: AccountTabProps) {
             <div>
               <p className="text-sm text-gray-600">Member Since</p>
               <p className="font-medium">
-                {user?.created_at
-                  ? new Date(user.created_at).toLocaleDateString()
+                {profile.created_at
+                  ? new Date(profile.created_at).toLocaleDateString()
                   : 'Not available'
                 }
               </p>
