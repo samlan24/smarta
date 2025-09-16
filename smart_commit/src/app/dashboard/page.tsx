@@ -1,3 +1,4 @@
+"use client";
 import { createClient } from "../lib/supabase/server";
 import SignOutButton from "../components/auth/SignOutButton";
 import { ApiKeyManager } from "../components/dashboard/ApiKeyManager";
@@ -5,12 +6,25 @@ import { UsageStats } from "../components/dashboard/UsageStats";
 import { RecentCalls } from "../components/dashboard/RecentCalls";
 import { UsageChart } from "../components/dashboard/UsageChart";
 import { TemplateManager } from "../components/dashboard/TemplateManager";
+import SettingsButton from "../components/dashboard/SettingsButton";
+import { SettingsModal } from "../components/dashboard/SettingsModal";
+import { useState, useEffect } from "react";
+import type { User } from "@supabase/supabase-js";
 
-export default async function DashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function DashboardPage() {
+  const [showSettings, setShowSettings] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    async function getUser() {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    getUser();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -24,7 +38,10 @@ export default async function DashboardPage() {
                 Welcome back, {user?.user_metadata.full_name || "User"}
               </p>
             </div>
-            <SignOutButton />
+            <div className="flex items-center gap-4">
+              <SettingsButton onClick={() => setShowSettings(true)} />
+              <SignOutButton />
+            </div>
           </div>
         </div>
       </div>
@@ -50,6 +67,9 @@ export default async function DashboardPage() {
           <RecentCalls />
         </div>
       </div>
+      {showSettings && (
+        <SettingsModal user={user} onClose={() => setShowSettings(false)} />
+      )}
     </div>
   );
 }
