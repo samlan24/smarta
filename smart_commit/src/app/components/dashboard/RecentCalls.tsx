@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 
 interface ApiCall {
   id: string;
-  endpoint: string;
   created_at: string;
   tokens_used?: number;
   success: boolean;
@@ -52,9 +51,7 @@ export function RecentCalls() {
                 <th className="text-left py-3 font-medium text-gray-600">
                   Status
                 </th>
-                <th className="text-left py-3 font-medium text-gray-600">
-                  Endpoint
-                </th>
+
                 <th className="text-left py-3 font-medium text-gray-600">
                   Tokens
                 </th>
@@ -83,9 +80,9 @@ export function RecentCalls() {
                       {call.success ? "✓" : "✗"}
                     </span>
                   </td>
-                  <td className="py-3 font-mono text-xs">{call.endpoint}</td>
-                  <td className="py-3">{call.tokens_used || 0}</td>
-                  <td className="py-3">
+
+                  <td className="py-3 text-gray-500">{call.tokens_used || 0}</td>
+                  <td className="py-3 text-gray-500">
                     {call.request_size
                       ? `${Math.round(call.request_size / 1024)}KB`
                       : "-"}
