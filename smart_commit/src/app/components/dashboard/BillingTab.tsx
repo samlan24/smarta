@@ -1,15 +1,68 @@
 "use client";
 import { CreditCard, Crown } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface BillingTabProps {
   user: any; // Replace with your User type
 }
 
+interface UsageData {
+  subscription: {
+    plan: string;
+    usageCount: number;
+    usageLimit: number;
+    resetDate: string;
+  };
+}
+
 export function BillingTab({ user }: BillingTabProps) {
-  // You'll need to fetch actual plan data from your backend
-  const currentPlan = "Free"; // This should come from user data
-  const monthlyRequests = 0; // This should come from usage stats
-  const requestLimit = 100; // This should come from plan data
+  const [usage, setUsage] = useState<UsageData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsageData = async () => {
+      try {
+        const response = await fetch('/api/usage');
+        if (response.ok) {
+          const data = await response.json();
+          setUsage(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch usage data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsageData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-gray-50 rounded-lg p-4 animate-pulse">
+          <div className="h-6 bg-gray-200 rounded mb-3"></div>
+          <div className="h-4 bg-gray-200 rounded mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!usage) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-red-50 rounded-lg p-4">
+          <p className="text-red-600">Failed to load billing information</p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentPlan = usage.subscription.plan;
+  const monthlyRequests = usage.subscription.usageCount;
+  const requestLimit = usage.subscription.usageLimit;
+  const resetDate = new Date(usage.subscription.resetDate).toLocaleDateString();
 
   const handleUpgrade = () => {
     // Implement your upgrade logic (redirect to Stripe, etc.)
@@ -28,22 +81,21 @@ export function BillingTab({ user }: BillingTabProps) {
           </div>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Monthly Requests</span>
             <span className="font-medium">{monthlyRequests}/{requestLimit}</span>
           </div>
 
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full"
-              style={{ width: `${(monthlyRequests / requestLimit) * 100}%` }}
-            ></div>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Max Requests</span>
+            <span className="font-medium">{requestLimit}</span>
           </div>
 
-          <p className="text-xs text-gray-500">
-            Resets on the 1st of each month
-          </p>
+          <div className="flex justify-between text-sm">
+            <span className="text-gray-600">Resets</span>
+            <span className="font-medium">{resetDate}</span>
+          </div>
         </div>
       </div>
 
