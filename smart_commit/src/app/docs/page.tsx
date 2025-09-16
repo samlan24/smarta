@@ -121,7 +121,7 @@ export default function DocsPage() {
               {/* Hero Section */}
               <div className="mb-12">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Smart Commit Documentation
+                  Cmarta Documentation
                 </h1>
                 <p className="text-xl text-gray-600">
                   AI-powered commit message generator that creates conventional
@@ -154,14 +154,14 @@ export default function DocsPage() {
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Install the CLI Tool
                   </h3>
-                  <CodeBlock>npm install -g smart-commit</CodeBlock>
+                  <CodeBlock>npm install -g cmarta</CodeBlock>
                 </div>
 
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Verify Installation
                   </h3>
-                  <CodeBlock>smart-commit --version</CodeBlock>
+                  <CodeBlock>cmarta --version</CodeBlock>
                 </div>
               </section>
 
@@ -208,7 +208,7 @@ export default function DocsPage() {
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       3. Configure the CLI Tool
                     </h3>
-                    <CodeBlock>smart-commit setup</CodeBlock>
+                    <CodeBlock>cmarta setup</CodeBlock>
                     <p className="text-gray-700 mt-4">
                       Enter your API key when prompted. The key will be securely
                       stored in your home directory.
@@ -236,11 +236,11 @@ export default function DocsPage() {
                       Navigate to your git repository and stage your changes:
                     </p>
                     <CodeBlock>{`git add .
-smart-commit`}</CodeBlock>
+cmarta`}</CodeBlock>
                     <p className="text-gray-700 mt-4">
                       Or stage and commit in one command:
                     </p>
-                    <CodeBlock>smart-commit -a</CodeBlock>
+                    <CodeBlock>cmarta -a</CodeBlock>
                   </div>
 
                   <div>
@@ -327,7 +327,7 @@ smart-commit`}</CodeBlock>
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       List Your Templates
                     </h3>
-                    <CodeBlock>smart-commit templates</CodeBlock>
+                    <CodeBlock>cmarta templates</CodeBlock>
                     <p className="text-gray-700 mt-4">Output:</p>
                     <div className="bg-gray-100 p-4 rounded-lg">
                       <pre className="text-sm text-gray-800">{`📋 Saved Templates:
@@ -341,7 +341,7 @@ smart-commit`}</CodeBlock>
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       Use a Template
                     </h3>
-                    <CodeBlock>smart-commit use-template api-fix</CodeBlock>
+                    <CodeBlock>cmarta use-template api-fix</CodeBlock>
                     <p className="text-gray-700 mt-4">This will:</p>
                     <ol className="list-decimal list-inside space-y-1 text-gray-700 mt-2">
                       <li>Stage your changes (if needed)</li>
@@ -357,14 +357,14 @@ smart-commit`}</CodeBlock>
                     <p className="text-gray-700 mb-4">
                       Auto-commit with a template:
                     </p>
-                    <CodeBlock>smart-commit use-template api-fix -y</CodeBlock>
+                    <CodeBlock>cmarta use-template api-fix -y</CodeBlock>
                   </div>
 
                   <div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       Delete a Template
                     </h3>
-                    <CodeBlock>smart-commit delete-template api-fix</CodeBlock>
+                    <CodeBlock>cmarta delete-template api-fix</CodeBlock>
                   </div>
                 </div>
               </section>
@@ -457,21 +457,21 @@ smart-commit`}</CodeBlock>
                     <div className="space-y-4">
                       <div>
                         <CodeBlock>{`# Setup API key
-smart-commit setup
+cmarta setup
 
 # Generate and commit (interactive)
-smart-commit
+cmarta
 
 # Auto-stage and generate commit
-smart-commit -a
-smart-commit --all
+cmarta -a
+cmarta --all
 
 # Auto-commit without confirmation
-smart-commit -y
-smart-commit --auto
+cmarta -y
+cmarta --auto
 
 # Combine options
-smart-commit -a -y`}</CodeBlock>
+cmarta -a -y`}</CodeBlock>
                       </div>
                     </div>
                   </div>
@@ -481,16 +481,16 @@ smart-commit -a -y`}</CodeBlock>
                       Template Commands
                     </h3>
                     <CodeBlock>{`# List all templates
-smart-commit templates
+cmarta templates
 
 # Use a specific template
-smart-commit use-template <name>
+cmarta use-template <name>
 
 # Use template with auto-commit
-smart-commit use-template <name> -y
+cmarta use-template <name> -y
 
 # Delete a template
-smart-commit delete-template <name>`}</CodeBlock>
+cmarta delete-template <name>`}</CodeBlock>
                   </div>
 
                   <div>
@@ -498,10 +498,10 @@ smart-commit delete-template <name>`}</CodeBlock>
                       Help and Information
                     </h3>
                     <CodeBlock>{`# Show version
-smart-commit --version
+cmarta --version
 
 # Show help
-smart-commit --help`}</CodeBlock>
+cmarta --help`}</CodeBlock>
                   </div>
                 </div>
               </section>
@@ -528,13 +528,13 @@ smart-commit --help`}</CodeBlock>
                       <li>
                         <strong>Linux/macOS</strong>:{" "}
                         <code className="bg-gray-100 px-2 py-1 rounded">
-                          ~/.smart-commit-config.json
+                          ~/.cmarta-config.json
                         </code>
                       </li>
                       <li>
                         <strong>Windows</strong>:{" "}
                         <code className="bg-gray-100 px-2 py-1 rounded">
-                          %USERPROFILE%\.smart-commit-config.json
+                          %USERPROFILE%\.cmarta-config.json
                         </code>
                       </li>
                     </ul>
@@ -556,7 +556,7 @@ smart-commit --help`}</CodeBlock>
                     <p className="text-gray-700 mb-4">
                       Re-run setup to update your API key:
                     </p>
-                    <CodeBlock>smart-commit setup</CodeBlock>
+                    <CodeBlock>cmarta setup</CodeBlock>
                   </div>
                 </div>
               </section>
@@ -591,14 +591,14 @@ smart-commit --help`}</CodeBlock>
                         <CodeBlock>{`# Stage your changes first
 git add .
 # Or use the auto-stage flag
-smart-commit -a`}</CodeBlock>
+cmarta -a`}</CodeBlock>
                       </div>
 
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <h4 className="font-semibold text-blue-800 mb-2">
                           "Invalid API key"
                         </h4>
-                        <CodeBlock>smart-commit setup</CodeBlock>
+                        <CodeBlock>cmarta setup</CodeBlock>
                       </div>
 
                       <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
