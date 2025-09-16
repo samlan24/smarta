@@ -112,7 +112,7 @@ export function AccountTab({ user }: AccountTabProps) {
             <Mail size={16} className="text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Email</p>
-              <p className="font-medium">{profile.email || 'Not available'}</p>
+              <p className="font-medium text-gray-600">{profile.email || 'Not available'}</p>
             </div>
           </div>
 
@@ -120,7 +120,7 @@ export function AccountTab({ user }: AccountTabProps) {
             <User size={16} className="text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Full Name</p>
-              <p className="font-medium">
+              <p className="font-medium text-gray-600">
                 {profile.full_name || 'Not set'}
               </p>
             </div>
@@ -130,7 +130,7 @@ export function AccountTab({ user }: AccountTabProps) {
             <Calendar size={16} className="text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Member Since</p>
-              <p className="font-medium">
+              <p className="font-medium text-gray-600">
                 {profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString()
                   : 'Not available'
