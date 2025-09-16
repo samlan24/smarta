@@ -10,7 +10,7 @@ const ProductSection = () => {
     },
     {
       number: "2",
-      command: "smart-commit",
+      command: "cmarta",
       description: "AI analyzes diff and suggests message",
     },
     {
@@ -94,18 +94,18 @@ const ProductSection = () => {
                   </span>
                   {"\n"}
                   <span className="code-keyword">npm install</span>{" "}
-                  <span className="code-string">-g smart-commit</span>
+                  <span className="code-string">-g cmarta</span>
                   {"\n\n"}
                   <span className="code-comment"># One-time account setup</span>
                   {"\n"}
-                  <span className="code-keyword">smart-commit</span>{" "}
+                  <span className="code-keyword">cmarta</span>{" "}
                   <span className="code-string">login</span>
                   {"\n\n"}
                   <span className="code-comment">
                     # Use instead of git commit -m
                   </span>
                   {"\n"}
-                  <span className="code-keyword">smart-commit</span>
+                  <span className="code-keyword">cmarta</span>
                 </code>
               </pre>
             </div>
@@ -118,7 +118,7 @@ const ProductSection = () => {
             Behind the Scenes
           </h3>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-4 sm:mb-8">
-            Smarta reads your{" "}
+            Cmarta reads your{" "}
             <code className="bg-muted px-2 py-1 rounded text-accent">
               git diff --staged
             </code>

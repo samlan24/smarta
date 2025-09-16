@@ -36,11 +36,11 @@ const FinalCTASection = () => {
                 </span>
                 {"\n"}
                 <span className="code-keyword">npm install</span>{" "}
-                <span className="code-string">-g smart-commit</span>
+                <span className="code-string">-g cmarta</span>
                 {"\n\n"}
                 <span className="code-comment"># Start using immediately</span>
                 {"\n"}
-                <span className="code-keyword">smart-commit</span>
+                <span className="code-keyword">cmarta</span>
               </code>
             </pre>
           </div>

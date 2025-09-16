@@ -38,7 +38,7 @@ const HeroSection = () => {
             <div className="space-y-2 sm:space-y-3">
               {[
                 "Generates conventional commits from git diffs",
-                "Works with existing workflow (git add → smart-commit)",
+                "Works with existing workflow (git add → cmarta)",
                 "AI-powered - no setup required",
                 "50 free commits included",
               ].map((point, index) => (
@@ -69,7 +69,7 @@ const HeroSection = () => {
             <div className="relative">
               <Image
                 src={heroTerminalImage}
-                alt="Smart Commit terminal demonstration showing AI-generated commit messages"
+                alt="Cmarta terminal demonstration showing AI-generated commit messages"
                 className="w-full rounded-xl shadow-elegant hover-lift"
               />
             </div>
