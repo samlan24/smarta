@@ -33,9 +33,9 @@ git add src/auth.js
 <span class="code-comment"># 2-3 minutes thinking...</span>
 git commit -m "add auth"
 
-<span class="code-comment"># Cmarta workflow</span>
+<span class="code-comment"># Cmarta-commit workflow</span>
 git add src/auth.js
-cmarta <span class="code-comment"># 3 seconds</span>
+cmarta-commit <span class="code-comment"># 3 seconds</span>
 <span class="code-string">✅ feat: add user authentication middleware</span>`,
     },
   ];

@@ -16,7 +16,7 @@ const HeroSection = () => {
             <div className="flex items-center space-x-2 sm:space-x-3 text-accent text-sm sm:text-base">
               <Terminal className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="font-medium tracking-wide uppercase">
-                Cmarta CLI
+                Cmarta-commit CLI
               </span>
             </div>
 
@@ -38,7 +38,7 @@ const HeroSection = () => {
             <div className="space-y-2 sm:space-y-3">
               {[
                 "Generates conventional commits from git diffs",
-                "Works with existing workflow (git add → cmarta)",
+                "Works with existing workflow (git add → cmarta-commit → git push)",
                 "AI-powered - no setup required",
                 "50 free commits included",
               ].map((point, index) => (
@@ -58,7 +58,7 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
               <Button className="btn-hero group w-full sm:w-auto">
                 <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Install Cmarta
+                Install Cmarta-commit
               </Button>
             </div>
           </div>
@@ -69,7 +69,7 @@ const HeroSection = () => {
             <div className="relative">
               <Image
                 src={heroTerminalImage}
-                alt="Cmarta terminal demonstration showing AI-generated commit messages"
+                alt="Cmarta-commit terminal demonstration showing AI-generated commit messages"
                 className="w-full rounded-xl shadow-elegant hover-lift"
               />
             </div>
