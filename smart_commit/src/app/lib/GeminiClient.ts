@@ -115,7 +115,7 @@ class GeminiClient {
     // Add specific examples based on context
     prompt += this.getContextSpecificExamples(analysis);
 
-    // Add the rules
+    // these are the rules
     prompt += `\n\n## Conventional Commit Rules:
 - Format: type(scope): description
 - For complex changes, add a body after a blank line
