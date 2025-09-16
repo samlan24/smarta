@@ -63,7 +63,7 @@ export default function DocsPage() {
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  Cmarta
+                  Cmarta Commit
                 </h1>
                 <p className="text-sm text-gray-600">Documentation</p>
               </div>
@@ -121,7 +121,7 @@ export default function DocsPage() {
               {/* Hero Section */}
               <div className="mb-12">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  Cmarta Documentation
+                  Cmarta Commit Documentation
                 </h1>
                 <p className="text-xl text-gray-600">
                   AI-powered commit message generator that creates conventional
@@ -154,14 +154,14 @@ export default function DocsPage() {
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Install the CLI Tool
                   </h3>
-                  <CodeBlock>npm install -g cmarta</CodeBlock>
+                  <CodeBlock>npm install -g cmarta-commit</CodeBlock>
                 </div>
 
                 <div className="mb-8">
                   <h3 className="text-xl font-semibold text-gray-800 mb-4">
                     Verify Installation
                   </h3>
-                  <CodeBlock>cmarta --version</CodeBlock>
+                  <CodeBlock>cmarta-commit --version</CodeBlock>
                 </div>
               </section>
 
@@ -183,7 +183,7 @@ export default function DocsPage() {
                     <p className="text-gray-700 mb-4">
                       Visit{" "}
                       <Link href="/" className="text-blue-600 hover:underline">
-                        Cmarta
+                        Cmarta Commit
                       </Link>{" "}
                       and create an account.
                     </p>
@@ -208,7 +208,7 @@ export default function DocsPage() {
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       3. Configure the CLI Tool
                     </h3>
-                    <CodeBlock>cmarta setup</CodeBlock>
+                    <CodeBlock>cmarta-commit setup</CodeBlock>
                     <p className="text-gray-700 mt-4">
                       Enter your API key when prompted. The key will be securely
                       stored in your home directory.
@@ -236,11 +236,11 @@ export default function DocsPage() {
                       Navigate to your git repository and stage your changes:
                     </p>
                     <CodeBlock>{`git add .
-cmarta`}</CodeBlock>
+cmarta-commit`}</CodeBlock>
                     <p className="text-gray-700 mt-4">
                       Or stage and commit in one command:
                     </p>
-                    <CodeBlock>cmarta -a</CodeBlock>
+                    <CodeBlock>cmarta-commit -a</CodeBlock>
                   </div>
 
                   <div>
@@ -327,7 +327,7 @@ cmarta`}</CodeBlock>
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       List Your Templates
                     </h3>
-                    <CodeBlock>cmarta templates</CodeBlock>
+                    <CodeBlock>cmarta-commit templates</CodeBlock>
                     <p className="text-gray-700 mt-4">Output:</p>
                     <div className="bg-gray-100 p-4 rounded-lg">
                       <pre className="text-sm text-gray-800">{`📋 Saved Templates:
@@ -341,7 +341,7 @@ cmarta`}</CodeBlock>
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       Use a Template
                     </h3>
-                    <CodeBlock>cmarta use-template api-fix</CodeBlock>
+                    <CodeBlock>cmarta-commit use-template api-fix</CodeBlock>
                     <p className="text-gray-700 mt-4">This will:</p>
                     <ol className="list-decimal list-inside space-y-1 text-gray-700 mt-2">
                       <li>Stage your changes (if needed)</li>
@@ -357,14 +357,14 @@ cmarta`}</CodeBlock>
                     <p className="text-gray-700 mb-4">
                       Auto-commit with a template:
                     </p>
-                    <CodeBlock>cmarta use-template api-fix -y</CodeBlock>
+                    <CodeBlock>cmarta-commit use-template api-fix -y</CodeBlock>
                   </div>
 
                   <div>
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">
                       Delete a Template
                     </h3>
-                    <CodeBlock>cmarta delete-template api-fix</CodeBlock>
+                    <CodeBlock>cmarta-commit delete-template api-fix</CodeBlock>
                   </div>
                 </div>
               </section>
@@ -457,21 +457,21 @@ cmarta`}</CodeBlock>
                     <div className="space-y-4">
                       <div>
                         <CodeBlock>{`# Setup API key
-cmarta setup
+cmarta-commit setup
 
 # Generate and commit (interactive)
-cmarta
+cmarta-commit
 
 # Auto-stage and generate commit
-cmarta -a
-cmarta --all
+cmarta-commit -a
+cmarta-commit --all
 
 # Auto-commit without confirmation
-cmarta -y
-cmarta --auto
+cmarta-commit -y
+cmarta-commit --auto
 
 # Combine options
-cmarta -a -y`}</CodeBlock>
+cmarta-commit -a -y`}</CodeBlock>
                       </div>
                     </div>
                   </div>
@@ -481,16 +481,16 @@ cmarta -a -y`}</CodeBlock>
                       Template Commands
                     </h3>
                     <CodeBlock>{`# List all templates
-cmarta templates
+cmarta-commit templates
 
 # Use a specific template
-cmarta use-template <name>
+cmarta-commit use-template <name>
 
 # Use template with auto-commit
-cmarta use-template <name> -y
+cmarta-commit use-template <name> -y
 
 # Delete a template
-cmarta delete-template <name>`}</CodeBlock>
+cmarta-commit delete-template <name>`}</CodeBlock>
                   </div>
 
                   <div>
@@ -498,10 +498,10 @@ cmarta delete-template <name>`}</CodeBlock>
                       Help and Information
                     </h3>
                     <CodeBlock>{`# Show version
-cmarta --version
+cmarta-commit --version
 
 # Show help
-cmarta --help`}</CodeBlock>
+cmarta-commit --help`}</CodeBlock>
                   </div>
                 </div>
               </section>
@@ -528,13 +528,13 @@ cmarta --help`}</CodeBlock>
                       <li>
                         <strong>Linux/macOS</strong>:{" "}
                         <code className="bg-gray-100 px-2 py-1 rounded">
-                          ~/.cmarta-config.json
+                          ~/.cmarta-commit-config.json
                         </code>
                       </li>
                       <li>
                         <strong>Windows</strong>:{" "}
                         <code className="bg-gray-100 px-2 py-1 rounded">
-                          %USERPROFILE%\.cmarta-config.json
+                          %USERPROFILE%\.cmarta-commit-config.json
                         </code>
                       </li>
                     </ul>
@@ -556,7 +556,7 @@ cmarta --help`}</CodeBlock>
                     <p className="text-gray-700 mb-4">
                       Re-run setup to update your API key:
                     </p>
-                    <CodeBlock>cmarta setup</CodeBlock>
+                    <CodeBlock>cmarta-commit setup</CodeBlock>
                   </div>
                 </div>
               </section>
@@ -591,14 +591,14 @@ cmarta --help`}</CodeBlock>
                         <CodeBlock>{`# Stage your changes first
 git add .
 # Or use the auto-stage flag
-cmarta -a`}</CodeBlock>
+cmarta-commit -a`}</CodeBlock>
                       </div>
 
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <h4 className="font-semibold text-blue-800 mb-2">
                           "Invalid API key"
                         </h4>
-                        <CodeBlock>cmarta setup</CodeBlock>
+                        <CodeBlock>cmarta-commit setup</CodeBlock>
                       </div>
 
                       <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
