@@ -84,17 +84,17 @@ export function BillingTab({ user }: BillingTabProps) {
         <div className="space-y-3">
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Monthly Requests</span>
-            <span className="font-medium">{monthlyRequests}/{requestLimit}</span>
+            <span className="font-medium text-gray-600">{monthlyRequests}/{requestLimit}</span>
           </div>
 
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Max Requests</span>
-            <span className="font-medium">{requestLimit}</span>
+            <span className="font-medium text-gray-600">{requestLimit}</span>
           </div>
 
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Resets</span>
-            <span className="font-medium">{resetDate}</span>
+            <span className="font-medium text-gray-600">{resetDate}</span>
           </div>
         </div>
       </div>
