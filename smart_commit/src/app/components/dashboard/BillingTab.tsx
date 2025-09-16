@@ -100,7 +100,7 @@ export function BillingTab({ user }: BillingTabProps) {
       </div>
 
       {/* Upgrade Section */}
-      {currentPlan === "Free" && (
+      {currentPlan === "free" && (
         <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
           <div className="flex items-start gap-3">
             <CreditCard className="text-blue-600 mt-1" size={20} />
