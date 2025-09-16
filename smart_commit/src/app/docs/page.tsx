@@ -63,7 +63,7 @@ export default function DocsPage() {
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
-                  Smart Commit
+                  Cmarta
                 </h1>
                 <p className="text-sm text-gray-600">Documentation</p>
               </div>
@@ -183,7 +183,7 @@ export default function DocsPage() {
                     <p className="text-gray-700 mb-4">
                       Visit{" "}
                       <Link href="/" className="text-blue-600 hover:underline">
-                        Smart Commit
+                        Cmarta
                       </Link>{" "}
                       and create an account.
                     </p>
