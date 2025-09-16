@@ -59,7 +59,7 @@ export default function DocsPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
               <div className="bg-blue-600 p-2 rounded-lg">
-                <span className="text-white font-bold text-xl">CC</span>
+                <span className="text-white font-bold text-xl">C_C</span>
               </div>
               <div>
                 <h1 className="text-xl font-semibold text-gray-900">
