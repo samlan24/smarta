@@ -125,8 +125,9 @@ class GeminiClient {
 - No period at end of subject line
 - Add '!' after type/scope for breaking changes
 - Scope should be specific and relevant
-- Body should explain what and why, not how
-- Keep body concise - maximum 3-4 lines total
+- Body should explain what and why the change matters, not how
+- Prioritize clarity and brevity
+- Keep body concise - maximum 2 -3 lines total
 
 ## Special Instructions:`;
 
