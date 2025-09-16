@@ -38,7 +38,7 @@ export default function DashboardPage() {
                 Welcome back, {user?.user_metadata.full_name || "User"}
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center gap-4">
               <SettingsButton onClick={() => setShowSettings(true)} />
               <SignOutButton />
             </div>
