@@ -25,9 +25,13 @@ import {
   Clock,
   GitBranch,
   FileText,
-  Zap
+  Zap,
+  Info,
+  Lightbulb,
+  HelpCircle
 } from 'lucide-react';
 import { RepositoryHealthCalculator } from '@/app/lib/health-calculator';
+import { HealthExplainer } from '@/app/lib/health-explanations';
 
 interface RepositoryHealthData {
   repositories: string[];
@@ -124,6 +128,8 @@ export default function RepositoryHealthChart() {
   }
 
   const healthInfo = RepositoryHealthCalculator.getHealthLevel(data.healthMetrics.healthScore);
+  const explanation = HealthExplainer.explainHealthScore(data.healthMetrics);
+  const recommendations = HealthExplainer.getPriorityRecommendations(data.healthMetrics);
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
@@ -187,45 +193,144 @@ export default function RepositoryHealthChart() {
         </div>
       </div>
 
+      {/* Health Explanation Section */}
+      <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+        <div className="flex items-start gap-3 mb-4">
+          <Info className="text-blue-600 mt-0.5" size={20} />
+          <div className="flex-1">
+            <h4 className="text-md font-medium text-gray-800 mb-2">Why is your health score {data.healthMetrics.healthScore}/100?</h4>
+            <p className="text-sm text-gray-600 mb-3">{explanation.impact}</p>
+            
+            {explanation.reasons.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-medium text-gray-700">Key factors affecting your score:</p>
+                <ul className="space-y-1">
+                  {explanation.reasons.map((reason, index) => (
+                    <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
+                      <span className="text-gray-400 mt-1">•</span>
+                      <span>{reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Recommendations */}
+        {recommendations.length > 0 && (
+          <div className="border-t border-gray-200 pt-4">
+            <div className="flex items-start gap-3">
+              <Lightbulb className="text-yellow-600 mt-0.5" size={20} />
+              <div className="flex-1">
+                <h4 className="text-md font-medium text-gray-800 mb-3">Recommended actions to improve:</h4>
+                <div className="space-y-3">
+                  {recommendations.slice(0, 3).map((rec, index) => (
+                    <div key={index} className="flex items-start gap-3 p-3 bg-white rounded-lg border border-gray-100">
+                      <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        rec.priority === 'high' ? 'bg-red-100 text-red-700' :
+                        rec.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-green-100 text-green-700'
+                      }`}>
+                        {rec.priority.toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-800">{rec.action}</p>
+                        <p className="text-xs text-gray-600 mt-1">{rec.benefit}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-blue-50 p-4 rounded-lg">
+        <div className="bg-blue-50 p-4 rounded-lg relative group">
           <div className="flex items-center gap-2">
             <TrendingUp className="text-blue-600" size={20} />
-            <div>
-              <p className="text-sm text-gray-600">Avg Commit Size</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">Avg Commit Size</p>
+                <HelpCircle className="text-gray-400 cursor-help" size={14} />
+              </div>
               <p className="text-xl font-bold text-blue-600">{data.healthMetrics.averageCommitSize} lines</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Ideal: 20-100 lines
+              </p>
             </div>
+          </div>
+          
+          {/* Tooltip */}
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
+            <p className="font-medium mb-1">Average Commit Size</p>
+            <p>Commits in the 20-100 line range are easy to review and understand. Too small creates noise, too large is hard to review.</p>
           </div>
         </div>
 
-        <div className="bg-green-50 p-4 rounded-lg">
+        <div className="bg-green-50 p-4 rounded-lg relative group">
           <div className="flex items-center gap-2">
             <Activity className="text-green-600" size={20} />
-            <div>
-              <p className="text-sm text-gray-600">Commit Frequency</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">Commit Frequency</p>
+                <HelpCircle className="text-gray-400 cursor-help" size={14} />
+              </div>
               <p className="text-xl font-bold text-green-600">{data.healthMetrics.commitFrequency}/day</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Ideal: 1-3 commits/day
+              </p>
             </div>
+          </div>
+          
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
+            <p className="font-medium mb-1">Commit Frequency</p>
+            <p>Regular commits show consistent progress and reduce merge conflicts. Too few suggests infrequent development, too many may indicate rushed work.</p>
           </div>
         </div>
 
-        <div className="bg-yellow-50 p-4 rounded-lg">
+        <div className="bg-yellow-50 p-4 rounded-lg relative group">
           <div className="flex items-center gap-2">
             <FileText className="text-yellow-600" size={20} />
-            <div>
-              <p className="text-sm text-gray-600">File Churn Rate</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">File Churn Rate</p>
+                <HelpCircle className="text-gray-400 cursor-help" size={14} />
+              </div>
               <p className="text-xl font-bold text-yellow-600">{data.healthMetrics.fileChurnRate} files/commit</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Ideal: 2-4 files/commit
+              </p>
             </div>
+          </div>
+          
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
+            <p className="font-medium mb-1">File Churn Rate</p>
+            <p>Focused commits touching few related files are easier to review and less likely to introduce bugs across multiple areas.</p>
           </div>
         </div>
 
-        <div className="bg-red-50 p-4 rounded-lg">
+        <div className="bg-red-50 p-4 rounded-lg relative group">
           <div className="flex items-center gap-2">
             <AlertTriangle className="text-red-600" size={20} />
-            <div>
-              <p className="text-sm text-gray-600">Breaking Changes</p>
+            <div className="flex-1">
+              <div className="flex items-center gap-1">
+                <p className="text-sm text-gray-600">Breaking Changes</p>
+                <HelpCircle className="text-gray-400 cursor-help" size={14} />
+              </div>
               <p className="text-xl font-bold text-red-600">{data.healthMetrics.breakingChangeFrequency}%</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Ideal: &lt;2% of commits
+              </p>
             </div>
+          </div>
+          
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
+            <p className="font-medium mb-1">Breaking Changes</p>
+            <p>Breaking changes disrupt users and require careful coordination. High frequency indicates unstable APIs or poor planning.</p>
           </div>
         </div>
       </div>
