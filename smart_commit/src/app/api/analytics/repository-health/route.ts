@@ -127,7 +127,7 @@ function calculateRepositoryHealth(commits: any[], days: number): RepositoryHeal
   const averageCommitSize = totalLinesChanged / totalCommits;
   const commitFrequency = totalCommits / days;
   
-  const totalFilesChanged = commits.reduce((sum: number, c: any) => sum + c.files_changed, 0);
+  const totalFilesChanged = commits.reduce((sum: number, c: any) => sum + (c.files_changed?.length || 0), 0);
   const fileChurnRate = totalFilesChanged / totalCommits;
   
   // Calculate breaking change frequency
@@ -184,7 +184,7 @@ function calculateHealthTrends(commits: any[], days: number): HealthTrend[] {
     if (dayCommits.length > 0) {
       const totalLines = dayCommits.reduce((sum: number, c: any) => sum + c.lines_added + c.lines_deleted, 0);
       const avgSize = totalLines / dayCommits.length;
-      const totalFiles = dayCommits.reduce((sum: number, c: any) => sum + c.files_changed, 0);
+      const totalFiles = dayCommits.reduce((sum: number, c: any) => sum + (c.files_changed?.length || 0), 0);
       const churnRate = totalFiles / dayCommits.length;
       
       const healthScore = RepositoryHealthCalculator.calculateHealthScore({

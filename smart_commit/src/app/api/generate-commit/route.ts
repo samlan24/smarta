@@ -63,15 +63,17 @@ export async function POST(request: NextRequest) {
     if (typeof userId === "string") {
       try {
         const supabase = await createClient();
-        await supabase.from('commit_analytics').insert({
-          user_id: userId,
-          files_changed: analytics.filesChanged,
-          lines_added: analytics.linesAdded,
-          lines_deleted: analytics.linesDeleted,
-          commit_type: commitType,
-          repository_name: repositoryName,
-          timestamp: new Date().toISOString()
-        });
+        const { data: analyticsData, error: analyticsError } = await supabase
+          .from('commit_analytics')
+          .insert({
+            user_id: userId,
+            files_changed: analytics.filesChanged, 
+            lines_added: analytics.linesAdded,
+            lines_deleted: analytics.linesDeleted,
+            commit_type: AnalyticsParser.extractCommitType(commitMessage),
+            repository_name: AnalyticsParser.extractRepositoryName(diff),
+            timestamp: new Date().toISOString()
+          });
       } catch (analyticsError) {
         console.error('Failed to store analytics:', analyticsError);
         // Don't fail the main request if analytics fails

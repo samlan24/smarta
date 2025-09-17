@@ -74,6 +74,7 @@ export default function RepositoryHealthChart() {
       if (!response.ok) throw new Error('Failed to fetch health data');
 
       const result = await response.json();
+      console.log('Health API Response:', result); // Debug log
       setData(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
