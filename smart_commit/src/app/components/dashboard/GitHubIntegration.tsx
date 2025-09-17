@@ -33,6 +33,9 @@ interface GitHubRepo {
   stars: number;
   forks: number;
   last_sync_at?: string | null; // track last sync per repo here
+  commits?: number; // add cumulative commits here
+  aiCommits?: number; // add AI commits here
+  manualCommits?: number;
 }
 
 interface RepoSyncStat {
@@ -46,9 +49,9 @@ interface RepoStat {
   commits: number;
   aiCommits: number;
   manualCommits: number;
- }
+}
 
- interface SyncStats {
+interface SyncStats {
   repositories: number;
   commits: number;
   aiCommits: number;
@@ -57,8 +60,7 @@ interface RepoStat {
   syncedCommits?: number;
   syncPeriod?: string;
   repoStats?: RepoStat[];
- }
-
+}
 
 export default function GitHubIntegration() {
   const [integration, setIntegration] = useState<GitHubIntegration | null>(
@@ -235,11 +237,20 @@ export default function GitHubIntegration() {
       const result = await response.json();
       if (response.ok) {
         setSyncedRepos((prev) =>
-          prev.map((r) =>
-            r.full_name === repoFullName
-              ? { ...r, last_sync_at: new Date().toISOString() }
-              : r
-          )
+          prev.map((repo) => {
+            if (repo.full_name === repoFullName) {
+              const repoStat = result.repoStats?.[0];
+              if (!repoStat) return repo;
+              return {
+                ...repo,
+                last_sync_at: new Date().toISOString(),
+                commits: repoStat.commits,
+                aiCommits: repoStat.aiCommits,
+                manualCommits: repoStat.manualCommits,
+              };
+            }
+            return repo;
+          })
         );
         setSyncStats(result);
         await fetchIntegrationStatus();
@@ -455,20 +466,19 @@ export default function GitHubIntegration() {
                       : "Never"}
                   </p>
                   {syncStats?.repoStats &&
- (() => {
-   const stats = syncStats.repoStats.find(
-     (s) => s.repoFullName === repo.full_name
-   );
-   if (!stats) return null;
-   return (
-     <div className="text-gray-700 mt-2 space-y-1">
-       Commits: {stats.commits}
-       Manual: {stats.manualCommits}
-       AI: {stats.aiCommits}
-     </div>
-   );
- })()}
-
+                    (() => {
+                      const stats = syncStats.repoStats.find(
+                        (s) => s.repoFullName === repo.full_name
+                      );
+                      if (!stats) return null;
+                      return (
+                        <div className="text-gray-700 mt-2 space-y-1">
+                          Commits: {stats.commits}
+                          Manual: {stats.manualCommits}
+                          AI: {stats.aiCommits}
+                        </div>
+                      );
+                    })()}
                 </div>
                 <div className="flex gap-2">
                   <button
