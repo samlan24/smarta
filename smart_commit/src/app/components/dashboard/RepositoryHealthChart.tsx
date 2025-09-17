@@ -123,6 +123,12 @@ export default function RepositoryHealthChart() {
           <Activity className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data To See</h3>
           <p className="text-gray-600">Start making commits to see repository health metrics.</p>
+          {/* Debug info */}
+          <div className="mt-4 text-xs text-gray-500">
+            <p>Debug: data exists: {data ? 'yes' : 'no'}</p>
+            <p>Debug: healthMetrics exists: {data?.healthMetrics ? 'yes' : 'no'}</p>
+            <p>Debug: repositories: {data?.repositories?.length || 0}</p>
+          </div>
         </div>
       </div>
     );
@@ -258,7 +264,9 @@ export default function RepositoryHealthChart() {
                 <p className="text-sm text-gray-600">Avg Commit Size</p>
                 <HelpCircle className="text-gray-400 cursor-help" size={14} />
               </div>
-              <p className="text-xl font-bold text-blue-600">{data.healthMetrics.averageCommitSize} lines</p>
+              <p className="text-xl font-bold text-blue-600">
+                {data.healthMetrics?.averageCommitSize || 'N/A'} lines
+              </p>
               <p className="text-xs text-gray-500 mt-1">
                 Ideal: 20-100 lines
               </p>
@@ -280,7 +288,9 @@ export default function RepositoryHealthChart() {
                 <p className="text-sm text-gray-600">Commit Frequency</p>
                 <HelpCircle className="text-gray-400 cursor-help" size={14} />
               </div>
-              <p className="text-xl font-bold text-green-600">{data.healthMetrics.commitFrequency}/day</p>
+              <p className="text-xl font-bold text-green-600">
+                {data.healthMetrics?.commitFrequency || 'N/A'}/day
+              </p>
               <p className="text-xs text-gray-500 mt-1">
                 Ideal: 1-3 commits/day
               </p>
@@ -301,7 +311,9 @@ export default function RepositoryHealthChart() {
                 <p className="text-sm text-gray-600">File Churn Rate</p>
                 <HelpCircle className="text-gray-400 cursor-help" size={14} />
               </div>
-              <p className="text-xl font-bold text-yellow-600">{data.healthMetrics.fileChurnRate} files/commit</p>
+              <p className="text-xl font-bold text-yellow-600">
+                {data.healthMetrics?.fileChurnRate || 'N/A'} files/commit
+              </p>
               <p className="text-xs text-gray-500 mt-1">
                 Ideal: 2-4 files/commit
               </p>
@@ -322,7 +334,9 @@ export default function RepositoryHealthChart() {
                 <p className="text-sm text-gray-600">Breaking Changes</p>
                 <HelpCircle className="text-gray-400 cursor-help" size={14} />
               </div>
-              <p className="text-xl font-bold text-red-600">{data.healthMetrics.breakingChangeFrequency}%</p>
+              <p className="text-xl font-bold text-red-600">
+                {data.healthMetrics?.breakingChangeFrequency || 'N/A'}%
+              </p>
               <p className="text-xs text-gray-500 mt-1">
                 Ideal: &lt;2% of commits
               </p>
