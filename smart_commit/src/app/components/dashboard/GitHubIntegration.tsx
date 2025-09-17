@@ -41,8 +41,14 @@ interface RepoSyncStat {
   aiCommits: number;
   manualCommits: number;
 }
+interface RepoStat {
+  repoFullName: string;
+  commits: number;
+  aiCommits: number;
+  manualCommits: number;
+ }
 
-interface SyncStats {
+ interface SyncStats {
   repositories: number;
   commits: number;
   aiCommits: number;
@@ -50,8 +56,9 @@ interface SyncStats {
   syncedRepositories?: number;
   syncedCommits?: number;
   syncPeriod?: string;
-  repoStats?: RepoSyncStat[];
-}
+  repoStats?: RepoStat[];
+ }
+
 
 export default function GitHubIntegration() {
   const [integration, setIntegration] = useState<GitHubIntegration | null>(
@@ -448,26 +455,20 @@ export default function GitHubIntegration() {
                       : "Never"}
                   </p>
                   {syncStats?.repoStats &&
-                    (() => {
-                      const stats = syncStats.repoStats.find(
-                        (s) => s.repoFullName === repo.full_name
-                      );
-                      if (!stats) return null;
-                      return (
-                        <div className="text-sm text-gray-700 mt-2 space-y-1">
-                          <p>
-                            <strong>Commits:</strong> {stats.commits}
-                          </p>
-                          <p>
-                            <strong>Manual Commits:</strong>{" "}
-                            {stats.manualCommits}
-                          </p>
-                          <p>
-                            <strong>AI Commits:</strong> {stats.aiCommits}
-                          </p>
-                        </div>
-                      );
-                    })()}
+ (() => {
+   const stats = syncStats.repoStats.find(
+     (s) => s.repoFullName === repo.full_name
+   );
+   if (!stats) return null;
+   return (
+     <div className="text-gray-700 mt-2 space-y-1">
+       Commits: {stats.commits}
+       Manual: {stats.manualCommits}
+       AI: {stats.aiCommits}
+     </div>
+   );
+ })()}
+
                 </div>
                 <div className="flex gap-2">
                   <button
