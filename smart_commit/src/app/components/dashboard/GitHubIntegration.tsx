@@ -70,7 +70,14 @@ export default function GitHubIntegration() {
       // Clear error from URL
       window.history.replaceState({}, '', '/dashboard?tab=integrations');
     }
-  }, []);
+  }, []); // Only run on mount
+
+  // Separate useEffect to fetch sync stats when integration is available
+  useEffect(() => {
+    if (integration) {
+      fetchSyncStats();
+    }
+  }, [integration]); // Only fetch sync stats when integration changes
 
   const handlePostConnection = async () => {
     try {
@@ -134,6 +141,18 @@ export default function GitHubIntegration() {
       console.error('GitHub connection error:', error);
       // Fall back to OAuth on any error
       initiateOAuthFlow();
+    }
+  };
+
+  const fetchSyncStats = async () => {
+    try {
+      const response = await fetch('/api/integrations/sync-stats');
+      if (response.ok) {
+        const data = await response.json();
+        setSyncStats(data);
+      }
+    } catch (error) {
+      console.error('Error fetching sync stats:', error);
     }
   };
 
@@ -414,6 +433,20 @@ export default function GitHubIntegration() {
                     <span className="text-sm text-gray-600">Commits</span>
                   </div>
                   <p className="text-xl font-bold text-green-600">{syncStats.commits}</p>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="text-green-600" size={16} />
+                    <span className="text-sm text-gray-600">Manual Commits</span>
+                  </div>
+                  <p className="text-xl font-bold text-green-600">{syncStats.manualCommits}</p>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="text-green-600" size={16} />
+                    <span className="text-sm text-gray-600">AI Commits</span>
+                  </div>
+                  <p className="text-xl font-bold text-green-600">{syncStats.aiCommits}</p>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
