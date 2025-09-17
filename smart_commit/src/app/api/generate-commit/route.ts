@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "../../lib/auth";
 import { logApiUsage } from "../../lib/usage-tracker";
 import GeminiClient from "../../lib/GeminiClient";
+import { AnalyticsParser } from "../../lib/analytics-parser";
+import { createClient } from "../../lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -51,6 +53,30 @@ export async function POST(request: NextRequest) {
     });
 
     const analysis = geminiClient.analyzeChanges(diff);
+
+    // Parse git diff for analytics
+    const analytics = AnalyticsParser.parseGitDiff(diff);
+    const commitType = AnalyticsParser.extractCommitType(commitMessage);
+    const repositoryName = AnalyticsParser.extractRepositoryName(diff);
+
+    // Store analytics data
+    if (typeof userId === "string") {
+      try {
+        const supabase = await createClient();
+        await supabase.from('commit_analytics').insert({
+          user_id: userId,
+          files_changed: analytics.filesChanged,
+          lines_added: analytics.linesAdded,
+          lines_deleted: analytics.linesDeleted,
+          commit_type: commitType,
+          repository_name: repositoryName,
+          timestamp: new Date().toISOString()
+        });
+      } catch (analyticsError) {
+        console.error('Failed to store analytics:', analyticsError);
+        // Don't fail the main request if analytics fails
+      }
+    }
 
     const requestSize = diff.length;
     const responseSize = commitMessage.length;

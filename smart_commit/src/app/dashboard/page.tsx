@@ -8,6 +8,8 @@ import { UsageChart } from "../components/dashboard/UsageChart";
 import { TemplateManager } from "../components/dashboard/TemplateManager";
 import SettingsButton from "../components/dashboard/SettingsButton";
 import { SettingsModal } from "../components/dashboard/SettingsModal";
+import { CodeChangesChart } from "../components/dashboard/CodeChangesChart";
+import { FileActivityChart } from "../components/dashboard/FileActivityChart";
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 
@@ -61,6 +63,12 @@ export default function DashboardPage() {
               <ApiKeyManager />
               <TemplateManager />
             </div>
+          </div>
+
+          {/* Analytics Section */}
+          <div className="space-y-8">
+            <CodeChangesChart />
+            <FileActivityChart />
           </div>
 
           {/* Recent Activity */}
