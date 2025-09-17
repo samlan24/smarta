@@ -69,10 +69,10 @@ export default function RepositoryHealthChart() {
         days: timeRange.toString(),
         repository: selectedRepository
       });
-      
+
       const response = await fetch(`/api/analytics/repository-health?${params}`);
       if (!response.ok) throw new Error('Failed to fetch health data');
-      
+
       const result = await response.json();
       setData(result);
     } catch (err) {
@@ -120,7 +120,7 @@ export default function RepositoryHealthChart() {
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="text-center py-8">
           <Activity className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data Available</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data To See</h3>
           <p className="text-gray-600">Start making commits to see repository health metrics.</p>
         </div>
       </div>
@@ -165,7 +165,7 @@ export default function RepositoryHealthChart() {
         <div className="flex items-center gap-4 mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <div 
+              <div
                 className={`w-4 h-4 rounded-full`}
                 style={{ backgroundColor: HEALTH_COLORS[healthInfo.color as keyof typeof HEALTH_COLORS] }}
               ></div>
@@ -185,7 +185,7 @@ export default function RepositoryHealthChart() {
         <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
           <div
             className="h-3 rounded-full transition-all duration-300"
-            style={{ 
+            style={{
               width: `${data.healthMetrics.healthScore}%`,
               backgroundColor: HEALTH_COLORS[healthInfo.color as keyof typeof HEALTH_COLORS]
             }}
@@ -200,7 +200,7 @@ export default function RepositoryHealthChart() {
           <div className="flex-1">
             <h4 className="text-md font-medium text-gray-800 mb-2">Why is your health score {data.healthMetrics.healthScore}/100?</h4>
             <p className="text-sm text-gray-600 mb-3">{explanation.impact}</p>
-            
+
             {explanation.reasons.length > 0 && (
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-700">Key factors affecting your score:</p>
@@ -263,7 +263,7 @@ export default function RepositoryHealthChart() {
               </p>
             </div>
           </div>
-          
+
           {/* Tooltip */}
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
             <p className="font-medium mb-1">Average Commit Size</p>
@@ -285,7 +285,7 @@ export default function RepositoryHealthChart() {
               </p>
             </div>
           </div>
-          
+
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
             <p className="font-medium mb-1">Commit Frequency</p>
             <p>Regular commits show consistent progress and reduce merge conflicts. Too few suggests infrequent development, too many may indicate rushed work.</p>
@@ -306,7 +306,7 @@ export default function RepositoryHealthChart() {
               </p>
             </div>
           </div>
-          
+
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
             <p className="font-medium mb-1">File Churn Rate</p>
             <p>Focused commits touching few related files are easier to review and less likely to introduce bugs across multiple areas.</p>
@@ -327,7 +327,7 @@ export default function RepositoryHealthChart() {
               </p>
             </div>
           </div>
-          
+
           <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 w-64">
             <p className="font-medium mb-1">Breaking Changes</p>
             <p>Breaking changes disrupt users and require careful coordination. High frequency indicates unstable APIs or poor planning.</p>
@@ -389,7 +389,7 @@ export default function RepositoryHealthChart() {
                       <Cell key={`cell-${index}`} fill={SIZE_COLORS[index % SIZE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
+                  <Tooltip
                     formatter={(value: number, name: string, props: any) => [
                       `${value} commits (${props.payload.percentage}%)`,
                       props.payload.range
@@ -402,7 +402,7 @@ export default function RepositoryHealthChart() {
               <div className="mt-4 space-y-2">
                 {data.commitSizeDistribution.map((item, index) => (
                   <div key={item.range} className="flex items-center gap-2 text-sm">
-                    <div 
+                    <div
                       className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: SIZE_COLORS[index % SIZE_COLORS.length] }}
                     ></div>
@@ -423,9 +423,9 @@ export default function RepositoryHealthChart() {
             {data.repositories.map(repo => {
               const repoHealth = data.healthMetrics[repo];
               if (!repoHealth) return null;
-              
+
               const repoHealthInfo = RepositoryHealthCalculator.getHealthLevel(repoHealth.healthScore);
-              
+
               return (
                 <div key={repo} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
