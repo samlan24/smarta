@@ -173,7 +173,7 @@ export default function RepositoryHealthChart() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
         <h3 className="text-lg font-semibold text-gray-800">Repository Health Metrics</h3>
         <div className="flex flex-col sm:flex-row gap-2">
-          {data.repositories.length > 1 && (
+          {data.repositories.length > 0 && (
             <select
               value={selectedRepository}
               onChange={(e) => setSelectedRepository(e.target.value)}

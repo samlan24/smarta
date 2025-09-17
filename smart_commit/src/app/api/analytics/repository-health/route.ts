@@ -95,13 +95,20 @@ export async function GET(request: NextRequest) {
 
     // Return overview of all repositories
     // For "all" repositories, return the first repository's metrics directly
-    // since the UI expects a single healthMetrics object, not a map
-    const primaryRepo = repositories[0];
-    const primaryHealthMetrics = primaryRepo ? healthMetrics[primaryRepo] : null;
+    // For specific repository, return that repository's metrics
+    let selectedHealthMetrics = null;
+    
+    if (repository !== 'all' && healthMetrics[repository]) {
+      selectedHealthMetrics = healthMetrics[repository];
+    } else {
+      // Default to first repository for "all" case
+      const primaryRepo = repositories[0];
+      selectedHealthMetrics = primaryRepo ? healthMetrics[primaryRepo] : null;
+    }
     
     return NextResponse.json({
       repositories,
-      healthMetrics: primaryHealthMetrics,
+      healthMetrics: selectedHealthMetrics,
       trends: [],
       fileChurn: [],
       commitSizeDistribution: []
