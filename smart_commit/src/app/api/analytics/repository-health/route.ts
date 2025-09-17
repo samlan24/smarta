@@ -123,11 +123,11 @@ function calculateRepositoryHealth(commits: any[], days: number): RepositoryHeal
   
   // Calculate metrics
   const totalCommits = commits.length;
-  const totalLinesChanged = commits.reduce((sum, c) => sum + c.lines_added + c.lines_deleted, 0);
+  const totalLinesChanged = commits.reduce((sum: number, c: any) => sum + c.lines_added + c.lines_deleted, 0);
   const averageCommitSize = totalLinesChanged / totalCommits;
   const commitFrequency = totalCommits / days;
   
-  const totalFilesChanged = commits.reduce((sum, c) => sum + c.files_changed, 0);
+  const totalFilesChanged = commits.reduce((sum: number, c: any) => sum + c.files_changed, 0);
   const fileChurnRate = totalFilesChanged / totalCommits;
   
   // Calculate breaking change frequency
@@ -182,9 +182,9 @@ function calculateHealthTrends(commits: any[], days: number): HealthTrend[] {
     const dayCommits = dailyCommits[dateStr] || [];
     
     if (dayCommits.length > 0) {
-      const totalLines = dayCommits.reduce((sum, c) => sum + c.lines_added + c.lines_deleted, 0);
+      const totalLines = dayCommits.reduce((sum: number, c: any) => sum + c.lines_added + c.lines_deleted, 0);
       const avgSize = totalLines / dayCommits.length;
-      const totalFiles = dayCommits.reduce((sum, c) => sum + c.files_changed, 0);
+      const totalFiles = dayCommits.reduce((sum: number, c: any) => sum + c.files_changed, 0);
       const churnRate = totalFiles / dayCommits.length;
       
       const healthScore = RepositoryHealthCalculator.calculateHealthScore({
@@ -218,7 +218,7 @@ function calculateFileChurnData(commits: any[]): FileChurnData[] {
 }
 
 function calculateCommitSizeDistribution(commits: any[]): CommitSizeDistribution[] {
-  const distribution = {
+  const distribution: Record<string, number> = {
     'Small (1-10 lines)': 0,
     'Medium (11-50 lines)': 0,
     'Large (51-200 lines)': 0,
@@ -228,7 +228,9 @@ function calculateCommitSizeDistribution(commits: any[]): CommitSizeDistribution
   commits.forEach(commit => {
     const totalLines = commit.lines_added + commit.lines_deleted;
     const category = RepositoryHealthCalculator.categorizeCommitSize(totalLines);
-    distribution[category]++;
+    if (distribution[category] !== undefined) {
+      distribution[category]++;
+    }
   });
 
   const total = commits.length;
