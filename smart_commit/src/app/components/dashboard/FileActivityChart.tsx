@@ -95,7 +95,7 @@ export function FileActivityChart() {
           <select
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as 'frequency' | 'changes')}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 text-sm"
           >
             <option value="frequency">Change Frequency</option>
             <option value="changes">Net Changes</option>
@@ -103,7 +103,7 @@ export function FileActivityChart() {
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(parseInt(e.target.value))}
-            className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-1 border border-gray-300 rounded-md text-gray-600 text-sm"
           >
             <option value={7}>Last 7 days</option>
             <option value={30}>Last 30 days</option>
@@ -166,15 +166,15 @@ export function FileActivityChart() {
             <BarChart data={barChartData} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
-              <YAxis 
-                type="category" 
-                dataKey="fileName" 
+              <YAxis
+                type="category"
+                dataKey="fileName"
                 width={120}
                 tick={{ fontSize: 12 }}
               />
-              <Tooltip 
+              <Tooltip
                 formatter={(value: number, name: string) => [
-                  value.toLocaleString(), 
+                  value.toLocaleString(),
                   name === 'changeCount' ? 'Changes' : 'Net Change'
                 ]}
                 labelFormatter={(label) => {
@@ -198,8 +198,8 @@ export function FileActivityChart() {
                   return null;
                 }}
               />
-              <Bar 
-                dataKey={viewMode === 'frequency' ? 'changeCount' : 'netChange'} 
+              <Bar
+                dataKey={viewMode === 'frequency' ? 'changeCount' : 'netChange'}
                 fill={viewMode === 'frequency' ? '#3B82F6' : '#10B981'}
                 radius={[0, 4, 4, 0]}
               />
@@ -229,14 +229,14 @@ export function FileActivityChart() {
               <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-          
+
           {/* File Types List */}
           <div className="mt-4 space-y-2">
             {fileTypesData.slice(0, 5).map((type, index) => (
               <div key={type.name} className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
+                  <div
+                    className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: COLORS[index % COLORS.length] }}
                   ></div>
                   <span className="text-gray-700">.{type.name}</span>

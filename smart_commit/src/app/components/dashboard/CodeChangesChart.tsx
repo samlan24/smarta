@@ -76,7 +76,7 @@ export function CodeChangesChart() {
         <select
           value={timeRange}
           onChange={(e) => setTimeRange(parseInt(e.target.value))}
-          className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+          className="px-3 py-1 border border-gray-300 text-gray-600 rounded-md text-sm"
         >
           <option value={7}>Last 7 days</option>
           <option value={30}>Last 30 days</option>
@@ -137,27 +137,27 @@ export function CodeChangesChart() {
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data.chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="date" 
+              <XAxis
+                dataKey="date"
                 tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               />
               <YAxis />
-              <Tooltip 
+              <Tooltip
                 labelFormatter={(value) => new Date(value).toLocaleDateString()}
                 formatter={(value: number, name: string) => [value.toLocaleString(), name]}
               />
               <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="linesAdded" 
-                stroke="#10B981" 
+              <Line
+                type="monotone"
+                dataKey="linesAdded"
+                stroke="#10B981"
                 strokeWidth={2}
                 name="Lines Added"
               />
-              <Line 
-                type="monotone" 
-                dataKey="linesDeleted" 
-                stroke="#EF4444" 
+              <Line
+                type="monotone"
+                dataKey="linesDeleted"
+                stroke="#EF4444"
                 strokeWidth={2}
                 name="Lines Deleted"
               />
