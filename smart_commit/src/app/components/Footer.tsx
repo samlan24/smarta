@@ -43,7 +43,7 @@ const Footer = () => {
               <span className="text-xl font-bold">Cmarta-commit</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-              AI-powered commit message generator for developers who want
+              AI-powered commit message generator for devs who want
               consistent, professional git history without the manual effort.
             </p>
 
