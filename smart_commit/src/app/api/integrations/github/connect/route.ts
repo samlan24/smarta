@@ -4,7 +4,7 @@ import { createClient } from '@/app/lib/supabase/server';
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
-    
+
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -12,10 +12,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Get GitHub provider token from user metadata
-    const githubToken = user.user_metadata?.provider_token;
-    if (!githubToken) {
-      return NextResponse.json({ error: 'No GitHub token found' }, { status: 400 });
-    }
+const githubToken = user.user_metadata?.provider_token;
+if (!githubToken) {
+  return NextResponse.json({
+    error: 'No GitHub token found. Please use OAuth flow.',
+    requiresOAuth: true
+  }, { status: 400 });
+}
 
     // Fetch GitHub user info
     const githubResponse = await fetch('https://api.github.com/user', {
@@ -78,8 +81,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       message: 'GitHub integration connected successfully',
       user: {
         username: githubUser.login,

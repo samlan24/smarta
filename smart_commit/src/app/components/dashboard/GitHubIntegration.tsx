@@ -107,7 +107,30 @@ export default function GitHubIntegration() {
       // Clear any previous errors
       setError(null);
 
-      // Instead of OAuth, redirect to GitHub OAuth manually to get just the access token
+      // Try the connect API first (for existing provider tokens)
+      const connectResponse = await fetch('/api/integrations/github/connect', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (connectResponse.ok) {
+        // Successfully connected using existing token
+        await fetchIntegrationStatus();
+        return;
+      } else {
+        const errorData = await connectResponse.json();
+        if (errorData.requiresOAuth) {
+          // Fall back to OAuth flow
+          // ... existing OAuth code
+        } else {
+          setError(errorData.error || 'Failed to connect');
+          return;
+        }
+      }
+
+      // If connect API fails, fall back to OAuth flow
       const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
       if (!clientId) {
         setError('GitHub integration not configured');
@@ -116,19 +139,17 @@ export default function GitHubIntegration() {
 
       const scope = 'repo user:email';
       const redirectUri = `${window.location.origin}/api/integrations/github/oauth-callback`;
-      const state = Math.random().toString(36).substring(7); // Simple state for CSRF protection
+      const state = Math.random().toString(36).substring(7);
 
       // Store state in sessionStorage for verification
       sessionStorage.setItem('github_oauth_state', state);
 
-      // Force GitHub to show authorization again (in case of cached denials)
+      // Redirect to GitHub OAuth
       const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}&prompt=consent`;
-
-      console.log('Redirecting to GitHub OAuth:', githubAuthUrl);
       window.location.href = githubAuthUrl;
     } catch (error) {
       setError('Failed to connect to GitHub');
-      console.error('GitHub OAuth error:', error);
+      console.error('GitHub connection error:', error);
     }
   };
 
