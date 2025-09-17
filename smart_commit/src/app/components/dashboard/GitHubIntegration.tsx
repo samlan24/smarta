@@ -172,7 +172,7 @@ export default function GitHubIntegration() {
         },
         body: JSON.stringify({
           repositories: selectedRepos,
-          syncDays: 15
+          syncDays: 1
         }),
       });
 
