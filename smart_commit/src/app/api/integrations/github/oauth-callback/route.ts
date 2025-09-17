@@ -108,6 +108,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('GitHub OAuth callback error:', error);
+    console.error('Error details:', error);
     return NextResponse.redirect(new URL('/dashboard?tab=integrations&error=callback_failed', request.url));
   }
 }

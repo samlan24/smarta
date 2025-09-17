@@ -50,7 +50,7 @@ export default function GitHubIntegration() {
 
   useEffect(() => {
     fetchIntegrationStatus();
-    
+
     // Check if user just connected GitHub or if there was an error
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('connected') === 'github') {
@@ -87,7 +87,7 @@ export default function GitHubIntegration() {
     try {
       setLoading(true);
       const response = await fetch('/api/integrations/status');
-      
+
       if (response.ok) {
         const data = await response.json();
         setIntegration(data.github || null);
@@ -104,22 +104,27 @@ export default function GitHubIntegration() {
 
   const handleConnect = async () => {
     try {
+      // Clear any previous errors
+      setError(null);
+
       // Instead of OAuth, redirect to GitHub OAuth manually to get just the access token
       const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
       if (!clientId) {
         setError('GitHub integration not configured');
         return;
       }
-      
+
       const scope = 'repo user:email';
       const redirectUri = `${window.location.origin}/api/integrations/github/oauth-callback`;
       const state = Math.random().toString(36).substring(7); // Simple state for CSRF protection
-      
+
       // Store state in sessionStorage for verification
       sessionStorage.setItem('github_oauth_state', state);
-      
-      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`;
-      
+
+      // Force GitHub to show authorization again (in case of cached denials)
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}&prompt=consent`;
+
+      console.log('Redirecting to GitHub OAuth:', githubAuthUrl);
       window.location.href = githubAuthUrl;
     } catch (error) {
       setError('Failed to connect to GitHub');
@@ -129,7 +134,7 @@ export default function GitHubIntegration() {
 
   const fetchRepositories = async () => {
     if (!integration) return;
-    
+
     setLoadingRepos(true);
     try {
       const response = await fetch('/api/integrations/github/repositories');
@@ -149,16 +154,16 @@ export default function GitHubIntegration() {
 
   const handleSync = async () => {
     if (!integration) return;
-    
+
     // If no repos selected, show repository selector
     if (selectedRepos.length === 0) {
       await fetchRepositories();
       return;
     }
-    
+
     setSyncing(true);
     setError(null);
-    
+
     try {
       const response = await fetch('/api/integrations/github/sync', {
         method: 'POST',
@@ -167,12 +172,12 @@ export default function GitHubIntegration() {
         },
         body: JSON.stringify({
           repositories: selectedRepos,
-          syncDays: 30
+          syncDays: 15
         }),
       });
 
       const result = await response.json();
-      
+
       if (response.ok) {
         setSyncStats(result);
         await fetchIntegrationStatus();
@@ -287,7 +292,7 @@ export default function GitHubIntegration() {
               <div>
                 <h4 className="font-medium text-gray-900">Repository Sync</h4>
                 <p className="text-sm text-gray-600">
-                  {integration.last_sync_at 
+                  {integration.last_sync_at
                     ? `Last synced: ${new Date(integration.last_sync_at).toLocaleString()}`
                     : 'Never synced'
                   }
