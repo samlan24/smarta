@@ -9,7 +9,12 @@ const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-export default function SignOutButton() {
+interface SignOutButtonProps {
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export default function SignOutButton({ className, children }: SignOutButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -31,9 +36,9 @@ export default function SignOutButton() {
     <button
       onClick={handleSignOut}
       disabled={loading}
-      className="btn btn-primary text-gray-600"
+      className={className || "btn btn-primary text-gray-600"}
     >
-      {loading ? 'Signing Out...' : 'Sign Out'}
+      {children || (loading ? 'Signing Out...' : 'Sign Out')}
     </button>
   );
 }
