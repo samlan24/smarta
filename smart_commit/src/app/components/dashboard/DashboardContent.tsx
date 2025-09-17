@@ -7,6 +7,7 @@ import { RecentCalls } from "./RecentCalls";
 import CodeChangesChart from './CodeChangesChart';
 import FileActivityChart from './FileActivityChart';
 import RepositoryHealthChart from './RepositoryHealthChart';
+import GitHubIntegration from './GitHubIntegration';
 
 interface DashboardContentProps {
   activeTab: string;
@@ -82,6 +83,17 @@ export function DashboardContent({ activeTab }: DashboardContentProps) {
               <p className="text-gray-600 mb-6">Generate and manage your API keys for CLI access</p>
             </div>
             <ApiKeyManager />
+          </div>
+        );
+
+      case 'integrations':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Git Integrations</h2>
+              <p className="text-gray-600 mb-6">Connect your GitHub account to analyze commit patterns and quality</p>
+            </div>
+            <GitHubIntegration />
           </div>
         );
 

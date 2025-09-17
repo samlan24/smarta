@@ -10,7 +10,8 @@ import {
   Menu, 
   X, 
   Shield, 
-  Clock
+  Clock,
+  Github
 } from 'lucide-react';
 import SignOutButton from '../auth/SignOutButton';
 import SettingsButton from './SettingsButton';
@@ -52,6 +53,12 @@ const tabs = [
     name: 'Templates',
     icon: FileText,
     description: 'Commit message templates and preferences'
+  },
+  {
+    id: 'integrations',
+    name: 'Git Integrations',
+    icon: Github,
+    description: 'Connect GitHub and analyze commit patterns'
   },
   {
     id: 'api-keys',

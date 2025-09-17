@@ -1,0 +1,94 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/app/lib/supabase/server';
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient();
+    
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Get GitHub provider token from user metadata
+    const githubToken = user.user_metadata?.provider_token;
+    if (!githubToken) {
+      return NextResponse.json({ error: 'No GitHub token found' }, { status: 400 });
+    }
+
+    // Fetch GitHub user info
+    const githubResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `Bearer ${githubToken}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'SmartCommit/1.0'
+      }
+    });
+
+    if (!githubResponse.ok) {
+      return NextResponse.json({ error: 'Failed to fetch GitHub user info' }, { status: 400 });
+    }
+
+    const githubUser = await githubResponse.json();
+
+    // Check if integration already exists
+    const { data: existingIntegration } = await supabase
+      .from('git_integrations')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('platform', 'github')
+      .single();
+
+    if (existingIntegration) {
+      // Update existing integration
+      const { error: updateError } = await supabase
+        .from('git_integrations')
+        .update({
+          username: githubUser.login,
+          avatar_url: githubUser.avatar_url,
+          access_token: githubToken,
+          is_active: true,
+          connected_at: new Date().toISOString()
+        })
+        .eq('id', existingIntegration.id);
+
+      if (updateError) {
+        console.error('Error updating GitHub integration:', updateError);
+        return NextResponse.json({ error: 'Failed to update integration' }, { status: 500 });
+      }
+    } else {
+      // Create new integration
+      const { error: insertError } = await supabase
+        .from('git_integrations')
+        .insert({
+          user_id: user.id,
+          platform: 'github',
+          platform_user_id: githubUser.id.toString(),
+          username: githubUser.login,
+          avatar_url: githubUser.avatar_url,
+          access_token: githubToken,
+          is_active: true,
+          connected_at: new Date().toISOString()
+        });
+
+      if (insertError) {
+        console.error('Error creating GitHub integration:', insertError);
+        return NextResponse.json({ error: 'Failed to create integration' }, { status: 500 });
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'GitHub integration connected successfully',
+      user: {
+        username: githubUser.login,
+        avatar_url: githubUser.avatar_url
+      }
+    });
+
+  } catch (error) {
+    console.error('GitHub connect API error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
