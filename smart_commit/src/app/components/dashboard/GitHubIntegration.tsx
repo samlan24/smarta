@@ -116,41 +116,44 @@ export default function GitHubIntegration() {
       });
 
       if (connectResponse.ok) {
-        // Successfully connected using existing token
-        await fetchIntegrationStatus();
-        return;
-      } else {
-        const errorData = await connectResponse.json();
-        if (errorData.requiresOAuth) {
-          // Fall back to OAuth flow
-          // ... existing OAuth code
-        } else {
-          setError(errorData.error || 'Failed to connect');
-          return;
+        const data = await connectResponse.json();
+
+        if (data.requiresOAuth) {
+          // Need to use OAuth flow
+          initiateOAuthFlow();
+        } else if (data.success) {
+          // Successfully connected using existing token
+          await fetchIntegrationStatus();
         }
-      }
-
-      // If connect API fails, fall back to OAuth flow
-      const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
-      if (!clientId) {
-        setError('GitHub integration not configured');
         return;
       }
 
-      const scope = 'repo user:email';
-      const redirectUri = `${window.location.origin}/api/integrations/github/oauth-callback`;
-      const state = Math.random().toString(36).substring(7);
-
-      // Store state in sessionStorage for verification
-      sessionStorage.setItem('github_oauth_state', state);
-
-      // Redirect to GitHub OAuth
-      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}&prompt=consent`;
-      window.location.href = githubAuthUrl;
+      // If connect API completely fails, fall back to OAuth
+      initiateOAuthFlow();
     } catch (error) {
-      setError('Failed to connect to GitHub');
       console.error('GitHub connection error:', error);
+      // Fall back to OAuth on any error
+      initiateOAuthFlow();
     }
+  };
+
+  const initiateOAuthFlow = () => {
+    const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+    if (!clientId) {
+      setError('GitHub integration not configured');
+      return;
+    }
+
+    const scope = 'repo user:email';
+    const redirectUri = `${window.location.origin}/api/integrations/github/oauth-callback`;
+    const state = Math.random().toString(36).substring(7);
+
+    // Store state in sessionStorage for verification
+    sessionStorage.setItem('github_oauth_state', state);
+
+    // Redirect to GitHub OAuth
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}&prompt=consent`;
+    window.location.href = githubAuthUrl;
   };
 
   const fetchRepositories = async () => {

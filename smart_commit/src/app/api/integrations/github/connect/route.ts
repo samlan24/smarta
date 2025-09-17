@@ -12,12 +12,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Get GitHub provider token from user metadata
+// Get GitHub provider token from user metadata
 const githubToken = user.user_metadata?.provider_token;
 if (!githubToken) {
   return NextResponse.json({
     error: 'No GitHub token found. Please use OAuth flow.',
     requiresOAuth: true
-  }, { status: 400 });
+  }, { status: 200 }); // Changed from 400 to 200
 }
 
     // Fetch GitHub user info
