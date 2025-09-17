@@ -5,6 +5,7 @@ import Link from "next/link";
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("installation");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,53 +47,123 @@ export default function DocsPage() {
     children: string;
     language?: string;
   }) => (
-    <pre className="bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto">
-      <code>{children}</code>
-    </pre>
+    <div className="bg-gray-900 text-gray-100 p-3 sm:p-4 rounded-lg overflow-x-auto">
+      <pre className="text-xs sm:text-sm whitespace-pre">
+        <code>{children}</code>
+      </pre>
+    </div>
   );
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
+      {/* Header - Replace your existing header */}
       <header className="bg-white shadow-sm border-b sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <div className="bg-blue-600 p-2 rounded-lg">
-                <span className="text-white font-bold text-xl">C_C</span>
+                <span className="text-white font-bold text-lg sm:text-xl">
+                  C_C
+                </span>
               </div>
               <div>
-                <h1 className="text-xl font-semibold text-gray-900">
+                <h1 className="text-lg sm:text-xl font-semibold text-gray-900">
                   Cmarta Commit
                 </h1>
-                <p className="text-sm text-gray-600">Documentation</p>
+                <p className="text-xs sm:text-sm text-gray-600">
+                  Documentation
+                </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Mobile menu button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d={
+                      isMobileMenuOpen
+                        ? "M6 18L18 6M6 6l12 12"
+                        : "M4 6h16M4 12h16M4 18h16"
+                    }
+                  />
+                </svg>
+              </button>
+              {/* Desktop navigation */}
+              <div className="hidden sm:flex items-center space-x-4">
+                <Link
+                  href="/dashboard"
+                  className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                >
+                  Get Started
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t bg-white">
+            <div className="px-4 py-4 space-y-3">
               <Link
                 href="/dashboard"
-                className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium"
+                className="block text-gray-700 hover:text-blue-600 py-2 text-sm font-medium"
               >
                 Dashboard
               </Link>
               <Link
                 href="/"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                className="block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 text-center"
               >
                 Get Started
               </Link>
+
+              {/* Mobile navigation */}
+              <div className="pt-4 border-t space-y-2">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                  Navigation
+                </h3>
+                {navigation.map((item) => (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md"
+                  >
+                    {item.title}
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           {/* Sidebar Navigation */}
           <div className="hidden lg:block w-64 flex-shrink-0">
             <nav className="sticky top-24 space-y-1">
               <div className="pb-4">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Documentation
                 </h2>
                 <p className="text-sm text-gray-600">
@@ -118,12 +189,12 @@ export default function DocsPage() {
           {/* Main Content */}
           <div className="flex-1 max-w-4xl">
             <div className="prose prose-gray max-w-none">
-              {/* Hero Section */}
-              <div className="mb-12">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              {/* Hero Section - Replace your existing hero */}
+              <div className="mb-8 sm:mb-12">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
                   Cmarta Commit Documentation
                 </h1>
-                <p className="text-xl text-gray-600">
+                <p className="text-lg sm:text-xl text-gray-600">
                   AI-powered commit message generator that creates conventional
                   commit messages based on your git changes.
                 </p>
@@ -135,12 +206,12 @@ export default function DocsPage() {
                 id="installation"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Installation
                 </h2>
 
                 <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                     Prerequisites
                   </h3>
                   <ul className="list-disc list-inside space-y-2 text-gray-700">
@@ -151,7 +222,7 @@ export default function DocsPage() {
                 </div>
 
                 <div className="mb-8">
-                  <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                     Install the CLI Tool
                   </h3>
                   <CodeBlock>npm install -g cmarta-commit</CodeBlock>
@@ -171,13 +242,13 @@ export default function DocsPage() {
                 id="getting-started"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Getting Started
                 </h2>
 
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       1. Create an Account
                     </h3>
                     <p className="text-gray-700 mb-4">
@@ -190,7 +261,7 @@ export default function DocsPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       2. Generate an API Key
                     </h3>
                     <ol className="list-decimal list-inside space-y-2 text-gray-700">
@@ -205,7 +276,7 @@ export default function DocsPage() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       3. Configure the CLI Tool
                     </h3>
                     <CodeBlock>cmarta-commit setup</CodeBlock>
@@ -223,13 +294,13 @@ export default function DocsPage() {
                 id="basic-usage"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Basic Usage
                 </h2>
 
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Generate AI-Powered Commit Messages
                     </h3>
                     <p className="text-gray-700 mb-4">
@@ -244,7 +315,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Interactive Flow
                     </h3>
                     <p className="text-gray-700 mb-4">
@@ -266,7 +337,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Command Options
                     </h3>
                     <ul className="space-y-2 text-gray-700">
@@ -300,7 +371,7 @@ cmarta-commit`}</CodeBlock>
                 id="template-system"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Template System
                 </h2>
                 <p className="text-gray-700 mb-8">
@@ -310,7 +381,7 @@ cmarta-commit`}</CodeBlock>
 
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Save a Template
                     </h3>
                     <p className="text-gray-700 mb-4">
@@ -324,7 +395,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       List Your Templates
                     </h3>
                     <CodeBlock>cmarta-commit templates</CodeBlock>
@@ -338,7 +409,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Use a Template
                     </h3>
                     <CodeBlock>cmarta-commit use-template api-fix</CodeBlock>
@@ -351,7 +422,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Quick Template Commit
                     </h3>
                     <p className="text-gray-700 mb-4">
@@ -361,7 +432,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Delete a Template
                     </h3>
                     <CodeBlock>cmarta-commit delete-template api-fix</CodeBlock>
@@ -375,7 +446,7 @@ cmarta-commit`}</CodeBlock>
                 id="dashboard"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Dashboard
                 </h2>
                 <p className="text-gray-700 mb-8">
@@ -388,9 +459,9 @@ cmarta-commit`}</CodeBlock>
                   </Link>
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                   <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Usage Overview
                     </h3>
                     <ul className="space-y-2 text-gray-700">
@@ -402,7 +473,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Usage Analytics
                     </h3>
                     <ul className="space-y-2 text-gray-700">
@@ -414,7 +485,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       API Key Management
                     </h3>
                     <ul className="space-y-2 text-gray-700">
@@ -426,7 +497,7 @@ cmarta-commit`}</CodeBlock>
                   </div>
 
                   <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Template Management
                     </h3>
                     <ul className="space-y-2 text-gray-700">
@@ -445,13 +516,13 @@ cmarta-commit`}</CodeBlock>
                 id="cli-commands"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   CLI Commands Reference
                 </h2>
 
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Core Commands
                     </h3>
                     <div className="space-y-4">
@@ -477,7 +548,7 @@ cmarta-commit -a -y`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Template Commands
                     </h3>
                     <CodeBlock>{`# List all templates
@@ -494,7 +565,7 @@ cmarta-commit delete-template <name>`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Help and Information
                     </h3>
                     <CodeBlock>{`# Show version
@@ -512,13 +583,13 @@ cmarta-commit --help`}</CodeBlock>
                 id="configuration"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Configuration
                 </h2>
 
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Config File Location
                     </h3>
                     <p className="text-gray-700 mb-4">
@@ -541,7 +612,7 @@ cmarta-commit --help`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Config Structure
                     </h3>
                     <CodeBlock language="json">{`{
@@ -550,7 +621,7 @@ cmarta-commit --help`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Updating Configuration
                     </h3>
                     <p className="text-gray-700 mb-4">
@@ -567,25 +638,25 @@ cmarta-commit --help`}</CodeBlock>
                 id="troubleshooting"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   Troubleshooting
                 </h2>
 
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Common Issues
                     </h3>
                     <div className="space-y-6">
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-red-800 mb-2">
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4">
+                        <h4 className="font-semibold text-red-800 mb-2 text-sm sm:text-base">
                           "Not a git repository"
                         </h4>
                         <CodeBlock>git init</CodeBlock>
                       </div>
 
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-yellow-800 mb-2">
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 sm:p-4">
+                        <h4 className="font-semibold text-yellow-800 mb-2 text-sm sm:text-base">
                           "No staged changes found"
                         </h4>
                         <CodeBlock>{`# Stage your changes first
@@ -594,15 +665,15 @@ git add .
 cmarta-commit -a`}</CodeBlock>
                       </div>
 
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-blue-800 mb-2">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+                        <h4 className="font-semibold text-blue-800 mb-2 text-sm sm:text-base">
                           "Invalid API key"
                         </h4>
                         <CodeBlock>cmarta-commit setup</CodeBlock>
                       </div>
 
-                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-                        <h4 className="font-semibold text-orange-800 mb-2">
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 sm:p-4">
+                        <h4 className="font-semibold text-orange-800 mb-2 text-sm sm:text-base">
                           "Rate limit exceeded"
                         </h4>
                         <ul className="list-disc list-inside space-y-1 text-orange-700 mt-2">
@@ -622,16 +693,16 @@ cmarta-commit -a`}</CodeBlock>
                 id="api-usage"
                 className="mb-12"
               >
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
                   API Usage
                 </h2>
 
                 <div className="space-y-8">
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Understanding Usage Limits
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                       <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                         <h4 className="font-semibold text-green-800 mb-3">
                           Free Plan
@@ -658,7 +729,7 @@ cmarta-commit -a`}</CodeBlock>
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
                       Optimizing Usage
                     </h3>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
