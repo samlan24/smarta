@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { repositories, syncDays = 30 } = await request.json();
+    const { repositories, syncDays = 5 } = await request.json();
 
     // Get user's GitHub integration
     const { data: integration, error: integrationError } = await supabase
