@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
 
     // Get commits from last 30 days
     const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 5);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const { count: recentCommits, error: recentCommitError } = await supabase
       .from('external_commits')
