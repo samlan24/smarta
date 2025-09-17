@@ -31,7 +31,7 @@ const HeroSection = () => {
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl">
               CLI tool for developers who want consistent, conventional commit
               messages without the manual effort. Analyzes your staged changes
-              and generates proper commits automatically – no API keys required.
+              and generates proper commits automatically – no LLM API keys required.
             </p>
 
             {/* Bullet Points */}
