@@ -237,13 +237,22 @@ export default function GitHubIntegration() {
       const result = await response.json();
       if (response.ok) {
         setSyncedRepos((prev) =>
-          prev.map((repo) =>
-            repo.full_name === repoFullName
-              ? { ...repo, last_sync_at: new Date().toISOString() }
-              : repo
-          )
+          prev.map((repo) => {
+            if (repo.full_name === repoFullName) {
+              const repoStat = result.repoStats?.[0];
+              if (!repoStat) return repo;
+              return {
+                ...repo,
+                last_sync_at: new Date().toISOString(),
+                commits: repoStat.commits,
+                aiCommits: repoStat.aiCommits,
+                manualCommits: repoStat.manualCommits,
+              };
+            }
+            return repo;
+          })
         );
-        await fetchSyncStats(); // refresh all stats to keep UI consistent
+        setSyncStats(result);
         await fetchIntegrationStatus();
       } else {
         setError(result.error || "Sync failed");
