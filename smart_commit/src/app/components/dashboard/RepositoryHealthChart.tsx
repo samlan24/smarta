@@ -116,18 +116,48 @@ export default function RepositoryHealthChart() {
     );
   }
 
+  const handleGenerateTestData = async () => {
+    try {
+      const response = await fetch('/api/test-data', {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        alert(`Generated ${result.commitsCreated} test commits! Refresh the page to see health metrics.`);
+        window.location.reload();
+      } else {
+        alert('Failed to generate test data');
+      }
+    } catch (error) {
+      console.error('Error generating test data:', error);
+      alert('Error generating test data');
+    }
+  };
+
   if (!data || !data.healthMetrics) {
     return (
       <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
         <div className="text-center py-8">
           <Activity className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data To See</h3>
-          <p className="text-gray-600">Start making commits to see repository health metrics.</p>
-          {/* Debug info */}
-          <div className="mt-4 text-xs text-gray-500">
-            <p>Debug: data exists: {data ? 'yes' : 'no'}</p>
-            <p>Debug: healthMetrics exists: {data?.healthMetrics ? 'yes' : 'no'}</p>
-            <p>Debug: repositories: {data?.repositories?.length || 0}</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data Available</h3>
+          <p className="text-gray-600 mb-4">No commits found in the analytics database.</p>
+          
+          <div className="space-y-3">
+            <p className="text-sm text-gray-500">
+              To see health metrics, either:
+            </p>
+            <div className="text-sm text-gray-600 space-y-1">
+              <p>• Use the commit generation feature to create real commits</p>
+              <p>• Generate test data to see how the metrics work</p>
+            </div>
+            
+            <button
+              onClick={handleGenerateTestData}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Generate Test Data
+            </button>
           </div>
         </div>
       </div>

@@ -46,7 +46,32 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch analytics data' }, { status: 500 });
     }
 
+    console.log(`Found ${commits?.length || 0} commits for user ${user.id} in last ${days} days`);
+    console.log('Repository filter:', repository);
+    console.log('Date range:', startDate.toISOString(), 'to', endDate.toISOString());
+    console.log('User ID:', user.id);
+    console.log('Query filters applied:', {
+      user_id: user.id,
+      start_date: startDate.toISOString(),
+      end_date: endDate.toISOString(),
+      repository: repository !== 'all' ? repository : 'no filter'
+    });
+
     if (!commits || commits.length === 0) {
+      console.log('No commits found with current filters, trying broader search...');
+      
+      // Try a broader search to see if there are any commits for this user at all
+      const { data: allUserCommits, error: broadError } = await supabase
+        .from('commit_analytics')
+        .select('*')
+        .eq('user_id', user.id)
+        .limit(5);
+        
+      console.log('Broader search found:', allUserCommits?.length || 0, 'commits for user');
+      if (allUserCommits && allUserCommits.length > 0) {
+        console.log('Sample commit:', allUserCommits[0]);
+      }
+      
       return NextResponse.json({
         repositories: [],
         healthMetrics: null,
