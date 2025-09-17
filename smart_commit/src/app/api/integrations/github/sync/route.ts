@@ -35,30 +35,33 @@ export async function POST(request: NextRequest) {
     let syncedCommits = 0;
 
     try {
-      // Sync repositories first
-      await github.syncUserRepositories(user.id);
-      
-      // If specific repositories requested, sync only those
-      if (repositories && repositories.length > 0) {
-        for (const repoFullName of repositories) {
+      // If no specific repositories provided, return error asking user to select repos
+      if (!repositories || repositories.length === 0) {
+        return NextResponse.json({ 
+          error: 'Please select repositories to sync',
+          requiresRepoSelection: true 
+        }, { status: 400 });
+      }
+
+      // Limit to maximum 3 repositories
+      if (repositories.length > 3) {
+        return NextResponse.json({ 
+          error: 'Maximum 3 repositories allowed for sync' 
+        }, { status: 400 });
+      }
+
+      // Sync only selected repositories
+      for (const repoFullName of repositories) {
+        try {
           await github.syncRepositoryCommits(user.id, repoFullName, sinceDate);
           syncedRepos++;
-        }
-      } else {
-        // Sync all user repositories
-        const { data: userRepos } = await supabase
-          .from('external_repositories')
-          .select('repo_full_name')
-          .eq('user_id', user.id)
-          .eq('integration_id', integration.id);
-
-        for (const repo of userRepos || []) {
-          await github.syncRepositoryCommits(user.id, repo.repo_full_name, sinceDate);
-          syncedRepos++;
+        } catch (repoError) {
+          console.error(`Error syncing repository ${repoFullName}:`, repoError);
+          // Continue with other repos even if one fails
         }
       }
 
-      // Count total synced commits
+      // Count commits for selected repositories only
       const { count } = await supabase
         .from('external_commits')
         .select('*', { count: 'exact', head: true })

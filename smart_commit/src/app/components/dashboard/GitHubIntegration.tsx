@@ -14,6 +14,18 @@ interface GitHubIntegration {
   is_active: boolean;
 }
 
+interface GitHubRepo {
+  id: number;
+  name: string;
+  full_name: string;
+  description: string;
+  private: boolean;
+  updated_at: string;
+  language: string;
+  stars: number;
+  forks: number;
+}
+
 interface SyncStats {
   repositories: number;
   commits: number;
@@ -30,6 +42,10 @@ export default function GitHubIntegration() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [syncStats, setSyncStats] = useState<SyncStats | null>(null);
+  const [repositories, setRepositories] = useState<GitHubRepo[]>([]);
+  const [selectedRepos, setSelectedRepos] = useState<string[]>([]);
+  const [showRepoSelector, setShowRepoSelector] = useState(false);
+  const [loadingRepos, setLoadingRepos] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -111,8 +127,34 @@ export default function GitHubIntegration() {
     }
   };
 
+  const fetchRepositories = async () => {
+    if (!integration) return;
+    
+    setLoadingRepos(true);
+    try {
+      const response = await fetch('/api/integrations/github/repositories');
+      if (response.ok) {
+        const data = await response.json();
+        setRepositories(data.repositories);
+        setShowRepoSelector(true);
+      } else {
+        setError('Failed to fetch repositories');
+      }
+    } catch (err) {
+      setError('Network error fetching repositories');
+    } finally {
+      setLoadingRepos(false);
+    }
+  };
+
   const handleSync = async () => {
     if (!integration) return;
+    
+    // If no repos selected, show repository selector
+    if (selectedRepos.length === 0) {
+      await fetchRepositories();
+      return;
+    }
     
     setSyncing(true);
     setError(null);
@@ -124,6 +166,7 @@ export default function GitHubIntegration() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          repositories: selectedRepos,
           syncDays: 30
         }),
       });
@@ -132,9 +175,14 @@ export default function GitHubIntegration() {
       
       if (response.ok) {
         setSyncStats(result);
-        await fetchIntegrationStatus(); // Refresh integration status
+        await fetchIntegrationStatus();
+        setShowRepoSelector(false);
       } else {
-        setError(result.error || 'Sync failed');
+        if (result.requiresRepoSelection) {
+          await fetchRepositories();
+        } else {
+          setError(result.error || 'Sync failed');
+        }
       }
     } catch (err) {
       setError('Network error during sync');
@@ -142,6 +190,17 @@ export default function GitHubIntegration() {
     } finally {
       setSyncing(false);
     }
+  };
+
+  const handleRepoToggle = (repoFullName: string) => {
+    setSelectedRepos(prev => {
+      if (prev.includes(repoFullName)) {
+        return prev.filter(r => r !== repoFullName);
+      } else if (prev.length < 3) {
+        return [...prev, repoFullName];
+      }
+      return prev; // Max 3 repos
+    });
   };
 
   const handleDisconnect = async () => {
@@ -248,6 +307,66 @@ export default function GitHubIntegration() {
               <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
                 <AlertCircle className="text-red-600" size={16} />
                 <span className="text-sm text-red-700">{error}</span>
+              </div>
+            )}
+
+            {/* Repository Selector */}
+            {showRepoSelector && (
+              <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <h4 className="font-medium text-gray-900 mb-3">Select repositories to sync (max 3):</h4>
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {loadingRepos ? (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="animate-spin" size={20} />
+                      <span className="ml-2 text-sm text-gray-600">Loading repositories...</span>
+                    </div>
+                  ) : (
+                    repositories.map(repo => (
+                      <label key={repo.id} className="flex items-center space-x-3 p-2 hover:bg-white rounded cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedRepos.includes(repo.full_name)}
+                          onChange={() => handleRepoToggle(repo.full_name)}
+                          disabled={!selectedRepos.includes(repo.full_name) && selectedRepos.length >= 3}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-sm text-gray-900">{repo.name}</span>
+                            {repo.private && <span className="text-xs bg-gray-200 text-gray-700 px-1 rounded">Private</span>}
+                            {repo.language && <span className="text-xs bg-blue-100 text-blue-700 px-1 rounded">{repo.language}</span>}
+                          </div>
+                          {repo.description && (
+                            <p className="text-xs text-gray-500 truncate">{repo.description}</p>
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          ⭐ {repo.stars}
+                        </div>
+                      </label>
+                    ))
+                  )}
+                </div>
+                <div className="flex justify-between items-center mt-4">
+                  <span className="text-sm text-gray-600">
+                    {selectedRepos.length}/3 repositories selected
+                  </span>
+                  <div className="space-x-2">
+                    <button
+                      onClick={() => setShowRepoSelector(false)}
+                      className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleSync}
+                      disabled={selectedRepos.length === 0 || syncing}
+                      className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {syncing ? 'Syncing...' : `Sync ${selectedRepos.length} Repo${selectedRepos.length !== 1 ? 's' : ''}`}
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
