@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     const github = new GitHubService(integration.access_token);
 
-    // *** NEW: Sync repositories first to populate external_repositories ***
+    // Sync user repositories first so external_repositories table is populated
     await github.syncUserRepositories(user.id);
 
     const sinceDate = new Date();
@@ -62,41 +62,40 @@ export async function POST(request: NextRequest) {
     }> = [];
 
     try {
-      // Sync selected repositories commits
+      // Sync commits for each selected repository and collect per-repo stats
       for (const repoFullName of repositories) {
         try {
           await github.syncRepositoryCommits(user.id, repoFullName, sinceDate);
           syncedRepos++;
 
-          // Query commit counts scoped to this repo
-          const { count: totalCommits } = await supabase
+          // Count total commits in the time range for this repo
+          const { count: repoCommits } = await supabase
             .from('external_commits')
-            .select('*', { count: 'exact', head: true })
+            .select('', { count: 'exact', head: true })
             .eq('user_id', user.id)
-            .eq('repo_full_name', repoFullName) // match repo_full_name column
+            .eq('repo_full_name', repoFullName)
             .gte('committed_at', sinceDate.toISOString());
 
-          const { count: aiCommits } = await supabase
+          // Count AI-generated commits in the time range for this repo
+          const { count: repoAiCommits } = await supabase
             .from('external_commits')
-            .select('*', { count: 'exact', head: true })
+            .select('', { count: 'exact', head: true })
             .eq('user_id', user.id)
             .eq('repo_full_name', repoFullName)
             .eq('is_ai_generated', true)
             .gte('committed_at', sinceDate.toISOString());
 
-          const manualCommits = (totalCommits || 0) - (aiCommits || 0);
+          const repoManualCommits = (repoCommits || 0) - (repoAiCommits || 0);
 
           repoStats.push({
             repoFullName,
-            commits: totalCommits || 0,
-            aiCommits: aiCommits || 0,
-            manualCommits: Math.max(0, manualCommits),
+            commits: repoCommits || 0,
+            aiCommits: repoAiCommits || 0,
+            manualCommits: Math.max(0, repoManualCommits),
           });
-
         } catch (repoError) {
           console.error(`Error syncing repository ${repoFullName}:`, repoError);
           failedRepos.push(repoFullName);
-          // Continue with other repos even if one fails
         }
       }
 
@@ -105,13 +104,12 @@ export async function POST(request: NextRequest) {
       const aiCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.aiCommits, 0);
       const manualCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.manualCommits, 0);
 
-      // Update last sync timestamp on integration
+      // Update last sync timestamp on git_integrations
       await supabase
         .from('git_integrations')
         .update({ last_sync_at: new Date().toISOString() })
         .eq('id', integration.id);
 
-      // Return response with repo stats and overall stats
       const response = {
         success: true,
         repositories: syncedRepos,
@@ -121,7 +119,7 @@ export async function POST(request: NextRequest) {
         syncedRepositories: syncedRepos,
         syncedCommits: totalCommitsAllRepos,
         syncPeriod: `${syncDays} days`,
-        repoStats,
+        repoStats, // <-- per repo commit stats included here
         ...(failedRepos.length > 0 && {
           warnings: `Failed to sync ${failedRepos.length} repositories: ${failedRepos.join(', ')}`
         }),
@@ -132,7 +130,6 @@ export async function POST(request: NextRequest) {
     } catch (syncError) {
       console.error('Sync error:', syncError);
 
-      // On failure still update timestamp once to avoid infinite retry
       try {
         await supabase
           .from('git_integrations')
