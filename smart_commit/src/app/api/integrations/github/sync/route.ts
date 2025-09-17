@@ -43,6 +43,10 @@ export async function POST(request: NextRequest) {
     }
 
     const github = new GitHubService(integration.access_token);
+
+    // *** NEW: Sync repositories first to populate external_repositories ***
+    await github.syncUserRepositories(user.id);
+
     const sinceDate = new Date();
     sinceDate.setDate(sinceDate.getDate() - syncDays);
 
@@ -58,7 +62,7 @@ export async function POST(request: NextRequest) {
     }> = [];
 
     try {
-      // Sync selected repositories
+      // Sync selected repositories commits
       for (const repoFullName of repositories) {
         try {
           await github.syncRepositoryCommits(user.id, repoFullName, sinceDate);
@@ -69,14 +73,14 @@ export async function POST(request: NextRequest) {
             .from('external_commits')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', user.id)
-            .eq('repository_full_name', repoFullName) // adjust field if needed
+            .eq('repo_full_name', repoFullName) // match repo_full_name column
             .gte('committed_at', sinceDate.toISOString());
 
           const { count: aiCommits } = await supabase
             .from('external_commits')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', user.id)
-            .eq('repository_full_name', repoFullName)
+            .eq('repo_full_name', repoFullName)
             .eq('is_ai_generated', true)
             .gte('committed_at', sinceDate.toISOString());
 
@@ -96,18 +100,18 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Aggregate totals from repoStats for overall summary
+      // Aggregate totals from repoStats
       const totalCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.commits, 0);
       const aiCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.aiCommits, 0);
       const manualCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.manualCommits, 0);
 
-      // Update last sync timestamp
+      // Update last sync timestamp on integration
       await supabase
         .from('git_integrations')
         .update({ last_sync_at: new Date().toISOString() })
         .eq('id', integration.id);
 
-      // Prepare response with comprehensive stats including per-repo stats
+      // Return response with repo stats and overall stats
       const response = {
         success: true,
         repositories: syncedRepos,
@@ -117,10 +121,10 @@ export async function POST(request: NextRequest) {
         syncedRepositories: syncedRepos,
         syncedCommits: totalCommitsAllRepos,
         syncPeriod: `${syncDays} days`,
-        repoStats, // per repository stats here
+        repoStats,
         ...(failedRepos.length > 0 && {
           warnings: `Failed to sync ${failedRepos.length} repositories: ${failedRepos.join(', ')}`
-        })
+        }),
       };
 
       return NextResponse.json(response);
@@ -128,6 +132,7 @@ export async function POST(request: NextRequest) {
     } catch (syncError) {
       console.error('Sync error:', syncError);
 
+      // On failure still update timestamp once to avoid infinite retry
       try {
         await supabase
           .from('git_integrations')
@@ -139,7 +144,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         error: 'Sync failed',
-        details: syncError instanceof Error ? syncError.message : 'Unknown error'
+        details: syncError instanceof Error ? syncError.message : 'Unknown error',
       }, { status: 500 });
     }
 
@@ -147,7 +152,7 @@ export async function POST(request: NextRequest) {
     console.error('GitHub sync API error:', error);
     return NextResponse.json({
       error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      details: error instanceof Error ? error.message : 'Unknown error',
     }, { status: 500 });
   }
 }
