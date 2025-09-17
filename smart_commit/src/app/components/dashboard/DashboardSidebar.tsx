@@ -7,10 +7,13 @@ import {
   Key, 
   Activity,
   Home,
-  TrendingUp
+  TrendingUp,
+  Menu,
+  X
 } from 'lucide-react';
 import SignOutButton from '../auth/SignOutButton';
 import SettingsButton from './SettingsButton';
+import { useState } from 'react';
 
 interface SidebarProps {
   activeTab: string;
@@ -58,13 +61,44 @@ const navigationItems = [
 ];
 
 export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: SidebarProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleTabChange = (tab: string) => {
+    onTabChange(tab);
+    setIsMobileMenuOpen(false); // Close mobile menu after selection
+  };
+
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-600 mt-1">Cmarta-commit</p>
+    <>
+      {/* Mobile Menu Button */}
+      <div className="lg:hidden fixed top-4 left-4 z-50">
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 bg-white border border-gray-200 rounded-lg shadow-sm"
+        >
+          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+        </button>
       </div>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div className={`
+        fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col h-screen
+        transform transition-transform duration-300 ease-in-out
+        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        {/* Header */}
+        <div className="p-6 border-b border-gray-200">
+          <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+          <p className="text-sm text-gray-600 mt-1">Cmarta-commit</p>
+        </div>
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
@@ -75,7 +109,7 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
           return (
             <button
               key={item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => handleTabChange(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                 isActive
                   ? 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -117,5 +151,6 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
         </div>
       </div>
     </div>
+    </>
   );
 }

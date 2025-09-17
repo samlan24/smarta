@@ -70,8 +70,8 @@ export function CodeChangesChart() {
   }));
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
         <h3 className="text-lg font-semibold text-gray-800">Code Change Patterns</h3>
         <select
           value={timeRange}
@@ -85,7 +85,7 @@ export function CodeChangesChart() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-green-50 p-4 rounded-lg">
           <div className="flex items-center gap-2">
             <TrendingUp className="text-green-600" size={20} />
@@ -130,9 +130,9 @@ export function CodeChangesChart() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Line Chart */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           <h4 className="text-md font-medium text-gray-700 mb-3">Daily Code Changes</h4>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={data.chartData}>
@@ -140,8 +140,9 @@ export function CodeChangesChart() {
               <XAxis
                 dataKey="date"
                 tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                fontSize={12}
               />
-              <YAxis />
+              <YAxis fontSize={12} />
               <Tooltip
                 labelFormatter={(value) => new Date(value).toLocaleDateString()}
                 formatter={(value: number, name: string) => [value.toLocaleString(), name]}
@@ -168,7 +169,7 @@ export function CodeChangesChart() {
         {/* Pie Chart */}
         <div>
           <h4 className="text-md font-medium text-gray-700 mb-3">Commit Types</h4>
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={commitTypesData}
@@ -179,6 +180,7 @@ export function CodeChangesChart() {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
+                fontSize={12}
               >
                 {commitTypesData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

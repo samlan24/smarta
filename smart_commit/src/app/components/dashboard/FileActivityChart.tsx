@@ -88,10 +88,10 @@ export function FileActivityChart() {
   }));
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3 sm:gap-0">
         <h3 className="text-lg font-semibold text-gray-800">File Activity Analysis</h3>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <select
             value={viewMode}
             onChange={(e) => setViewMode(e.target.value as 'frequency' | 'changes')}
@@ -113,7 +113,7 @@ export function FileActivityChart() {
       </div>
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 p-4 rounded-lg">
           <div className="flex items-center gap-2">
             <FileText className="text-blue-600" size={20} />
@@ -156,19 +156,20 @@ export function FileActivityChart() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Bar Chart */}
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-2">
           <h4 className="text-md font-medium text-gray-700 mb-3">
             Most {viewMode === 'frequency' ? 'Frequently Changed' : 'Modified'} Files
           </h4>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={barChartData} layout="horizontal">
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
+              <XAxis type="number" fontSize={12} />
               <YAxis
                 type="category"
                 dataKey="fileName"
+                fontSize={12}
                 width={120}
                 tick={{ fontSize: 12 }}
               />
@@ -221,6 +222,7 @@ export function FileActivityChart() {
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
+                fontSize={12}
               >
                 {fileTypesData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

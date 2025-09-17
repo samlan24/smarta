@@ -100,8 +100,8 @@ export function DashboardContent({ activeTab }: DashboardContentProps) {
   };
 
   return (
-    <div className="flex-1 p-8 bg-gray-50 overflow-y-auto">
-      <div className="max-w-6xl mx-auto">
+    <div className="flex-1 p-4 sm:p-6 overflow-auto">
+      <div className="max-w-7xl mx-auto">
         {renderContent()}
       </div>
     </div>
