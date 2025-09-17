@@ -4,8 +4,9 @@ import { UsageChart } from "./UsageChart";
 import { ApiKeyManager } from "./ApiKeyManager";
 import { TemplateManager } from "./TemplateManager";
 import { RecentCalls } from "./RecentCalls";
-import { CodeChangesChart } from "./CodeChangesChart";
-import { FileActivityChart } from "./FileActivityChart";
+import CodeChangesChart from './CodeChangesChart';
+import FileActivityChart from './FileActivityChart';
+import RepositoryHealthChart from './RepositoryHealthChart';
 
 interface DashboardContentProps {
   activeTab: string;
@@ -36,6 +37,17 @@ export function DashboardContent({ activeTab }: DashboardContentProps) {
             </div>
             <CodeChangesChart />
             <FileActivityChart />
+          </div>
+        );
+
+      case 'health':
+        return (
+          <div className="space-y-8">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Repository Health</h2>
+              <p className="text-gray-600 mb-6">Monitor your repository health metrics and code quality</p>
+            </div>
+            <RepositoryHealthChart />
           </div>
         );
 

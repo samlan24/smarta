@@ -1,15 +1,16 @@
 "use client";
 import { 
   BarChart3, 
+  TrendingUp, 
+  Activity, 
   FileText, 
+  Key, 
   Settings, 
   LogOut, 
-  Key, 
-  Activity,
-  Home,
-  TrendingUp,
-  Menu,
-  X
+  Menu, 
+  X, 
+  Shield, 
+  Clock
 } from 'lucide-react';
 import SignOutButton from '../auth/SignOutButton';
 import SettingsButton from './SettingsButton';
@@ -21,42 +22,48 @@ interface SidebarProps {
   onSettingsClick: () => void;
 }
 
-const navigationItems = [
+const tabs = [
   {
     id: 'overview',
-    label: 'Overview',
-    icon: Home,
-    description: 'Usage stats and recent activity'
+    name: 'Overview',
+    icon: BarChart3,
+    description: 'Dashboard summary and key metrics'
   },
   {
     id: 'analytics',
-    label: 'Analytics',
+    name: 'Analytics',
     icon: TrendingUp,
-    description: 'Code changes and file activity'
+    description: 'Code changes and file activity analysis'
+  },
+  {
+    id: 'health',
+    name: 'Repository Health',
+    icon: Shield,
+    description: 'Repository health metrics and code quality'
   },
   {
     id: 'usage',
-    label: 'Usage',
-    icon: BarChart3,
-    description: 'API usage and billing'
+    name: 'Usage',
+    icon: Activity,
+    description: 'API usage and billing information'
   },
   {
     id: 'templates',
-    label: 'Templates',
+    name: 'Templates',
     icon: FileText,
-    description: 'Commit message templates'
+    description: 'Commit message templates and preferences'
   },
   {
     id: 'api-keys',
-    label: 'API Keys',
+    name: 'API Keys',
     icon: Key,
-    description: 'Manage your API keys'
+    description: 'Manage your API keys and authentication'
   },
   {
     id: 'activity',
-    label: 'Recent Activity',
-    icon: Activity,
-    description: 'Recent API calls and logs'
+    name: 'Recent Activity',
+    icon: Clock,
+    description: 'Recent commits and system activity'
   }
 ];
 
@@ -102,7 +109,7 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-        {navigationItems.map((item) => {
+        {tabs.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
           
@@ -122,7 +129,7 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
               />
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
-                  {item.label}
+                  {item.name}
                 </p>
                 <p className={`text-xs ${isActive ? 'text-blue-600' : 'text-gray-500'} truncate`}>
                   {item.description}

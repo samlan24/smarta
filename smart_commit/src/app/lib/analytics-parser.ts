@@ -8,35 +8,22 @@ interface GitDiffAnalytics {
 
 export class AnalyticsParser {
   static parseGitDiff(diff: string): GitDiffAnalytics {
-    const filesChanged: string[] = [];
+    const lines = diff.split('\n');
+    const filesChanged = new Set<string>();
     let linesAdded = 0;
     let linesDeleted = 0;
 
-    // Split diff into lines
-    const lines = diff.split('\n');
-
     for (const line of lines) {
-      // Parse file headers: diff --git a/path/to/file b/path/to/file
+      // Parse file headers (e.g., "diff --git a/file.js b/file.js")
       if (line.startsWith('diff --git')) {
         const match = line.match(/diff --git a\/(.+?) b\/(.+)/);
         if (match) {
-          const fileName = match[2]; // Use the "b/" path (after changes)
-          if (!filesChanged.includes(fileName)) {
-            filesChanged.push(fileName);
-          }
+          filesChanged.add(match[2]); // Use the "b/" version (after changes)
         }
       }
       
-      // Alternative file header: +++ b/path/to/file
-      else if (line.startsWith('+++ b/')) {
-        const fileName = line.substring(6); // Remove "+++ b/"
-        if (fileName !== '/dev/null' && !filesChanged.includes(fileName)) {
-          filesChanged.push(fileName);
-        }
-      }
-      
-      // Count additions (lines starting with + but not +++)
-      else if (line.startsWith('+') && !line.startsWith('+++')) {
+      // Count added lines
+      if (line.startsWith('+') && !line.startsWith('+++')) {
         linesAdded++;
       }
       
@@ -47,7 +34,7 @@ export class AnalyticsParser {
     }
 
     return {
-      filesChanged,
+      filesChanged: Array.from(filesChanged),
       linesAdded,
       linesDeleted,
       commitType: 'unknown' // Will be extracted from generated commit message
@@ -82,5 +69,30 @@ export class AnalyticsParser {
     }
     
     return undefined;
+  }
+
+  static extractRepositoryInfo(diff: string, cwd?: string): { name: string; branch: string; path: string } {
+    // Try to extract repository name from diff or use current working directory
+    let repositoryName = 'unknown';
+    let repositoryPath = cwd || process.cwd();
+    let branch = 'main'; // Default branch
+
+    // Extract repository name from path
+    if (repositoryPath) {
+      const pathParts = repositoryPath.split('/');
+      repositoryName = pathParts[pathParts.length - 1] || 'unknown';
+    }
+
+    // Try to extract branch info from diff (some git configs include it)
+    const branchMatch = diff.match(/On branch (\w+)/);
+    if (branchMatch) {
+      branch = branchMatch[1];
+    }
+
+    return {
+      name: repositoryName,
+      branch,
+      path: repositoryPath
+    };
   }
 }

@@ -24,7 +24,7 @@ interface FileActivityData {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658'];
 
-export function FileActivityChart() {
+function FileActivityChart() {
   const [data, setData] = useState<FileActivityData | null>(null);
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState(30);
@@ -252,3 +252,5 @@ export function FileActivityChart() {
     </div>
   );
 }
+
+export default FileActivityChart;
