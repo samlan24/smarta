@@ -35,25 +35,33 @@ export default function GitHubIntegration() {
   useEffect(() => {
     fetchIntegrationStatus();
     
-    // Check if user just connected GitHub
+    // Check if user just connected GitHub or if there was an error
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('connected') === 'github') {
       handlePostConnection();
+    } else if (urlParams.get('error')) {
+      const errorType = urlParams.get('error');
+      const errorMessages: Record<string, string> = {
+        'no_code': 'GitHub authorization was cancelled',
+        'token_exchange_failed': 'Failed to exchange authorization code',
+        'github_api_failed': 'Failed to fetch GitHub user information',
+        'not_authenticated': 'Please sign in first before connecting GitHub',
+        'update_failed': 'Failed to update GitHub integration',
+        'create_failed': 'Failed to create GitHub integration',
+        'callback_failed': 'GitHub connection failed'
+      };
+      setError(errorMessages[errorType || ''] || 'GitHub connection failed');
+      // Clear error from URL
+      window.history.replaceState({}, '', '/dashboard?tab=integrations');
     }
   }, []);
 
   const handlePostConnection = async () => {
     try {
-      const response = await fetch('/api/integrations/github/connect', {
-        method: 'POST'
-      });
-      
-      if (response.ok) {
-        // Refresh integration status
-        await fetchIntegrationStatus();
-        // Clear URL params
-        window.history.replaceState({}, '', '/dashboard?tab=integrations');
-      }
+      // Just refresh integration status - the OAuth callback already handled the connection
+      await fetchIntegrationStatus();
+      // Clear URL params
+      window.history.replaceState({}, '', '/dashboard?tab=integrations');
     } catch (error) {
       console.error('Error handling post-connection:', error);
     }
@@ -80,18 +88,23 @@ export default function GitHubIntegration() {
 
   const handleConnect = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: {
-          scopes: 'repo user:email',
-          redirectTo: `${window.location.origin}/dashboard?tab=integrations&connected=github`
-        }
-      });
-      
-      if (error) {
-        setError('Failed to connect to GitHub');
-        console.error('GitHub OAuth error:', error);
+      // Instead of OAuth, redirect to GitHub OAuth manually to get just the access token
+      const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
+      if (!clientId) {
+        setError('GitHub integration not configured');
+        return;
       }
+      
+      const scope = 'repo user:email';
+      const redirectUri = `${window.location.origin}/api/integrations/github/oauth-callback`;
+      const state = Math.random().toString(36).substring(7); // Simple state for CSRF protection
+      
+      // Store state in sessionStorage for verification
+      sessionStorage.setItem('github_oauth_state', state);
+      
+      const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}`;
+      
+      window.location.href = githubAuthUrl;
     } catch (error) {
       setError('Failed to connect to GitHub');
       console.error('GitHub OAuth error:', error);
