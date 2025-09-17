@@ -99,7 +99,7 @@ const ProductSection = () => {
                   <span className="code-comment"># One-time account setup</span>
                   {"\n"}
                   <span className="code-keyword">cmarta-commit</span>{" "}
-                  <span className="code-string">login</span>
+                  <span className="code-string">setup</span>
                   {"\n\n"}
                   <span className="code-comment">
                     # Use instead of git commit -m
