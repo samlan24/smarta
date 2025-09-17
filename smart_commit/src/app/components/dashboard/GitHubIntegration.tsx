@@ -1,8 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Github, CheckCircle, AlertCircle, Loader2, RefreshCw, GitBranch, Clock } from 'lucide-react';
-import { createClient } from '@/app/lib/supabase/client';
+import { useState, useEffect } from "react";
+import {
+  Github,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  RefreshCw,
+  GitBranch,
+  Clock,
+} from "lucide-react";
+import { createClient } from "@/app/lib/supabase/client";
 
 interface GitHubIntegration {
   id: string;
@@ -27,6 +35,13 @@ interface GitHubRepo {
   last_sync_at?: string | null; // track last sync per repo here
 }
 
+interface RepoSyncStat {
+  repoFullName: string;
+  commits: number;
+  aiCommits: number;
+  manualCommits: number;
+}
+
 interface SyncStats {
   repositories: number;
   commits: number;
@@ -35,10 +50,13 @@ interface SyncStats {
   syncedRepositories?: number;
   syncedCommits?: number;
   syncPeriod?: string;
+  repoStats?: RepoSyncStat[];
 }
 
 export default function GitHubIntegration() {
-  const [integration, setIntegration] = useState<GitHubIntegration | null>(null);
+  const [integration, setIntegration] = useState<GitHubIntegration | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncingRepo, setSyncingRepo] = useState<string | null>(null); // which repo is currently syncing
@@ -55,21 +73,21 @@ export default function GitHubIntegration() {
     fetchIntegrationStatus();
 
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('connected') === 'github') {
+    if (urlParams.get("connected") === "github") {
       handlePostConnection();
-    } else if (urlParams.get('error')) {
-      const errorType = urlParams.get('error');
+    } else if (urlParams.get("error")) {
+      const errorType = urlParams.get("error");
       const errorMessages: Record<string, string> = {
-        'no_code': 'GitHub authorization was cancelled',
-        'token_exchange_failed': 'Failed to exchange authorization code',
-        'github_api_failed': 'Failed to fetch GitHub user information',
-        'not_authenticated': 'Please sign in first before connecting GitHub',
-        'update_failed': 'Failed to update GitHub integration',
-        'create_failed': 'Failed to create GitHub integration',
-        'callback_failed': 'GitHub connection failed'
+        no_code: "GitHub authorization was cancelled",
+        token_exchange_failed: "Failed to exchange authorization code",
+        github_api_failed: "Failed to fetch GitHub user information",
+        not_authenticated: "Please sign in first before connecting GitHub",
+        update_failed: "Failed to update GitHub integration",
+        create_failed: "Failed to create GitHub integration",
+        callback_failed: "GitHub connection failed",
       };
-      setError(errorMessages[errorType || ''] || 'GitHub connection failed');
-      window.history.replaceState({}, '', '/dashboard?tab=integrations');
+      setError(errorMessages[errorType || ""] || "GitHub connection failed");
+      window.history.replaceState({}, "", "/dashboard?tab=integrations");
     }
   }, []);
 
@@ -82,25 +100,25 @@ export default function GitHubIntegration() {
   const handlePostConnection = async () => {
     try {
       await fetchIntegrationStatus();
-      window.history.replaceState({}, '', '/dashboard?tab=integrations');
+      window.history.replaceState({}, "", "/dashboard?tab=integrations");
     } catch (error) {
-      console.error('Error handling post-connection:', error);
+      console.error("Error handling post-connection:", error);
     }
   };
 
   const fetchIntegrationStatus = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/integrations/status');
+      const response = await fetch("/api/integrations/status");
       if (response.ok) {
         const data = await response.json();
         setIntegration(data.github || null);
       } else {
-        console.error('Failed to fetch integration status');
+        console.error("Failed to fetch integration status");
       }
     } catch (error) {
-      console.error('Error fetching integration status:', error);
-      setError('Failed to load integration status');
+      console.error("Error fetching integration status:", error);
+      setError("Failed to load integration status");
     } finally {
       setLoading(false);
     }
@@ -108,20 +126,23 @@ export default function GitHubIntegration() {
 
   const fetchSyncStats = async () => {
     try {
-      const response = await fetch('/api/integrations/sync-stats');
+      const response = await fetch("/api/integrations/sync-stats");
       if (response.ok) {
         const data = await response.json();
         setSyncStats(data);
       }
     } catch (error) {
-      console.error('Error fetching sync stats:', error);
+      console.error("Error fetching sync stats:", error);
     }
   };
 
   const handleConnect = async () => {
     try {
       setError(null);
-      const connectResponse = await fetch('/api/integrations/github/connect', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const connectResponse = await fetch("/api/integrations/github/connect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
       if (connectResponse.ok) {
         const data = await connectResponse.json();
         if (data.requiresOAuth) {
@@ -133,7 +154,7 @@ export default function GitHubIntegration() {
       }
       initiateOAuthFlow();
     } catch (error) {
-      console.error('GitHub connection error:', error);
+      console.error("GitHub connection error:", error);
       initiateOAuthFlow();
     }
   };
@@ -141,13 +162,13 @@ export default function GitHubIntegration() {
   const initiateOAuthFlow = () => {
     const clientId = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID;
     if (!clientId) {
-      setError('GitHub integration not configured');
+      setError("GitHub integration not configured");
       return;
     }
-    const scope = 'repo user:email';
+    const scope = "repo user:email";
     const redirectUri = `${window.location.origin}/api/integrations/github/oauth-callback`;
     const state = Math.random().toString(36).substring(7);
-    sessionStorage.setItem('github_oauth_state', state);
+    sessionStorage.setItem("github_oauth_state", state);
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=${scope}&redirect_uri=${redirectUri}&state=${state}&prompt=consent`;
     window.location.href = githubAuthUrl;
   };
@@ -156,20 +177,21 @@ export default function GitHubIntegration() {
     if (!integration) return;
     setLoadingRepos(true);
     try {
-      const response = await fetch('/api/integrations/github/repositories');
+      const response = await fetch("/api/integrations/github/repositories");
       if (response.ok) {
         const data = await response.json();
         // Filter out repos already synced
-        const filteredRepos = data.repositories.filter((repo: GitHubRepo) =>
-          !syncedRepos.some(sr => sr.full_name === repo.full_name)
+        const filteredRepos = data.repositories.filter(
+          (repo: GitHubRepo) =>
+            !syncedRepos.some((sr) => sr.full_name === repo.full_name)
         );
         setRepositories(filteredRepos);
         setShowRepoSelector(true);
       } else {
-        setError('Failed to fetch repositories');
+        setError("Failed to fetch repositories");
       }
     } catch (err) {
-      setError('Network error fetching repositories');
+      setError("Network error fetching repositories");
     } finally {
       setLoadingRepos(false);
     }
@@ -179,14 +201,14 @@ export default function GitHubIntegration() {
     setError(null);
     setShowRepoSelector(false);
     if (syncedRepos.length >= 3) {
-      setError('Maximum of 3 repositories can be synced');
+      setError("Maximum of 3 repositories can be synced");
       return;
     }
-    if (syncedRepos.find(r => r.full_name === repo.full_name)) {
-      setError('Repository already synced');
+    if (syncedRepos.find((r) => r.full_name === repo.full_name)) {
+      setError("Repository already synced");
       return;
     }
-    setSyncedRepos(prev => [...prev, { ...repo, last_sync_at: null }]);
+    setSyncedRepos((prev) => [...prev, { ...repo, last_sync_at: null }]);
     await syncSingleRepo(repo.full_name);
   };
 
@@ -198,26 +220,28 @@ export default function GitHubIntegration() {
     setError(null);
 
     try {
-      const response = await fetch('/api/integrations/github/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/integrations/github/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ repositories: [repoFullName], syncDays: 1 }),
       });
       const result = await response.json();
       if (response.ok) {
-        setSyncedRepos(prev =>
-          prev.map(r =>
-            r.full_name === repoFullName ? { ...r, last_sync_at: new Date().toISOString() } : r
+        setSyncedRepos((prev) =>
+          prev.map((r) =>
+            r.full_name === repoFullName
+              ? { ...r, last_sync_at: new Date().toISOString() }
+              : r
           )
         );
         setSyncStats(result);
         await fetchIntegrationStatus();
       } else {
-        setError(result.error || 'Sync failed');
+        setError(result.error || "Sync failed");
       }
     } catch (err) {
-      setError('Network error during sync');
-      console.error('Sync error:', err);
+      setError("Network error during sync");
+      console.error("Sync error:", err);
     } finally {
       setSyncing(false);
       setSyncingRepo(null);
@@ -225,20 +249,27 @@ export default function GitHubIntegration() {
   };
 
   const handleDisconnect = async () => {
-    if (!confirm('Are you sure you want to disconnect GitHub? This will remove all synced data.')) return;
+    if (
+      !confirm(
+        "Are you sure you want to disconnect GitHub? This will remove all synced data."
+      )
+    )
+      return;
 
     try {
-      const response = await fetch('/api/integrations/github/disconnect', { method: 'POST' });
+      const response = await fetch("/api/integrations/github/disconnect", {
+        method: "POST",
+      });
       if (response.ok) {
         setIntegration(null);
         setSyncStats(null);
         setSyncedRepos([]);
       } else {
-        setError('Failed to disconnect GitHub');
+        setError("Failed to disconnect GitHub");
       }
     } catch (err) {
-      setError('Network error during disconnect');
-      console.error('Disconnect error:', err);
+      setError("Network error during disconnect");
+      console.error("Disconnect error:", err);
     }
   };
 
@@ -257,15 +288,20 @@ export default function GitHubIntegration() {
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
       <div className="flex items-center gap-3 mb-6">
         <Github className="text-gray-700" size={24} />
-        <h3 className="text-lg font-semibold text-gray-800">GitHub Integration</h3>
+        <h3 className="text-lg font-semibold text-gray-800">
+          GitHub Integration
+        </h3>
       </div>
 
       {!integration ? (
         <div className="text-center py-8">
           <Github className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h4 className="text-lg font-medium text-gray-900 mb-2">Connect Your GitHub Account</h4>
+          <h4 className="text-lg font-medium text-gray-900 mb-2">
+            Connect Your GitHub Account
+          </h4>
           <p className="text-gray-600 mb-6">
-            Analyze your commit patterns and see how AI-generated commits compare to manual ones.
+            Analyze your commit patterns and see how AI-generated commits
+            compare to manual ones.
           </p>
           <button
             onClick={handleConnect}
@@ -286,15 +322,20 @@ export default function GitHubIntegration() {
                 className="w-10 h-10 rounded-full"
               />
               <div>
-                <p className="font-medium text-gray-900">@{integration.username}</p>
+                <p className="font-medium text-gray-900">
+                  @{integration.username}
+                </p>
                 <p className="text-sm text-gray-600">
-                  Connected {new Date(integration.connected_at).toLocaleDateString()}
+                  Connected{" "}
+                  {new Date(integration.connected_at).toLocaleDateString()}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="text-green-600" size={20} />
-              <span className="text-sm font-medium text-green-700">Connected</span>
+              <span className="text-sm font-medium text-green-700">
+                Connected
+              </span>
             </div>
           </div>
 
@@ -316,31 +357,51 @@ export default function GitHubIntegration() {
             {/* Repo Selector Modal/Panel */}
             {showRepoSelector && (
               <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50 max-h-72 overflow-y-auto">
-                <h5 className="font-medium text-gray-900 mb-3">Select a repository to sync:</h5>
+                <h5 className="font-medium text-gray-900 mb-3">
+                  Select a repository to sync:
+                </h5>
                 {loadingRepos ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="animate-spin" size={20} />
-                    <span className="ml-2 text-sm text-gray-600">Loading repositories...</span>
+                    <span className="ml-2 text-sm text-gray-600">
+                      Loading repositories...
+                    </span>
                   </div>
                 ) : repositories.length === 0 ? (
-                  <p className="text-sm text-gray-600">No available repositories to add.</p>
+                  <p className="text-sm text-gray-600">
+                    No available repositories to add.
+                  </p>
                 ) : (
                   <ul>
-                    {repositories.map(repo => (
+                    {repositories.map((repo) => (
                       <li
                         key={repo.id}
                         className="p-2 cursor-pointer hover:bg-white rounded flex justify-between items-center"
                         onClick={() => addAndSyncRepo(repo)}
                       >
                         <div>
-                          <div className="font-medium text-gray-900">{repo.name}</div>
-                          <div className="text-xs text-gray-500 truncate max-w-xs">{repo.description}</div>
+                          <div className="font-medium text-gray-900">
+                            {repo.name}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate max-w-xs">
+                            {repo.description}
+                          </div>
                           <div className="text-xs text-gray-400 flex gap-2 mt-1">
-                            {repo.private && <span className="bg-gray-200 px-1 rounded">Private</span>}
-                            {repo.language && <span className="bg-blue-100 text-blue-700 px-1 rounded">{repo.language}</span>}
+                            {repo.private && (
+                              <span className="bg-gray-200 px-1 rounded">
+                                Private
+                              </span>
+                            )}
+                            {repo.language && (
+                              <span className="bg-blue-100 text-blue-700 px-1 rounded">
+                                {repo.language}
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <div className="text-xs text-gray-400">⭐ {repo.stars}</div>
+                        <div className="text-xs text-gray-400">
+                          ⭐ {repo.stars}
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -357,47 +418,78 @@ export default function GitHubIntegration() {
             )}
 
             {/* Synced Repositories Display */}
-            {syncedRepos.length > 0 && (
-              <div className="grid grid-cols-1 gap-4">
-                {syncedRepos.map(repo => (
-                  <div key={repo.full_name} className="p-4 border border-gray-200 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                    <div>
-                      <h5 className="font-semibold text-gray-900">{repo.name}</h5>
-                      <p className="text-xs text-gray-500 truncate max-w-md">{repo.description}</p>
-                      <div className="text-xs text-gray-400 flex gap-2 mt-1">
-                        {repo.private && <span className="bg-gray-200 px-1 rounded">Private</span>}
-                        {repo.language && <span className="bg-blue-100 text-blue-700 px-1 rounded">{repo.language}</span>}
-                        <span>⭐ {repo.stars}</span>
-                        <span>🍴 {repo.forks}</span>
-                      </div>
-                      <p className="mt-1 text-xs text-gray-500">
-                        Last synced:{' '}
-                        {repo.last_sync_at ? new Date(repo.last_sync_at).toLocaleString() : 'Never'}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => syncSingleRepo(repo.full_name)}
-                        disabled={syncing && syncingRepo === repo.full_name}
-                        className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {syncing && syncingRepo === repo.full_name ? (
-                          <>
-                            <RefreshCw className="animate-spin" size={16} />
-                            Syncing...
-                          </>
-                        ) : (
-                          <>
-                            <RefreshCw size={16} />
-                            Resync
-                          </>
-                        )}
-                      </button>
-                    </div>
+            {syncedRepos.map((repo) => (
+              <div
+                key={repo.full_name}
+                className="p-4 border border-gray-200 rounded-lg flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
+              >
+                <div>
+                  <h5 className="font-semibold text-gray-900">{repo.name}</h5>
+                  <p className="text-xs text-gray-500 truncate max-w-md">
+                    {repo.description}
+                  </p>
+                  {/* Existing repo detail badges */}
+                  <div className="text-xs text-gray-400 flex gap-2 mt-1">
+                    {repo.private && (
+                      <span className="bg-gray-200 px-1 rounded">Private</span>
+                    )}
+                    {repo.language && (
+                      <span className="bg-blue-100 text-blue-700 px-1 rounded">
+                        {repo.language}
+                      </span>
+                    )}
+                    <span>⭐ {repo.stars}</span>
+                    <span>🍴 {repo.forks}</span>
                   </div>
-                ))}
+                  <p className="mt-1 text-xs text-gray-500">
+                    Last synced:{" "}
+                    {repo.last_sync_at
+                      ? new Date(repo.last_sync_at).toLocaleString()
+                      : "Never"}
+                  </p>
+                  {syncStats?.repoStats &&
+                    (() => {
+                      const stats = syncStats.repoStats.find(
+                        (s) => s.repoFullName === repo.full_name
+                      );
+                      if (!stats) return null;
+                      return (
+                        <div className="text-sm text-gray-700 mt-2 space-y-1">
+                          <p>
+                            <strong>Commits:</strong> {stats.commits}
+                          </p>
+                          <p>
+                            <strong>Manual Commits:</strong>{" "}
+                            {stats.manualCommits}
+                          </p>
+                          <p>
+                            <strong>AI Commits:</strong> {stats.aiCommits}
+                          </p>
+                        </div>
+                      );
+                    })()}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => syncSingleRepo(repo.full_name)}
+                    disabled={syncing && syncingRepo === repo.full_name}
+                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {syncing && syncingRepo === repo.full_name ? (
+                      <>
+                        <RefreshCw className="animate-spin" size={16} />
+                        Syncing...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw size={16} />
+                        Resync
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            )}
+            ))}
 
             {/* Error message */}
             {error && (
@@ -415,35 +507,47 @@ export default function GitHubIntegration() {
                     <GitBranch className="text-blue-600" size={16} />
                     <span className="text-sm text-gray-600">Repositories</span>
                   </div>
-                  <p className="text-xl font-bold text-blue-600">{syncStats.repositories}</p>
+                  <p className="text-xl font-bold text-blue-600">
+                    {syncStats.repositories}
+                  </p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="text-green-600" size={16} />
                     <span className="text-sm text-gray-600">Commits</span>
                   </div>
-                  <p className="text-xl font-bold text-green-600">{syncStats.commits}</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {syncStats.commits}
+                  </p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="text-green-600" size={16} />
-                    <span className="text-sm text-gray-600">Manual Commits</span>
+                    <span className="text-sm text-gray-600">
+                      Manual Commits
+                    </span>
                   </div>
-                  <p className="text-xl font-bold text-green-600">{syncStats.manualCommits}</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {syncStats.manualCommits}
+                  </p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="text-green-600" size={16} />
                     <span className="text-sm text-gray-600">AI Commits</span>
                   </div>
-                  <p className="text-xl font-bold text-green-600">{syncStats.aiCommits}</p>
+                  <p className="text-xl font-bold text-green-600">
+                    {syncStats.aiCommits}
+                  </p>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Clock className="text-gray-600" size={16} />
                     <span className="text-sm text-gray-600">Period</span>
                   </div>
-                  <p className="text-xl font-bold text-gray-600">Last 30 days</p>
+                  <p className="text-xl font-bold text-gray-600">
+                    Last 30 days
+                  </p>
                 </div>
               </div>
             )}
