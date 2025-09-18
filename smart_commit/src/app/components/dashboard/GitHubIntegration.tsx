@@ -190,6 +190,13 @@ export default function GitHubIntegration() {
       const response = await fetch("/api/integrations/github/repositories");
       if (response.ok) {
         const data = await response.json();
+
+        console.log("All repos:", data.repositories.length);
+        console.log("Synced repos:", syncedRepos.length);
+        console.log(
+          "Synced repo names:",
+          syncedRepos.map((r) => r.full_name)
+        );
         // Filter out repos already synced
         const filteredRepos = data.repositories.filter(
           (repo: GitHubRepo) =>
@@ -303,16 +310,18 @@ export default function GitHubIntegration() {
   };
 
   const fetchSyncedRepositories = async () => {
-  try {
-    const response = await fetch("/api/integrations/github/synced-repositories");
-    if (response.ok) {
-      const data = await response.json();
-      setSyncedRepos(data.repositories || []);
+    try {
+      const response = await fetch(
+        "/api/integrations/github/synced-repositories"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setSyncedRepos(data.repositories || []);
+      }
+    } catch (error) {
+      console.error("Error fetching synced repositories:", error);
     }
-  } catch (error) {
-    console.error("Error fetching synced repositories:", error);
-  }
-};
+  };
 
   if (loading) {
     return (
