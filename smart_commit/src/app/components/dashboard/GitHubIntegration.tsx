@@ -41,7 +41,9 @@ interface GitHubRepo {
 }
 
 export default function GitHubIntegration() {
-  const [integration, setIntegration] = useState<GitHubIntegration | null>(null);
+  const [integration, setIntegration] = useState<GitHubIntegration | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [syncingRepo, setSyncingRepo] = useState<string | null>(null);
@@ -251,6 +253,42 @@ export default function GitHubIntegration() {
     }
   };
 
+  const getQualityExplanation = (score: number) => {
+    if (score >= 80) {
+      return {
+        color: "text-green-700 bg-green-50 border-green-200",
+        icon: "🎯",
+        title: "Excellent Quality",
+        message:
+          "Your commits follow best practices with clear, structured messages using conventional commit formats.",
+      };
+    } else if (score >= 65) {
+      return {
+        color: "text-blue-700 bg-blue-50 border-blue-200",
+        icon: "👍",
+        title: "Good Quality",
+        message:
+          "Most of your commits are well-structured. Consider using conventional commit formats more consistently.",
+      };
+    } else if (score >= 50) {
+      return {
+        color: "text-yellow-700 bg-yellow-50 border-yellow-200",
+        icon: "⚠️",
+        title: "Room for Improvement",
+        message:
+          'Your commits could be more descriptive. Try using formats like "feat: add user authentication" or "fix: resolve login bug".',
+      };
+    } else {
+      return {
+        color: "text-red-700 bg-red-50 border-red-200",
+        icon: "📝",
+        title: "Needs Attention",
+        message:
+          'Consider writing more detailed commit messages. Avoid short messages like "fix" or "update". Be specific about what changed and why.',
+      };
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -303,13 +341,16 @@ export default function GitHubIntegration() {
                   @{integration.username}
                 </p>
                 <p className="text-sm text-gray-600">
-                  Connected {new Date(integration.connected_at).toLocaleDateString()}
+                  Connected{" "}
+                  {new Date(integration.connected_at).toLocaleDateString()}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="text-green-600" size={20} />
-              <span className="text-sm font-medium text-green-700">Connected</span>
+              <span className="text-sm font-medium text-green-700">
+                Connected
+              </span>
             </div>
           </div>
 
@@ -334,10 +375,14 @@ export default function GitHubIntegration() {
                 {loadingRepos ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="animate-spin" size={20} />
-                    <span className="ml-2 text-sm text-gray-600">Loading repositories...</span>
+                    <span className="ml-2 text-sm text-gray-600">
+                      Loading repositories...
+                    </span>
                   </div>
                 ) : repositories.length === 0 ? (
-                  <p className="text-sm text-gray-600">No available repositories to add.</p>
+                  <p className="text-sm text-gray-600">
+                    No available repositories to add.
+                  </p>
                 ) : (
                   <ul>
                     {repositories.map((repo) => (
@@ -347,22 +392,37 @@ export default function GitHubIntegration() {
                         onClick={() => addAndSyncRepo(repo)}
                       >
                         <div>
-                          <div className="font-medium text-gray-900">{repo.name}</div>
+                          <div className="font-medium text-gray-900">
+                            {repo.name}
+                          </div>
                           <div className="text-xs text-gray-500 truncate max-w-xs">
                             {repo.description}
                           </div>
                           <div className="text-xs text-gray-400 flex gap-2 mt-1">
-                            {repo.private && <span className="bg-gray-200 px-1 rounded">Private</span>}
-                            {repo.language && <span className="bg-blue-100 text-blue-700 px-1 rounded">{repo.language}</span>}
+                            {repo.private && (
+                              <span className="bg-gray-200 px-1 rounded">
+                                Private
+                              </span>
+                            )}
+                            {repo.language && (
+                              <span className="bg-blue-100 text-blue-700 px-1 rounded">
+                                {repo.language}
+                              </span>
+                            )}
                           </div>
                         </div>
-                        <div className="text-xs text-gray-400">⭐ {repo.stars}</div>
+                        <div className="text-xs text-gray-400">
+                          ⭐ {repo.stars}
+                        </div>
                       </li>
                     ))}
                   </ul>
                 )}
                 <div className="flex justify-end mt-3">
-                  <button onClick={() => setShowRepoSelector(false)} className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800">
+                  <button
+                    onClick={() => setShowRepoSelector(false)}
+                    className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+                  >
                     Cancel
                   </button>
                 </div>
@@ -376,15 +436,26 @@ export default function GitHubIntegration() {
               >
                 <div>
                   <h5 className="font-semibold text-gray-900">{repo.name}</h5>
-                  <p className="text-xs text-gray-500 truncate max-w-md">{repo.description}</p>
+                  <p className="text-xs text-gray-500 truncate max-w-md">
+                    {repo.description}
+                  </p>
                   <div className="text-xs text-gray-400 flex gap-2 mt-1">
-                    {repo.private && <span className="bg-gray-200 px-1 rounded">Private</span>}
-                    {repo.language && <span className="bg-blue-100 text-blue-700 px-1 rounded">{repo.language}</span>}
+                    {repo.private && (
+                      <span className="bg-gray-200 px-1 rounded">Private</span>
+                    )}
+                    {repo.language && (
+                      <span className="bg-blue-100 text-blue-700 px-1 rounded">
+                        {repo.language}
+                      </span>
+                    )}
                     <span>⭐ {repo.stars}</span>
                     <span>🍴 {repo.forks}</span>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
-                    Last synced: {repo.last_sync_at ? new Date(repo.last_sync_at).toLocaleString() : "Never"}
+                    Last synced:{" "}
+                    {repo.last_sync_at
+                      ? new Date(repo.last_sync_at).toLocaleString()
+                      : "Never"}
                   </p>
                   {repo.stats && (
                     <div className="grid grid-cols-4 gap-2 mt-3">
@@ -393,29 +464,69 @@ export default function GitHubIntegration() {
                           <CheckCircle className="text-green-600" size={16} />
                           <span className="text-sm text-gray-600">Total</span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">{repo.stats.commits}</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {repo.stats.commits}
+                        </p>
                       </div>
                       <div className="bg-green-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="text-green-600" size={16} />
                           <span className="text-sm text-gray-600">Manual</span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">{repo.stats.manualCommits}</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {repo.stats.manualCommits}
+                        </p>
                       </div>
                       <div className="bg-green-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="text-green-600" size={16} />
                           <span className="text-sm text-gray-600">AI</span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">{repo.stats.aiCommits}</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {repo.stats.aiCommits}
+                        </p>
                       </div>
-                       <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="bg-green-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="text-green-600" size={16} />
-                          <span className="text-sm text-gray-600">Commit Quality%</span>
+                          <span className="text-sm text-gray-600">
+                            Quality Score
+                          </span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">{repo.stats.qualityScore}</p>
+                        <p className="text-xl font-bold text-green-600">
+                          {repo.stats.qualityScore}/100
+                        </p>
                       </div>
+                      {repo.stats && (
+                        <div
+                          className={`mt-3 p-3 rounded-lg border ${
+                            getQualityExplanation(repo.stats.qualityScore).color
+                          }`}
+                        >
+                          <div className="flex items-start gap-2">
+                            <span className="text-lg">
+                              {
+                                getQualityExplanation(repo.stats.qualityScore)
+                                  .icon
+                              }
+                            </span>
+                            <div>
+                              <h6 className="font-medium text-sm">
+                                {
+                                  getQualityExplanation(repo.stats.qualityScore)
+                                    .title
+                                }
+                              </h6>
+                              <p className="text-sm mt-1">
+                                {
+                                  getQualityExplanation(repo.stats.qualityScore)
+                                    .message
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
