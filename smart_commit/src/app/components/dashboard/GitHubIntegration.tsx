@@ -32,11 +32,14 @@ interface GitHubRepo {
   language: string;
   stars: number;
   forks: number;
-  last_sync_at?: string | null; // track last sync per repo here
-  commits?: number; // add cumulative commits here
-  aiCommits?: number; // add AI commits here
-  manualCommits?: number;
+  last_sync_at?: string | null;
+  stats?: {
+    commits: number;
+    aiCommits: number;
+    manualCommits: number;
+  };
 }
+
 
 interface RepoSyncStat {
   repoFullName: string;
@@ -497,57 +500,32 @@ export default function GitHubIntegration() {
                       ? new Date(repo.last_sync_at).toLocaleString()
                       : "Never"}
                   </p>
-                  {syncStats?.repoStats &&
-                    (() => {
-                      const stats = syncStats.repoStats.find(
-                        (s) => s.repoFullName === repo.full_name
-                      );
-                      if (!stats) return null;
-                      return (
-                        <div className="grid grid-cols-3 gap-2 mt-3">
-                          <div className="bg-green-50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle
-                                className="text-green-600"
-                                size={16}
-                              />
-                              <span className="text-sm text-gray-600">
-                                Total
-                              </span>
-                            </div>
-                            <p className="text-xl font-bold text-green-600">
-                              {stats.commits}
-                            </p>
-                          </div>
-                          <div className="bg-green-50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle
-                                className="text-green-600"
-                                size={16}
-                              />
-                              <span className="text-sm text-gray-600">
-                                Manual
-                              </span>
-                            </div>
-                            <p className="text-xl font-bold text-green-600">
-                              {stats.manualCommits}
-                            </p>
-                          </div>
-                          <div className="bg-green-50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle
-                                className="text-green-600"
-                                size={16}
-                              />
-                              <span className="text-sm text-gray-600">AI</span>
-                            </div>
-                            <p className="text-xl font-bold text-green-600">
-                              {stats.aiCommits}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })()}
+                  {repo.stats && (
+  <div className="grid grid-cols-3 gap-2 mt-3">
+    <div className="bg-green-50 p-3 rounded-lg">
+      <div className="flex items-center gap-2">
+        <CheckCircle className="text-green-600" size={16} />
+        <span className="text-sm text-gray-600">Total</span>
+      </div>
+      <p className="text-xl font-bold text-green-600">{repo.stats.commits}</p>
+    </div>
+    <div className="bg-green-50 p-3 rounded-lg">
+      <div className="flex items-center gap-2">
+        <CheckCircle className="text-green-600" size={16} />
+        <span className="text-sm text-gray-600">Manual</span>
+      </div>
+      <p className="text-xl font-bold text-green-600">{repo.stats.manualCommits}</p>
+    </div>
+    <div className="bg-green-50 p-3 rounded-lg">
+      <div className="flex items-center gap-2">
+        <CheckCircle className="text-green-600" size={16} />
+        <span className="text-sm text-gray-600">AI</span>
+      </div>
+      <p className="text-xl font-bold text-green-600">{repo.stats.aiCommits}</p>
+    </div>
+  </div>
+)}
+
                 </div>
                 <div className="flex gap-2">
                   <button
