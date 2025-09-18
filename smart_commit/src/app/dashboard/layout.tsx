@@ -1,6 +1,7 @@
 // app/dashboard/layout.tsx
 import { createClient } from "../lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 export default async function DashboardLayout({
   children,
@@ -26,6 +27,9 @@ export default async function DashboardLayout({
             {user.user_metadata.full_name || user.email}
           </span>
         )}
+        <Link href="/docs" className="text-sm text-blue-600 hover:underline">
+        docs
+        </Link>
       </header>
       <main className="p-6">{children}</main>
     </div>
