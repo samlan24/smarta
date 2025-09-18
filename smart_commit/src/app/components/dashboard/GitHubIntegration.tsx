@@ -37,6 +37,7 @@ interface GitHubRepo {
     manualCommits: number;
     aiPercentage: number;
     qualityScore: number;
+    unknownCommits: number;
   };
 }
 
@@ -484,6 +485,15 @@ export default function GitHubIntegration() {
                         </div>
                         <p className="text-xl font-bold text-indigo-600">
                           {repo.stats.aiCommits}
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-lg border border-gray-300">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="text-gray-600" size={16} />
+                          <span className="text-sm text-gray-600">Unknown</span>
+                        </div>
+                        <p className="text-xl font-bold text-gray-600">
+                          {repo.stats.unknownCommits}
                         </p>
                       </div>
                       <div className="bg-emerald-50 p-3 rounded-lg">
