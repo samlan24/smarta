@@ -121,7 +121,7 @@ export default function RepositoryHealthChart() {
       const response = await fetch('/api/test-data', {
         method: 'POST',
       });
-      
+
       if (response.ok) {
         const result = await response.json();
         alert(`Generated ${result.commitsCreated} test commits! Refresh the page to see health metrics.`);
@@ -142,7 +142,7 @@ export default function RepositoryHealthChart() {
           <Activity className="mx-auto h-12 w-12 text-gray-400 mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">No Health Data Available</h3>
           <p className="text-gray-600 mb-4">No commits found in the analytics database.</p>
-          
+
           <div className="space-y-3">
             <p className="text-sm text-gray-500">
               To see health metrics, either:
@@ -151,7 +151,7 @@ export default function RepositoryHealthChart() {
               <p>• Use the commit generation feature to create real commits</p>
               <p>• Generate test data to see how the metrics work</p>
             </div>
-            
+
             <button
               onClick={handleGenerateTestData}
               className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"

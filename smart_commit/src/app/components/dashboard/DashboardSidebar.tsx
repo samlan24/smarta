@@ -1,15 +1,15 @@
 "use client";
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Activity, 
-  FileText, 
-  Key, 
-  Settings, 
-  LogOut, 
-  Menu, 
-  X, 
-  Shield, 
+import {
+  BarChart3,
+  TrendingUp,
+  Activity,
+  FileText,
+  Key,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  Shield,
   Clock,
   Github
 } from 'lucide-react';
@@ -96,7 +96,7 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -119,7 +119,7 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
         {tabs.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
-          
+
           return (
             <button
               key={item.id}
@@ -130,9 +130,9 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
                   : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              <Icon 
-                size={20} 
-                className={isActive ? 'text-blue-600' : 'text-gray-500'} 
+              <Icon
+                size={20}
+                className={isActive ? 'text-blue-600' : 'text-gray-500'}
               />
               <div className="flex-1 min-w-0">
                 <p className={`text-sm font-medium ${isActive ? 'text-blue-700' : 'text-gray-900'}`}>
@@ -149,14 +149,14 @@ export function DashboardSidebar({ activeTab, onTabChange, onSettingsClick }: Si
 
       {/* Bottom Actions */}
       <div className="p-4 border-t border-gray-200 space-y-2">
-        <SettingsButton 
+        <SettingsButton
           onClick={onSettingsClick}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors"
         >
           <Settings size={20} className="text-gray-500" />
           <span className="text-sm font-medium">Settings</span>
         </SettingsButton>
-        
+
         <div className="w-full">
           <SignOutButton className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-700 hover:bg-red-50 hover:text-red-800 transition-colors">
             <LogOut size={20} className="text-red-500" />
