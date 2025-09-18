@@ -252,7 +252,19 @@ export default function GitHubIntegration() {
             return repo;
           })
         );
-        setSyncStats(result);
+
+        // Change this line to merge instead of replace:
+        setSyncStats((prev) => ({
+          ...prev,
+          ...result,
+          repoStats: [
+            ...(prev?.repoStats?.filter(
+              (s) => s.repoFullName !== repoFullName
+            ) || []),
+            ...(result.repoStats || []),
+          ],
+        }));
+
         await fetchIntegrationStatus();
       } else {
         setError(result.error || "Sync failed");
