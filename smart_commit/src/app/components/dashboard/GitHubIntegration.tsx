@@ -35,6 +35,8 @@ interface GitHubRepo {
     commits: number;
     aiCommits: number;
     manualCommits: number;
+    aiPercentage: number;
+    qualityScore: number;
   };
 }
 
@@ -406,6 +408,13 @@ export default function GitHubIntegration() {
                           <span className="text-sm text-gray-600">AI</span>
                         </div>
                         <p className="text-xl font-bold text-green-600">{repo.stats.aiCommits}</p>
+                      </div>
+                       <div className="bg-green-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="text-green-600" size={16} />
+                          <span className="text-sm text-gray-600">Quality</span>
+                        </div>
+                        <p className="text-xl font-bold text-green-600">{repo.stats.qualityScore}</p>
                       </div>
                     </div>
                   )}

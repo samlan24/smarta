@@ -1,5 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/app/lib/supabase/server';
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// Helper function to calculate commit stats for a repo
+async function calculateCommitStats(supabase:SupabaseClient, userId: string, repoFullName: string) {
+  const { count: totalCommits, error: totalError } = await supabase
+    .from('external_commits')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('repo_full_name', repoFullName);
+
+  const { count: aiCommits, error: aiError } = await supabase
+    .from('external_commits')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('repo_full_name', repoFullName)
+    .eq('is_ai_generated', true);
+
+  if (totalError || aiError) {
+    console.error(`Error fetching commit stats for repo ${repoFullName}`, totalError || aiError);
+    throw new Error('Error fetching commit stats');
+  }
+
+  const manualCommits = (totalCommits || 0) - (aiCommits || 0);
+  const aiPercentage = totalCommits ? (aiCommits || 0) / totalCommits : 0;
+  const qualityScore = Math.round(aiPercentage * 100); // Simple scoring example
+
+  return {
+    totalCommits,
+    aiCommits,
+    manualCommits,
+    aiPercentage,
+    qualityScore,
+  };
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,41 +67,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Map over repos to fetch commit counts concurrently
+    // For each repo, calculate commit stats and scoring
     const formattedRepos = await Promise.all(
       (syncedRepos || []).map(async (repo) => {
-        // Fetch total commits count
-        const { count: commits, error: commitsError } = await supabase
-          .from('external_commits')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('repo_full_name', repo.repo_full_name);
-
-        if (commitsError) {
-          console.error(
-            `Error fetching commits count for repo ${repo.repo_full_name}:`,
-            commitsError
-          );
-        }
-
-        // Fetch AI commits count
-        const { count: aiCommits, error: aiCommitsError } = await supabase
-          .from('external_commits')
-          .select('*', { count: 'exact', head: true })
-          .eq('user_id', user.id)
-          .eq('repo_full_name', repo.repo_full_name)
-          .eq('is_ai_generated', true);
-
-        if (aiCommitsError) {
-          console.error(
-            `Error fetching AI commits count for repo ${repo.repo_full_name}:`,
-            aiCommitsError
-          );
-        }
-
-        const totalCommits = commits || 0;
-        const totalAiCommits = aiCommits || 0;
-        const manualCommits = totalCommits - totalAiCommits;
+        const stats = await calculateCommitStats(supabase, user.id, repo.repo_full_name);
 
         return {
           id: repo.id,
@@ -81,9 +84,11 @@ export async function GET(request: NextRequest) {
           forks: repo.forks || 0,
           last_sync_at: repo.updated_at,
           stats: {
-            commits: totalCommits,
-            aiCommits: totalAiCommits,
-            manualCommits,
+            commits: stats.totalCommits,
+            aiCommits: stats.aiCommits,
+            manualCommits: stats.manualCommits,
+            aiPercentage: stats.aiPercentage,
+            qualityScore: stats.qualityScore,
           },
         };
       })
