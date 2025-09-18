@@ -3,15 +3,16 @@ import { createClient } from "@/app/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Helper function to calculate commit stats for a repo
+// Helper function to calculate commit stats for a repo
 async function calculateCommitStats(
   supabase: SupabaseClient,
   userId: string,
   repoFullName: string
 ) {
-  // Fetch all commits with their quality scores and source
+  // Fetch all commits with their quality scores
   const { data: commits, error: commitsError } = await supabase
     .from("external_commits")
-    .select("commit_source, is_ai_generated, quality_score")
+    .select("is_ai_generated, quality_score")
     .eq("user_id", userId)
     .eq("repo_full_name", repoFullName);
 
@@ -24,16 +25,12 @@ async function calculateCommitStats(
   }
 
   const totalCommits = commits?.length || 0;
-
-  // Count commit source categories
   const aiCommits =
-    commits?.filter((c) => c.commit_source === "smart-commit").length || 0;
-  const manualCommits =
-    commits?.filter((c) => c.commit_source === "manual").length || 0;
-  const unknownCommits =
-    commits?.filter((c) => c.commit_source === "unknown").length || 0;
+    commits?.filter((commit) => commit.is_ai_generated).length || 0;
+  const manualCommits = totalCommits - aiCommits;
+  const aiPercentage = totalCommits ? aiCommits / totalCommits : 0;
 
-  // Calculate average quality score
+  // Calculate actual quality score from the stored quality_score values
   const qualityScore = totalCommits
     ? Math.round(
         commits.reduce((sum, commit) => sum + (commit.quality_score || 0), 0) /
@@ -45,7 +42,7 @@ async function calculateCommitStats(
     totalCommits,
     aiCommits,
     manualCommits,
-    unknownCommits,
+    aiPercentage,
     qualityScore,
   };
 }
@@ -103,6 +100,7 @@ export async function GET(request: NextRequest) {
             commits: stats.totalCommits,
             aiCommits: stats.aiCommits,
             manualCommits: stats.manualCommits,
+            aiPercentage: stats.aiPercentage,
             qualityScore: stats.qualityScore,
           },
         };
