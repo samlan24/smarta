@@ -103,6 +103,7 @@ export default function GitHubIntegration() {
   useEffect(() => {
     if (integration) {
       fetchSyncStats();
+      fetchSyncedRepositories();
     }
   }, [integration]);
 
@@ -300,6 +301,18 @@ export default function GitHubIntegration() {
       console.error("Disconnect error:", err);
     }
   };
+
+  const fetchSyncedRepositories = async () => {
+  try {
+    const response = await fetch("/api/integrations/github/synced-repositories");
+    if (response.ok) {
+      const data = await response.json();
+      setSyncedRepos(data.repositories || []);
+    }
+  } catch (error) {
+    console.error("Error fetching synced repositories:", error);
+  }
+};
 
   if (loading) {
     return (
