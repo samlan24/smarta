@@ -264,8 +264,6 @@ export default function GitHubIntegration() {
             ...(result.repoStats || []),
           ],
         }));
-
-        await fetchIntegrationStatus();
       } else {
         setError(result.error || "Sync failed");
       }
