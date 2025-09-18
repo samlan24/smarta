@@ -44,9 +44,6 @@ export async function POST(request: NextRequest) {
 
     const github = new GitHubService(integration.access_token);
 
-    // Sync user repositories first so external_repositories table is populated
-    await github.syncUserRepositories(user.id);
-
     const sinceDate = new Date();
     sinceDate.setDate(sinceDate.getDate() - syncDays);
 
@@ -61,11 +58,57 @@ export async function POST(request: NextRequest) {
       manualCommits: number;
     }> = [];
 
+    // Fetch repository details from GitHub API to store complete info
+    const allRepoDetails = new Map();
+    for (const repoFullName of repositories) {
+      try {
+        const response = await fetch(`https://api.github.com/repos/${repoFullName}`, {
+          headers: {
+            'Authorization': `Bearer ${integration.access_token}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'User-Agent': 'SmartCommit-App',
+          },
+        });
+
+        if (response.ok) {
+          const repoDetails = await response.json();
+          allRepoDetails.set(repoFullName, {
+            repo_name: repoDetails.name,
+            repo_full_name: repoDetails.full_name,
+            description: repoDetails.description,
+            language: repoDetails.language,
+            is_private: repoDetails.private,
+            stars: repoDetails.stargazers_count || 0,
+            forks: repoDetails.forks_count || 0,
+            last_commit_at: repoDetails.pushed_at,
+          });
+        }
+      } catch (error) {
+        console.error(`Failed to fetch details for ${repoFullName}:`, error);
+      }
+    }
+
     try {
       // Sync commits for each selected repository and collect per-repo stats
       for (const repoFullName of repositories) {
         try {
           await github.syncRepositoryCommits(user.id, repoFullName, sinceDate);
+
+          // Store repository info after successful commit sync
+          const repoDetails = allRepoDetails.get(repoFullName);
+          if (repoDetails) {
+            await supabase
+              .from('external_repositories')
+              .upsert({
+                user_id: user.id,
+                integration_id: integration.id,
+                ...repoDetails,
+                updated_at: new Date().toISOString()
+              }, {
+                onConflict: 'integration_id,repo_full_name'
+              });
+          }
+
           syncedRepos++;
 
           // Count total commits in the time range for this repo
