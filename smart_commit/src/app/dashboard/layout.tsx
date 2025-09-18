@@ -19,20 +19,25 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900">My Dashboard</h1>
+  <div className="min-h-screen">
+    <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
+      {/* Left side: Dashboard title */}
+      <h1 className="text-xl font-bold text-gray-900">My Dashboard</h1>
+
+      {/* Right side: user info and docs link grouped */}
+      <div className="flex items-center space-x-6">
         {user && (
-          <span className="text-sm text-gray-800">
+          <span className="text-sm text-gray-800 whitespace-nowrap">
             {user.user_metadata.full_name || user.email}
           </span>
         )}
         <Link href="/docs" className="text-sm text-blue-600 hover:underline">
-        docs
+          docs
         </Link>
-      </header>
-      <main className="p-6">{children}</main>
-    </div>
-  );
+      </div>
+    </header>
+    <main className="p-6">{children}</main>
+  </div>
+);
 }
 
