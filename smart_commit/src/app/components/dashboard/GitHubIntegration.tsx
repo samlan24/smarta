@@ -232,7 +232,7 @@ export default function GitHubIntegration() {
       const response = await fetch("/api/integrations/github/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ repositories: [repoFullName], syncDays: 1 }),
+        body: JSON.stringify({ repositories: [repoFullName], syncDays: 30 }),
       });
       const result = await response.json();
       if (response.ok) {
