@@ -459,41 +459,41 @@ export default function GitHubIntegration() {
                   </p>
                   {repo.stats && (
                     <div className="grid grid-cols-4 gap-2 mt-3">
-                      <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="bg-blue-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="text-green-600" size={16} />
+                          <CheckCircle className="text-blue-600" size={16} />
                           <span className="text-sm text-gray-600">Total</span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">
+                        <p className="text-xl font-bold text-blue-600">
                           {repo.stats.commits}
                         </p>
                       </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="bg-purple-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="text-green-600" size={16} />
+                          <CheckCircle className="text-purple-600" size={16} />
                           <span className="text-sm text-gray-600">Manual</span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">
+                        <p className="text-xl font-bold text-purple-600">
                           {repo.stats.manualCommits}
                         </p>
                       </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="bg-indigo-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="text-green-600" size={16} />
+                          <CheckCircle className="text-indigo-600" size={16} />
                           <span className="text-sm text-gray-600">AI</span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">
+                        <p className="text-xl font-bold text-indigo-600">
                           {repo.stats.aiCommits}
                         </p>
                       </div>
-                      <div className="bg-green-50 p-3 rounded-lg">
+                      <div className="bg-emerald-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="text-green-600" size={16} />
+                          <CheckCircle className="text-emerald-600" size={16} />
                           <span className="text-sm text-gray-600">
                             Quality Score
                           </span>
                         </div>
-                        <p className="text-xl font-bold text-green-600">
+                        <p className="text-xl font-bold text-emerald-600">
                           {repo.stats.qualityScore}/100
                         </p>
                       </div>
