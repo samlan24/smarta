@@ -484,10 +484,47 @@ export default function GitHubIntegration() {
                       );
                       if (!stats) return null;
                       return (
-                        <div className="text-gray-700 mt-2 space-y-1">
-                          Commits: {stats.commits}
-                          Manual: {stats.manualCommits}
-                          AI: {stats.aiCommits}
+                        <div className="grid grid-cols-3 gap-2 mt-3">
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle
+                                className="text-green-600"
+                                size={16}
+                              />
+                              <span className="text-sm text-gray-600">
+                                Total
+                              </span>
+                            </div>
+                            <p className="text-xl font-bold text-green-600">
+                              {stats.commits}
+                            </p>
+                          </div>
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle
+                                className="text-green-600"
+                                size={16}
+                              />
+                              <span className="text-sm text-gray-600">
+                                Manual
+                              </span>
+                            </div>
+                            <p className="text-xl font-bold text-green-600">
+                              {stats.manualCommits}
+                            </p>
+                          </div>
+                          <div className="bg-green-50 p-3 rounded-lg">
+                            <div className="flex items-center gap-2">
+                              <CheckCircle
+                                className="text-green-600"
+                                size={16}
+                              />
+                              <span className="text-sm text-gray-600">AI</span>
+                            </div>
+                            <p className="text-xl font-bold text-green-600">
+                              {stats.aiCommits}
+                            </p>
+                          </div>
                         </div>
                       );
                     })()}
@@ -519,59 +556,6 @@ export default function GitHubIntegration() {
               <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                 <AlertCircle className="text-red-600" size={16} />
                 <span className="text-sm text-red-700">{error}</span>
-              </div>
-            )}
-
-            {/* Sync Stats */}
-            {syncStats && (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <GitBranch className="text-blue-600" size={16} />
-                    <span className="text-sm text-gray-600">Repositories</span>
-                  </div>
-                  <p className="text-xl font-bold text-blue-600">
-                    {syncStats.repositories}
-                  </p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="text-green-600" size={16} />
-                    <span className="text-sm text-gray-600">Commits</span>
-                  </div>
-                  <p className="text-xl font-bold text-green-600">
-                    {syncStats.commits}
-                  </p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="text-green-600" size={16} />
-                    <span className="text-sm text-gray-600">
-                      Manual Commits
-                    </span>
-                  </div>
-                  <p className="text-xl font-bold text-green-600">
-                    {syncStats.manualCommits}
-                  </p>
-                </div>
-                <div className="bg-green-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="text-green-600" size={16} />
-                    <span className="text-sm text-gray-600">AI Commits</span>
-                  </div>
-                  <p className="text-xl font-bold text-green-600">
-                    {syncStats.aiCommits}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <Clock className="text-gray-600" size={16} />
-                    <span className="text-sm text-gray-600">Period</span>
-                  </div>
-                  <p className="text-xl font-bold text-gray-600">
-                    Last 30 days
-                  </p>
-                </div>
               </div>
             )}
           </div>
