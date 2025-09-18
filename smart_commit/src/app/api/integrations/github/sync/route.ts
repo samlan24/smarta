@@ -1,45 +1,57 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/app/lib/supabase/server';
-import { GitHubService } from '@/app/lib/github';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/app/lib/supabase/server";
+import { GitHubService } from "@/app/lib/github";
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { repositories, syncDays = 30 } = await request.json();
 
     // Get user's GitHub integration
     const { data: integration, error: integrationError } = await supabase
-      .from('git_integrations')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('platform', 'github')
-      .eq('is_active', true)
+      .from("git_integrations")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("platform", "github")
+      .eq("is_active", true)
       .single();
 
     if (integrationError || !integration) {
-      return NextResponse.json({ error: 'GitHub integration not found' }, { status: 404 });
+      return NextResponse.json(
+        { error: "GitHub integration not found" },
+        { status: 404 }
+      );
     }
 
     // Validate repositories input
     if (!repositories || repositories.length === 0) {
-      return NextResponse.json({
-        error: 'Please select repositories to sync',
-        requiresRepoSelection: true
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Please select repositories to sync",
+          requiresRepoSelection: true,
+        },
+        { status: 400 }
+      );
     }
 
     // Limit to maximum 3 repositories
     if (repositories.length > 3) {
-      return NextResponse.json({
-        error: 'Maximum 3 repositories allowed for sync'
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: "Maximum 3 repositories allowed for sync",
+        },
+        { status: 400 }
+      );
     }
 
     const github = new GitHubService(integration.access_token);
@@ -48,7 +60,7 @@ export async function POST(request: NextRequest) {
     sinceDate.setDate(sinceDate.getDate() - syncDays);
 
     let syncedRepos = 0;
-    const failedRepos: string[] = [];
+    const failedRepos: Array<{ repo: string; error: string }> = [];
 
     // Array to hold per-repo sync stats
     const repoStats: Array<{
@@ -62,13 +74,16 @@ export async function POST(request: NextRequest) {
     const allRepoDetails = new Map();
     for (const repoFullName of repositories) {
       try {
-        const response = await fetch(`https://api.github.com/repos/${repoFullName}`, {
-          headers: {
-            'Authorization': `Bearer ${integration.access_token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'SmartCommit-App',
-          },
-        });
+        const response = await fetch(
+          `https://api.github.com/repos/${repoFullName}`,
+          {
+            headers: {
+              Authorization: `Bearer ${integration.access_token}`,
+              Accept: "application/vnd.github.v3+json",
+              "User-Agent": "SmartCommit-App",
+            },
+          }
+        );
 
         if (response.ok) {
           const repoDetails = await response.json();
@@ -97,36 +112,37 @@ export async function POST(request: NextRequest) {
           // Store repository info after successful commit sync
           const repoDetails = allRepoDetails.get(repoFullName);
           if (repoDetails) {
-            await supabase
-              .from('external_repositories')
-              .upsert({
+            await supabase.from("external_repositories").upsert(
+              {
                 user_id: user.id,
                 integration_id: integration.id,
                 ...repoDetails,
-                updated_at: new Date().toISOString()
-              }, {
-                onConflict: 'integration_id,repo_full_name'
-              });
+                updated_at: new Date().toISOString(),
+              },
+              {
+                onConflict: "integration_id,repo_full_name",
+              }
+            );
           }
 
           syncedRepos++;
 
           // Count total commits in the time range for this repo
           const { count: repoCommits } = await supabase
-            .from('external_commits')
-            .select('', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('repo_full_name', repoFullName)
-            .gte('committed_at', sinceDate.toISOString());
+            .from("external_commits")
+            .select("", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .eq("repo_full_name", repoFullName)
+            .gte("committed_at", sinceDate.toISOString());
 
           // Count AI-generated commits in the time range for this repo
           const { count: repoAiCommits } = await supabase
-            .from('external_commits')
-            .select('', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .eq('repo_full_name', repoFullName)
-            .eq('is_ai_generated', true)
-            .gte('committed_at', sinceDate.toISOString());
+            .from("external_commits")
+            .select("", { count: "exact", head: true })
+            .eq("user_id", user.id)
+            .eq("repo_full_name", repoFullName)
+            .eq("is_ai_generated", true)
+            .gte("committed_at", sinceDate.toISOString());
 
           const repoManualCommits = (repoCommits || 0) - (repoAiCommits || 0);
 
@@ -138,20 +154,39 @@ export async function POST(request: NextRequest) {
           });
         } catch (repoError) {
           console.error(`Error syncing repository ${repoFullName}:`, repoError);
-          failedRepos.push(repoFullName);
+          failedRepos.push({
+            repo: repoFullName,
+            error:
+              repoError instanceof Error ? repoError.message : "Unknown error",
+          });
         }
       }
 
+       if (repositories.length === 1 && failedRepos.length === 1) {
+        return NextResponse.json({
+          error: failedRepos[0].error
+        }, { status: 400 });
+      }
+
       // Aggregate totals from repoStats
-      const totalCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.commits, 0);
-      const aiCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.aiCommits, 0);
-      const manualCommitsAllRepos = repoStats.reduce((sum, r) => sum + r.manualCommits, 0);
+      const totalCommitsAllRepos = repoStats.reduce(
+        (sum, r) => sum + r.commits,
+        0
+      );
+      const aiCommitsAllRepos = repoStats.reduce(
+        (sum, r) => sum + r.aiCommits,
+        0
+      );
+      const manualCommitsAllRepos = repoStats.reduce(
+        (sum, r) => sum + r.manualCommits,
+        0
+      );
 
       // Update last sync timestamp on git_integrations
       await supabase
-        .from('git_integrations')
+        .from("git_integrations")
         .update({ last_sync_at: new Date().toISOString() })
-        .eq('id', integration.id);
+        .eq("id", integration.id);
 
       const response = {
         success: true,
@@ -164,35 +199,42 @@ export async function POST(request: NextRequest) {
         syncPeriod: `${syncDays} days`,
         repoStats, // <-- per repo commit stats included here
         ...(failedRepos.length > 0 && {
-          warnings: `Failed to sync ${failedRepos.length} repositories: ${failedRepos.join(', ')}`
+          warnings: `Failed to sync ${
+            failedRepos.length
+          } repositories: ${failedRepos.join(", ")}`,
         }),
       };
 
       return NextResponse.json(response);
-
     } catch (syncError) {
-      console.error('Sync error:', syncError);
+      console.error("Sync error:", syncError);
 
       try {
         await supabase
-          .from('git_integrations')
+          .from("git_integrations")
           .update({ last_sync_at: new Date().toISOString() })
-          .eq('id', integration.id);
+          .eq("id", integration.id);
       } catch (timestampError) {
-        console.error('Failed to update timestamp:', timestampError);
+        console.error("Failed to update timestamp:", timestampError);
       }
 
-      return NextResponse.json({
-        error: 'Sync failed',
-        details: syncError instanceof Error ? syncError.message : 'Unknown error',
-      }, { status: 500 });
+      return NextResponse.json(
+        {
+          error: "Sync failed",
+          details:
+            syncError instanceof Error ? syncError.message : "Unknown error",
+        },
+        { status: 500 }
+      );
     }
-
   } catch (error) {
-    console.error('GitHub sync API error:', error);
-    return NextResponse.json({
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
+    console.error("GitHub sync API error:", error);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
