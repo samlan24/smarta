@@ -1,4 +1,4 @@
-import { createClient } from '@/app/lib/supabase/server';
+import { createClient } from "@/app/lib/supabase/server";
 
 export interface GitHubUser {
   id: number;
@@ -54,31 +54,43 @@ export class GitHubService {
     const response = await fetch(`https://api.github.com${url}`, {
       ...options,
       headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'SmartCommit-App',
+        Authorization: `Bearer ${this.accessToken}`,
+        Accept: "application/vnd.github.v3+json",
+        "User-Agent": "SmartCommit-App",
         ...options.headers,
       },
     });
 
     if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `GitHub API error: ${response.status} ${response.statusText}`
+      );
     }
 
     return response.json();
   }
 
   async getCurrentUser(): Promise<GitHubUser> {
-    return this.makeRequest('/user');
+    return this.makeRequest("/user");
   }
 
   async getUserRepositories(page = 1, perPage = 100): Promise<GitHubRepo[]> {
-    return this.makeRequest(`/user/repos?page=${page}&per_page=${perPage}&sort=updated`);
+    return this.makeRequest(
+      `/user/repos?page=${page}&per_page=${perPage}&sort=updated`
+    );
+  }
+
+  async hasCommitsLast30Days(owner: string, repo: string): Promise<boolean> {
+    const sinceDate = new Date();
+    sinceDate.setDate(sinceDate.getDate() - 30);
+    const since = sinceDate.toISOString();
+    const commits = await this.getRepositoryCommits(owner, repo, since);
+    return commits.length > 0;
   }
 
   async getRepositoryCommits(
-    owner: string, 
-    repo: string, 
+    owner: string,
+    repo: string,
     since?: string,
     page = 1,
     perPage = 100
@@ -90,37 +102,40 @@ export class GitHubService {
     return this.makeRequest(url);
   }
 
-  async getCommitDetails(owner: string, repo: string, sha: string): Promise<GitHubCommit> {
+  async getCommitDetails(
+    owner: string,
+    repo: string,
+    sha: string
+  ): Promise<GitHubCommit> {
     return this.makeRequest(`/repos/${owner}/${repo}/commits/${sha}`);
   }
 
   async syncUserRepositories(userId: string): Promise<void> {
     const supabase = await createClient();
-    
+
     try {
       // Get user's GitHub integration
       const { data: integration } = await supabase
-        .from('git_integrations')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('platform', 'github')
-        .eq('is_active', true)
+        .from("git_integrations")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("platform", "github")
+        .eq("is_active", true)
         .single();
 
       if (!integration) {
-        throw new Error('No active GitHub integration found');
+        throw new Error("No active GitHub integration found");
       }
 
       const github = new GitHubService(integration.access_token);
-      
+
       // Fetch repositories
       const repos = await github.getUserRepositories();
-      
+
       // Store repositories
       for (const repo of repos) {
-        await supabase
-          .from('external_repositories')
-          .upsert({
+        await supabase.from("external_repositories").upsert(
+          {
             user_id: userId,
             integration_id: integration.id,
             repo_name: repo.name,
@@ -131,57 +146,73 @@ export class GitHubService {
             stars: repo.stargazers_count,
             forks: repo.forks_count,
             last_commit_at: repo.pushed_at,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'integration_id,repo_full_name'
-          });
+            updated_at: new Date().toISOString(),
+          },
+          {
+            onConflict: "integration_id,repo_full_name",
+          }
+        );
       }
 
       // Update last sync time
       await supabase
-        .from('git_integrations')
+        .from("git_integrations")
         .update({ last_sync_at: new Date().toISOString() })
-        .eq('id', integration.id);
-
+        .eq("id", integration.id);
     } catch (error) {
-      console.error('Error syncing repositories:', error);
+      console.error("Error syncing repositories:", error);
       throw error;
     }
   }
 
-  async syncRepositoryCommits(userId: string, repoFullName: string, since?: Date): Promise<void> {
+  async syncRepositoryCommits(
+    userId: string,
+    repoFullName: string,
+    since?: Date
+  ): Promise<void> {
     const supabase = await createClient();
-    
+
     try {
       const { data: integration } = await supabase
-        .from('git_integrations')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('platform', 'github')
-        .eq('is_active', true)
+        .from("git_integrations")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("platform", "github")
+        .eq("is_active", true)
         .single();
 
       if (!integration) {
-        throw new Error('No active GitHub integration found');
+        throw new Error("No active GitHub integration found");
       }
 
       const github = new GitHubService(integration.access_token);
-      const [owner, repo] = repoFullName.split('/');
-      
+      const [owner, repo] = repoFullName.split("/");
+
+      // Check if there are commits in the last 30 days
+      const hasRecentCommits = await github.hasCommitsLast30Days(owner, repo);
+      if (!hasRecentCommits) {
+        throw new Error(
+          `Could not find any commits in the last 30 days for repository ${repoFullName}`
+        );
+      }
+
       const sinceParam = since ? since.toISOString() : undefined;
-      const commits = await github.getRepositoryCommits(owner, repo, sinceParam);
-      
-      // Process and store commits
+      const commits = await github.getRepositoryCommits(
+        owner,
+        repo,
+        sinceParam
+      );
+
       for (const commit of commits) {
-        // Get detailed commit info for stats
-        const detailedCommit = await github.getCommitDetails(owner, repo, commit.sha);
-        
-        // Analyze if commit is AI-generated
+        const detailedCommit = await github.getCommitDetails(
+          owner,
+          repo,
+          commit.sha
+        );
         const analysis = this.analyzeCommitMessage(commit.commit.message);
-        
-        await supabase
-          .from('external_commits')
-          .upsert({
+
+        await supabase.from("external_commits").upsert(
+          {
             user_id: userId,
             integration_id: integration.id,
             repo_name: repo,
@@ -197,14 +228,15 @@ export class GitHubService {
             is_ai_generated: analysis.isAI,
             ai_confidence: analysis.confidence,
             commit_source: analysis.source,
-            quality_score: analysis.qualityScore
-          }, {
-            onConflict: 'integration_id,commit_sha'
-          });
+            quality_score: analysis.qualityScore,
+          },
+          {
+            onConflict: "integration_id,commit_sha",
+          }
+        );
       }
-
     } catch (error) {
-      console.error('Error syncing commits:', error);
+      console.error("Error syncing commits:", error);
       throw error;
     }
   }
@@ -263,24 +295,25 @@ export class GitHubService {
     }
 
     // Descriptiveness scoring
-    if (message.split(' ').length >= 4) qualityScore += 10;
-    if (/\b(add|remove|update|fix|implement|resolve)\b/i.test(message)) qualityScore += 5;
+    if (message.split(" ").length >= 4) qualityScore += 10;
+    if (/\b(add|remove|update|fix|implement|resolve)\b/i.test(message))
+      qualityScore += 5;
 
     // Determine source
-    let source = 'unknown';
+    let source = "unknown";
     if (isSmartCommit && confidence > 0.5) {
-      source = 'smart-commit';
+      source = "smart-commit";
     } else if (isManual) {
-      source = 'manual';
+      source = "manual";
     } else if (confidence > 0.3) {
-      source = 'other-ai';
+      source = "other-ai";
     }
 
     return {
       isAI: isSmartCommit,
       confidence: Math.min(confidence, 1),
       source,
-      qualityScore: Math.max(0, Math.min(100, qualityScore))
+      qualityScore: Math.max(0, Math.min(100, qualityScore)),
     };
   }
 }
