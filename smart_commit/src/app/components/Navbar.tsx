@@ -1,11 +1,42 @@
 "use client";
-import { Button } from "../components/ui/button";
-import { Terminal, Menu, X } from "lucide-react";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { createClient } from "../lib/supabase/client";
+import { Terminal, Menu, X } from "lucide-react";
+import { Button } from "../components/ui/button";
+import { User } from "@supabase/supabase-js";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    // Get current user on mount
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    // Listen to auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+  };
 
   const navItems = [
     { label: "Features", href: "#features" },
@@ -25,9 +56,9 @@ const Navbar = () => {
           <span className="text-xl font-bold">Cmarta-commit</span>
         </div>
 
-        {/* Desktop Navigation + CTA */}
+        {/* Desktop Nav */}
         <div className="hidden md:flex items-center space-x-8">
-          {/* Navigation links */}
+          {/* Nav links */}
           <div className="flex items-center space-x-6">
             {navItems.map((item, index) => (
               <a
@@ -40,16 +71,27 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* CTA Buttons */}
+          {/* Auth buttons */}
           <div className="flex items-center space-x-4">
-            <Link href="/auth/signin">
-            <Button
-              variant="ghost"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              Sign in
-            </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/dashboard">
+                  <Button className="btn-hero">Dashboard</Button>
+                </Link>
+                <Button variant="ghost" onClick={handleSignOut}>
+                  Sign out
+                </Button>
+              </>
+            ) : (
+              <Link href="/auth/signin">
+                <Button
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  Sign in
+                </Button>
+              </Link>
+            )}
             <Button className="btn-hero">Install Now</Button>
           </div>
         </div>
@@ -67,7 +109,7 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="md:hidden py-4 border-t border-border bg-background/90 backdrop-blur-md">
           <div className="flex flex-col space-y-4">
@@ -82,13 +124,27 @@ const Navbar = () => {
               </a>
             ))}
             <div className="flex flex-col space-y-2 px-4 pt-4">
-              <Link href="/auth/signin">
-              <Button variant="ghost" className="justify-start">
-                Sign in
-              </Button>
-              </Link>
+              {user ? (
+                <>
+                  <Link href="/dashboard">
+                    <Button className="justify-start">Dashboard</Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="justify-start"
+                    onClick={handleSignOut}
+                  >
+                    Sign out
+                  </Button>
+                </>
+              ) : (
+                <Link href="/auth/signin">
+                  <Button variant="ghost" className="justify-start">
+                    Sign in
+                  </Button>
+                </Link>
+              )}
               <Button className="btn-hero justify-start">Install Now</Button>
-
             </div>
           </div>
         </div>
