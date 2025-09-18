@@ -387,7 +387,7 @@ export default function GitHubIntegration() {
                     Last synced: {repo.last_sync_at ? new Date(repo.last_sync_at).toLocaleString() : "Never"}
                   </p>
                   {repo.stats && (
-                    <div className="grid grid-cols-3 gap-2 mt-3">
+                    <div className="grid grid-cols-4 gap-2 mt-3">
                       <div className="bg-green-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="text-green-600" size={16} />
@@ -412,7 +412,7 @@ export default function GitHubIntegration() {
                        <div className="bg-green-50 p-3 rounded-lg">
                         <div className="flex items-center gap-2">
                           <CheckCircle className="text-green-600" size={16} />
-                          <span className="text-sm text-gray-600">Quality</span>
+                          <span className="text-sm text-gray-600">Quality%</span>
                         </div>
                         <p className="text-xl font-bold text-green-600">{repo.stats.qualityScore}</p>
                       </div>
