@@ -1,5 +1,6 @@
 import { Button } from "../components/ui/button";
 import { Check, Zap, Crown } from "lucide-react";
+import Link from "next/link";
 
 const PricingSection = () => {
   const plans = [
@@ -8,7 +9,8 @@ const PricingSection = () => {
       icon: Zap,
       price: "$0",
       period: "/month",
-      description: "Get started with AI-powered productivity & commit analytics",
+      description:
+        "Get started with AI-powered productivity & commit analytics",
       features: [
         "50 commits/month",
         "AI-powered messages",
@@ -24,7 +26,8 @@ const PricingSection = () => {
       icon: Crown,
       price: "$9.99",
       period: "/month",
-      description: "Unlock advanced analytics & unlimited productivity features",
+      description:
+        "Unlock advanced analytics & unlimited productivity features",
       features: [
         "Unlimited commits",
         "Advanced AI models",
@@ -46,7 +49,8 @@ const PricingSection = () => {
             Simple, Developer-Centric Pricing
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start for free and unlock powerful productivity and analytics features as you grow. No hidden fees, cancel anytime.
+            Start for free and unlock powerful productivity and analytics
+            features as you grow. No hidden fees, cancel anytime.
           </p>
         </div>
 
@@ -96,20 +100,27 @@ const PricingSection = () => {
                 ))}
               </div>
 
-              <Button
-                className={
-                  plan.popular ? "btn-hero w-full" : "btn-outline-hero w-full"
-                }
+              <Link
+                href={plan.name === "Free" ? "/auth/signin" : "/upgrade"}
+                passHref
+                className="block"
               >
-                {plan.cta}
-              </Button>
+                <Button
+                  className={
+                    plan.popular ? "btn-hero w-full" : "btn-outline-hero w-full"
+                  }
+                >
+                  {plan.cta}
+                </Button>
+              </Link>
             </div>
           ))}
         </div>
 
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground">
-            All plans include our core AI technology, productivity dashboard, and support.
+            All plans include our core AI technology, productivity dashboard,
+            and support.
           </p>
         </div>
       </div>
