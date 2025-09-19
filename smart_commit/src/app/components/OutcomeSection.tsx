@@ -48,16 +48,6 @@ Quality Score: <span class="code-string">88/100</span>
 AI vs Manual: <span class="code-string">70% AI, 30% Manual</span>
 Conventional Commits: <span class="code-string">95%</span>`,
     },
-    {
-      icon: Users,
-      title: "Team & Repo Insights",
-      description:
-        "Gain visibility on your team's commit habits. See which repos follow best practices and where to improve.",
-      terminalExample: `<span class="code-comment"># Team View</span>
-<span class="code-string">alice:</span> 90/100
-<span class="code-string">bob:</span> 75/100
-<span class="code-string">carol:</span> 82/100`,
-    }
   ];
 
   return (
