@@ -1,5 +1,5 @@
 import { Button } from "../components/ui/button";
-import { Terminal, Download, Play } from "lucide-react";
+import { Terminal, Download, BarChart3 } from "lucide-react";
 import heroTerminalImage from "../assets/hero-terminal.png";
 import Image from "next/image";
 
@@ -16,30 +16,29 @@ const HeroSection = () => {
             <div className="flex items-center space-x-2 sm:space-x-3 text-accent text-sm sm:text-base">
               <Terminal className="w-5 h-5 sm:w-6 sm:h-6" />
               <span className="font-medium tracking-wide uppercase">
-                Cmarta-commit CLI
+                Cmarta-commit Productivity Suite
               </span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-snug sm:leading-tight">
-              AI-Generated
+              Supercharge Developer Productivity
               <span className="bg-gradient-primary bg-clip-text text-transparent block">
-                Commit Messages
+                AI Commits & Code Analytics
               </span>
-              from Your Code Changes
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl">
-              CLI tool for developers who want consistent, conventional commit
-              messages without the manual effort. Analyzes your staged changes
-              and generates proper commits automatically – no LLM API keys required.
+              All-in-one CLI & dashboard for developers and teams. Instantly generate conventional commit messages, track your commit quality, and unlock actionable insights into your codebase—all seamlessly integrated with GitHub.
             </p>
 
             {/* Bullet Points */}
             <div className="space-y-2 sm:space-y-3">
               {[
-                "Generates conventional commits from git diffs",
-                "Works with existing workflow (git add → cmarta-commit → git push)",
-                "AI-powered - no setup required",
+                "AI-powered commit messages from staged changes",
+                "Auto-score commit quality & spot trends",
+                "Track productivity with detailed analytics",
+                "Sync your GitHub repos for instant insights",
+                "Works with your workflow (git add → cmarta-commit → git push)",
                 "50 free commits included",
               ].map((point, index) => (
                 <div
@@ -60,6 +59,13 @@ const HeroSection = () => {
                 <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
                 Install Cmarta-commit
               </Button>
+              <Button
+                variant="secondary"
+                className="btn-hero group w-full sm:w-auto"
+              >
+                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
+                View Analytics Demo
+              </Button>
             </div>
           </div>
 
@@ -69,7 +75,7 @@ const HeroSection = () => {
             <div className="relative">
               <Image
                 src={heroTerminalImage}
-                alt="Cmarta-commit terminal demonstration showing AI-generated commit messages"
+                alt="Cmarta-commit terminal demonstration showing AI-generated commit messages and analytics dashboard"
                 className="w-full rounded-xl shadow-elegant hover-lift"
               />
             </div>

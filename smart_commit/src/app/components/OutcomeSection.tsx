@@ -1,4 +1,4 @@
-import { CheckCircle, Clock, GitBranch } from "lucide-react";
+import { CheckCircle, Clock, GitBranch, BarChart3, Users } from "lucide-react";
 
 const OutcomeSection = () => {
   const outcomes = [
@@ -24,8 +24,8 @@ const OutcomeSection = () => {
 <span class="code-comment"># Includes proper scope and detailed description</span>`,
     },
     {
-      title: "Time Saved",
       icon: Clock,
+      title: "Time Saved",
       description:
         "Generate descriptive commit messages in 3 seconds instead of thinking for minutes.",
       terminalExample: `<span class="code-comment"># Traditional workflow</span>
@@ -38,6 +38,26 @@ git add src/auth.js
 cmarta-commit <span class="code-comment"># 3 seconds</span>
 <span class="code-string">✅ feat: add user authentication middleware</span>`,
     },
+    {
+      icon: BarChart3,
+      title: "Commit Quality Analytics",
+      description:
+        "Track your commit best practices over time. Visualize patterns, spot trends, and improve your workflow.",
+      terminalExample: `<span class="code-comment"># Dashboard Example</span>
+Quality Score: <span class="code-string">88/100</span>
+AI vs Manual: <span class="code-string">70% AI, 30% Manual</span>
+Conventional Commits: <span class="code-string">95%</span>`,
+    },
+    {
+      icon: Users,
+      title: "Team & Repo Insights",
+      description:
+        "Gain visibility on your team's commit habits. See which repos follow best practices and where to improve.",
+      terminalExample: `<span class="code-comment"># Team View</span>
+<span class="code-string">alice:</span> 90/100
+<span class="code-string">bob:</span> 75/100
+<span class="code-string">carol:</span> 82/100`,
+    }
   ];
 
   return (
@@ -46,11 +66,10 @@ cmarta-commit <span class="code-comment"># 3 seconds</span>
         {/* Section Header */}
         <div className="text-center mb-12 sm:mb-16 space-y-4 sm:space-y-6">
           <h2 className="text-3xl sm:text-4xl lg:text-4xl font-bold mb-2 sm:mb-6">
-            Clean, Meaningful Git History
+            Clean Commits. Actionable Analytics.
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-full sm:max-w-3xl mx-auto leading-relaxed">
-            AI can analyze your code changes and write better commit messages
-            than manual effort.
+            Go beyond automation—track your commit quality, get insights into your workflow, and help your team ship better code.
           </p>
         </div>
 

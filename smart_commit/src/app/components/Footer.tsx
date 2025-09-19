@@ -6,12 +6,10 @@ const Footer = () => {
       { label: "Features", href: "#features" },
       { label: "Pricing", href: "#pricing" },
       { label: "Documentation", href: "#docs" },
-
     ],
     Company: [
       { label: "About", href: "#about" },
       { label: "Blog", href: "#blog" },
-
     ],
     Support: [
       { label: "Help Center", href: "#help" },
@@ -19,12 +17,10 @@ const Footer = () => {
     Legal: [
       { label: "Privacy Policy", href: "#privacy" },
       { label: "Terms of Service", href: "#terms" },
-
     ],
   };
 
   const socialLinks = [
-
     { icon: Twitter, href: "#twitter", label: "Twitter" },
     { icon: Mail, href: "#email", label: "Email" },
   ];
@@ -43,8 +39,8 @@ const Footer = () => {
               <span className="text-xl font-bold">Cmarta-commit</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-              AI-powered commit message generator for devs who want
-              consistent, professional git history without the manual effort.
+              The all-in-one AI-powered productivity suite for developers and teams.
+              Automate commit messages, track commit quality, and unlock workflow analytics—all seamlessly integrated with your git workflow.
             </p>
 
             {/* Social links */}
@@ -90,9 +86,9 @@ const Footer = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6 text-sm text-muted-foreground text-center md:text-right">
-              <span>Made for developers, by developers</span>
+              <span>Built for productivity-focused developers and teams</span>
               <div className="flex items-center space-x-1 justify-center sm:justify-end">
-                <span>Built with</span>
+                <span>Made with</span>
                 <span className="text-red-500">♥</span>
                 <span>and AI</span>
               </div>
