@@ -8,11 +8,12 @@ const PricingSection = () => {
       icon: Zap,
       price: "$0",
       period: "/month",
-      description: "Perfect for trying Cmarta-commit",
+      description: "Get started with AI-powered productivity & commit analytics",
       features: [
         "50 commits/month",
         "AI-powered messages",
-        "Conventional commit format",
+        "Commit quality scoring",
+        "Productivity dashboard (basic)",
         "No setup required",
       ],
       cta: "Get Started Free",
@@ -23,14 +24,14 @@ const PricingSection = () => {
       icon: Crown,
       price: "$9.99",
       period: "/month",
-      description: "For professional developers",
+      description: "Unlock advanced analytics & unlimited productivity features",
       features: [
         "Unlimited commits",
         "Advanced AI models",
-        "Custom templates",
+        "Custom commit templates",
+        "Productivity analytics (full)",
+        "Commit history insights",
         "Priority support",
-        "Team collaboration",
-        "Analytics dashboard",
       ],
       cta: "Upgrade to Pro",
       popular: true,
@@ -42,11 +43,10 @@ const PricingSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-6">
-            Simple, Developer-Friendly Pricing
+            Simple, Developer-Centric Pricing
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Start free, upgrade when you need more. No hidden fees, cancel
-            anytime.
+            Start for free and unlock powerful productivity and analytics features as you grow. No hidden fees, cancel anytime.
           </p>
         </div>
 
@@ -109,8 +109,7 @@ const PricingSection = () => {
 
         <div className="text-center mt-12">
           <p className="text-sm text-muted-foreground">
-            All plans include our core AI technology and 24/7 support.
-
+            All plans include our core AI technology, productivity dashboard, and support.
           </p>
         </div>
       </div>
