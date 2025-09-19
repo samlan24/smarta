@@ -2,6 +2,7 @@ import { Button } from "../components/ui/button";
 import { Terminal, Download, BarChart3 } from "lucide-react";
 import heroTerminalImage from "../assets/hero-terminal.png";
 import Image from "next/image";
+import Link from "next/link";
 
 const HeroSection = () => {
   return (
@@ -48,10 +49,13 @@ const HeroSection = () => {
 
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+              <Link href="/docs">
               <Button className="btn-hero group w-full sm:w-auto">
                 <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
                 Install Cmarta-commit
               </Button>
+              </Link>
+              <Link href="/auth/signin">
               <Button
                 variant="secondary"
                 className="btn-hero group w-full sm:w-auto"
@@ -59,6 +63,7 @@ const HeroSection = () => {
                 <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
                 View Analytics Demo
               </Button>
+              </Link>
             </div>
           </div>
 

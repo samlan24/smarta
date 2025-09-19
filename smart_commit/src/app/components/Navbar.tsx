@@ -92,7 +92,9 @@ const Navbar = () => {
                 </Button>
               </Link>
             )}
+            <Link href="/docs">
             <Button className="btn-hero">Install Now</Button>
+            </Link>
           </div>
         </div>
 
@@ -144,7 +146,9 @@ const Navbar = () => {
                   </Button>
                 </Link>
               )}
+              <Link href="/docs">
               <Button className="btn-hero justify-start">Install Now</Button>
+              </Link>
             </div>
           </div>
         </div>
