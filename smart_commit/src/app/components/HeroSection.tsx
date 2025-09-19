@@ -13,13 +13,6 @@ const HeroSection = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left side - Content */}
           <div className="space-y-6 sm:space-y-8">
-            <div className="flex items-center space-x-2 sm:space-x-3 text-accent text-sm sm:text-base">
-              <Terminal className="w-5 h-5 sm:w-6 sm:h-6" />
-              <span className="font-medium tracking-wide uppercase">
-                Cmarta-commit Productivity Suite
-              </span>
-            </div>
-
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-snug sm:leading-tight">
               Supercharge Developer Productivity
               <span className="bg-gradient-primary bg-clip-text text-transparent block">
