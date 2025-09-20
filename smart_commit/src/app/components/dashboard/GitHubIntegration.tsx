@@ -153,6 +153,12 @@ export default function GitHubIntegration() {
 
   const fetchRepositories = async () => {
     if (!integration) return;
+
+    if (showRepoSelector) {
+      setShowRepoSelector(false);
+      return;
+    }
+
     setLoadingRepos(true);
     try {
       const response = await fetch("/api/integrations/github/repositories");
@@ -381,7 +387,10 @@ export default function GitHubIntegration() {
               <h4 className="font-medium text-gray-900">Synced Repositories</h4>
               <button
                 onClick={fetchRepositories}
-                disabled={syncedRepos.length >= 3 || syncing}
+                disabled={
+                  syncedRepos.length >= (planInfo?.githubSyncLimit || 1) ||
+                  syncing
+                }
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <Github size={16} />
@@ -600,7 +609,7 @@ export default function GitHubIntegration() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => syncSingleRepo(repo.full_name)}
-                    disabled={syncing && syncingRepo === repo.full_name}
+                    disabled={syncing}
                     className="inline-flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {syncing && syncingRepo === repo.full_name ? (
