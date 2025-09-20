@@ -52,6 +52,10 @@ export default function GitHubIntegration() {
   const [syncedRepos, setSyncedRepos] = useState<GitHubRepo[]>([]);
   const [showRepoSelector, setShowRepoSelector] = useState(false);
   const [loadingRepos, setLoadingRepos] = useState(false);
+  const [planInfo, setPlanInfo] = useState<{
+    planName: string;
+    githubSyncLimit: number;
+  } | null>(null);
 
   const supabase = createClient();
 
@@ -154,6 +158,10 @@ export default function GitHubIntegration() {
       const response = await fetch("/api/integrations/github/repositories");
       if (response.ok) {
         const data = await response.json();
+
+        // Store plan info from the API response
+        setPlanInfo(data.planInfo);
+
         const filteredRepos = data.repositories.filter(
           (repo: GitHubRepo) =>
             !syncedRepos.some((sr) => sr.full_name === repo.full_name)
@@ -173,14 +181,28 @@ export default function GitHubIntegration() {
   const addAndSyncRepo = async (repo: GitHubRepo) => {
     setError(null);
     setShowRepoSelector(false);
-    if (syncedRepos.length >= 3) {
-      setError("Maximum of 3 repositories can be synced");
+
+    // Use plan-aware limit instead of hardcoded 3
+    const maxRepos = planInfo?.githubSyncLimit || 1;
+
+    if (syncedRepos.length >= maxRepos) {
+      setError(
+        `Repository sync limit reached (${maxRepos} ${
+          maxRepos === 1 ? "repository" : "repositories"
+        } for ${planInfo?.planName || "Free"} plan). ${
+          planInfo?.planName === "Free"
+            ? "Upgrade to Pro for more repositories."
+            : ""
+        }`
+      );
       return;
     }
+
     if (syncedRepos.find((r) => r.full_name === repo.full_name)) {
       setError("Repository already synced");
       return;
     }
+
     setSyncedRepos((prev) => [...prev, { ...repo, last_sync_at: null }]);
     await syncSingleRepo(repo.full_name);
   };
@@ -367,11 +389,56 @@ export default function GitHubIntegration() {
               </button>
             </div>
 
+            {planInfo && (
+              <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium text-gray-700">
+                      {planInfo.planName} Plan
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {syncedRepos.length}/{planInfo.githubSyncLimit}{" "}
+                      repositories synced
+                    </p>
+                  </div>
+                  {planInfo.planName === "Free" &&
+                    syncedRepos.length >= planInfo.githubSyncLimit && (
+                      <div className="text-right">
+                        <p className="text-xs text-orange-600 font-medium">
+                          Limit reached
+                        </p>
+                        <button className="text-xs text-blue-600 hover:text-blue-800 underline">
+                          Upgrade to Pro
+                        </button>
+                      </div>
+                    )}
+                </div>
+              </div>
+            )}
+
             {showRepoSelector && (
               <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50 max-h-72 overflow-y-auto">
-                <h5 className="font-medium text-gray-900 mb-3">
-                  Select a repository to sync:
-                </h5>
+                <div className="flex justify-between items-center mb-3">
+                  <h5 className="font-medium text-gray-900">
+                    Select a repository to sync:
+                  </h5>
+                  {planInfo && (
+                    <p className="text-xs text-gray-600">
+                      {syncedRepos.length}/{planInfo.githubSyncLimit} used
+                    </p>
+                  )}
+                </div>
+
+                {/* Add warning for free users at limit */}
+                {planInfo &&
+                  planInfo.planName === "Free" &&
+                  syncedRepos.length >= planInfo.githubSyncLimit && (
+                    <div className="mb-3 p-2 bg-orange-50 border border-orange-200 rounded text-xs text-orange-700">
+                      Repository limit reached. Upgrade to Pro to sync more
+                      repositories.
+                    </div>
+                  )}
+
                 {loadingRepos ? (
                   <div className="flex items-center justify-center py-4">
                     <Loader2 className="animate-spin" size={20} />
