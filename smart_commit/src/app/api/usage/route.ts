@@ -1,6 +1,7 @@
 import { createClient } from "../../lib/supabase/server";
 import { NextResponse } from "next/server";
 import { checkEndpointRateLimits, ENDPOINT_LIMITS } from "../../lib/rateLimit";
+import { getUserPlan } from "../../lib/planManager";
 
 export async function GET() {
   try {
@@ -13,7 +14,7 @@ export async function GET() {
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
+    const planInfo = await getUserPlan(user.id);
     const rateLimitResult = await checkEndpointRateLimits(
       user.id,
       "usage-dashboard",
@@ -93,6 +94,17 @@ export async function GET() {
         resetDate: subscription?.reset_date,
         status: subscription?.status || "active",
       },
+      planInfo: planInfo
+        ? {
+            planName: planInfo.planName,
+            features: {
+              commitGenerations: planInfo.features.commit_generations_monthly,
+              templates: planInfo.features.commit_templates,
+              analyticsDays: planInfo.features.analytics_days,
+              githubRepos: planInfo.features.github_sync_repos,
+            },
+          }
+        : null,
       stats: {
         totalRequests,
         monthlyRequests,

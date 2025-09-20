@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "../../../lib/auth";
 import { createClient } from "../../../lib/supabase/server";
-import {
-  checkEndpointRateLimits,
-  ENDPOINT_LIMITS,
-} from "../../../lib/rateLimit";
+import { checkFeatureAccess } from "../../../lib/planManager";
+import { checkEndpointRateLimits, extractRequestMetadata, ENDPOINT_LIMITS } from "../../../lib/rateLimit";
 
 export async function GET(request: NextRequest) {
   try {
@@ -33,6 +31,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userId = authResult.userId;
+    const metadata = extractRequestMetadata(request);
     const rateLimitResult = await checkEndpointRateLimits(
       userId,
       "templates-get",
@@ -99,6 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = authResult.userId;
+    const metadata = extractRequestMetadata(request);
     const rateLimitResult = await checkEndpointRateLimits(
       userId,
       "templates-create",
@@ -141,15 +141,21 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Check template count limit
-    const { count } = await supabase
-      .from("user_templates")
-      .select("*", { count: "exact" })
-      .eq("user_id", userId);
-
-    if (count && count >= 20) {
+    const templateCheck = await checkFeatureAccess(
+      userId,
+      "commit_templates",
+      1
+    );
+    if (!templateCheck.allowed) {
       return NextResponse.json(
-        { error: "Maximum 20 templates allowed" },
-        { status: 400 }
+        {
+          error: templateCheck.error,
+          upgrade_required: templateCheck.upgrade_required,
+          current_usage: templateCheck.current_usage,
+          limit: templateCheck.limit,
+          feature: "templates",
+        },
+        { status: templateCheck.upgrade_required ? 402 : 429 }
       );
     }
 

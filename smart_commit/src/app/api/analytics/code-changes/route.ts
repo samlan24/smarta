@@ -4,6 +4,7 @@ import {
   checkEndpointRateLimits,
   ENDPOINT_LIMITS,
 } from "../../../lib/rateLimit";
+import { getAnalyticsLimits } from "../../../lib/planManager";
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,6 +20,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const analyticsLimits = await getAnalyticsLimits(user.id);
+    const { searchParams } = new URL(request.url);
+    const requestedDays = parseInt(searchParams.get("days") || "30");
+    const days = Math.min(requestedDays, analyticsLimits.maxDays);
     const rateLimitResult = await checkEndpointRateLimits(
       user.id,
       "analytics-code-changes",
@@ -30,13 +35,13 @@ export async function GET(request: NextRequest) {
           error: rateLimitResult.error,
           reset_time: rateLimitResult.reset_time,
           limit_type: rateLimitResult.limit_type,
+          upgrade_required: rateLimitResult.upgrade_required || false
         },
         { status: 429 }
       );
     }
 
-    const { searchParams } = new URL(request.url);
-    const days = parseInt(searchParams.get("days") || "30");
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/app/lib/supabase/server";
 import { GitHubService } from "@/app/lib/github";
-import {
-  checkEndpointRateLimits,
-  ENDPOINT_LIMITS,
-} from "../../../../lib/rateLimit";
-import { makeGitHubAPICall } from "../../../../lib/githubRateLimit";
+import { checkEndpointRateLimits } from "@/app/lib/rateLimit";
+import { makeGitHubAPICall } from "@/app/lib/githubRateLimit";
+import { getUserPlan } from "@/app/lib/planManager";
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,11 +35,11 @@ export async function POST(request: NextRequest) {
           error: rateLimitResult.error,
           reset_time: rateLimitResult.reset_time,
           limit_type: rateLimitResult.limit_type,
+          upgrade_required: rateLimitResult.upgrade_required || false, // Add this
         },
-        { status: 429 }
+        { status: rateLimitResult.upgrade_required ? 402 : 429 } // Update this
       );
     }
-
     const { repositories, syncDays = 30 } = await request.json();
 
     // Get user's GitHub integration
@@ -70,14 +68,21 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    const planInfo = await getUserPlan(user.id);
 
-    // Limit to maximum 3 repositories
-    if (repositories.length > 3) {
+    const maxRepos = planInfo?.features.github_sync_repos || 1;
+
+    if (repositories.length > maxRepos) {
       return NextResponse.json(
         {
-          error: "Maximum 3 repositories allowed for sync",
+          error: `Repository sync limit exceeded (${maxRepos} repositories for ${
+            planInfo?.planName || "Free"
+          } plan)`,
+          upgrade_required: planInfo?.planId === "free",
+          current_request: repositories.length,
+          limit: maxRepos,
         },
-        { status: 400 }
+        { status: planInfo?.planId === "free" ? 402 : 400 }
       );
     }
 

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/app/lib/supabase/server";
-import { GitHubService } from "@/app/lib/github";
 import {
   checkEndpointRateLimits,
   ENDPOINT_LIMITS,
-} from "../../../../lib/rateLimit";
-import { makeGitHubAPICall } from "../../../../lib/githubRateLimit";
+} from "@/app/lib/rateLimit";
+import { makeGitHubAPICall } from "@/app/lib/githubRateLimit";
+import { getUserPlan } from "@/app/lib/planManager";
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
           error: rateLimitResult.error,
           reset_time: rateLimitResult.reset_time,
           limit_type: rateLimitResult.limit_type,
+          upgrade_required: rateLimitResult.upgrade_required || false,
         },
         { status: 429 }
       );
@@ -51,6 +52,7 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
+    const planInfo = await getUserPlan(user.id);
 
     let repositories;
     try {
@@ -104,7 +106,15 @@ export async function GET(request: NextRequest) {
         forks: repo.forks_count || 0,
       }));
 
-    return NextResponse.json({ repositories: formattedRepos });
+    return NextResponse.json({
+      repositories: formattedRepos,
+      planInfo: planInfo
+        ? {
+            planName: planInfo.planName,
+            githubSyncLimit: planInfo.features.github_sync_repos,
+          }
+        : null,
+    });
   } catch (error) {
     console.error("GitHub repositories API error:", error);
     return NextResponse.json(
