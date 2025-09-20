@@ -58,7 +58,7 @@ export async function getUserPlan(userId: string): Promise<PlanInfo | null> {
       planName: 'Free',
       features: getDefaultFreePlanFeatures(),
       usage_count: 0,
-      usage_limit: 20,
+      usage_limit: 500,
       reset_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
     };
   }
@@ -225,21 +225,21 @@ async function getCurrentTemplateCount(userId: string): Promise<number> {
 
 function getDefaultFreePlanFeatures(): PlanFeatures {
   return {
-    commit_generations_monthly: 20,
+    commit_generations_monthly: 500,
     commit_templates: 3,
-    analytics_days: 7,
-    analytics_repos: 1,
-    github_sync_repos: 1,
+    analytics_days: 14,
+    analytics_repos: 3,
+    github_sync_repos: 3,
     github_sync_auto: false,
-    api_calls_monthly: 20,
+    api_calls_monthly: 200,
     export_data: false,
     priority_support: false,
     team_features: false,
     rate_limits: {
-      generate_commit_hourly: 5,
-      generate_commit_daily: 10,
-      templates_hourly: 10,
-      analytics_hourly: 5
+      generate_commit_hourly: 100,
+      generate_commit_daily: 100,
+      templates_hourly: 100,
+      analytics_hourly: 100
     }
   };
 }
