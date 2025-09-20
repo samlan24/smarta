@@ -64,38 +64,37 @@ Conventional Commits: <span class="code-string">95%</span>`,
         </div>
 
         {/* Outcomes Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-          {outcomes.map((outcome, index) => (
-            <div
-              key={index}
-              className="card-gradient p-6 sm:p-8 hover-lift flex flex-col"
-            >
-              {/* Icon and Description */}
-              <div className="mb-4 sm:mb-6">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-primary rounded-xl flex items-center justify-center mb-3 sm:mb-4">
-                  <outcome.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
-                </div>
-                <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 text-foreground">
-                  {outcome.title}
-                </h3>
-                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  {outcome.description}
-                </p>
-              </div>
-
-              {/* Code Example */}
-              <div className="code-block mt-auto overflow-x-auto">
-                <pre className="text-xs sm:text-sm whitespace-pre-wrap break-words">
-                  <code
-                    dangerouslySetInnerHTML={{
-                      __html: outcome.terminalExample,
-                    }}
-                  />
-                </pre>
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 sm:gap-8">
+  {outcomes.map((outcome, index) => (
+    <div
+      key={index}
+      className="card-gradient p-6 sm:p-8 hover-lift flex flex-col"
+    >
+      {/* Icon and Description */}
+      <div className="mb-4 sm:mb-6">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-primary rounded-xl flex items-center justify-center mb-3 sm:mb-4">
+          <outcome.icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
         </div>
+        <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 text-foreground">
+          {outcome.title}
+        </h3>
+        <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
+          {outcome.description}
+        </p>
+      </div>
+
+      {/* Code Example */}
+      <div className="code-block mt-auto overflow-x-auto">
+        <pre className="text-xs sm:text-sm whitespace-pre-wrap break-words">
+          <code
+            dangerouslySetInnerHTML={{ __html: outcome.terminalExample }}
+          />
+        </pre>
+      </div>
+    </div>
+  ))}
+</div>
+
       </div>
     </section>
   );

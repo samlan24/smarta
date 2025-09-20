@@ -59,12 +59,19 @@ g7h8i9j more changes`,
           </p>
         </div>
 
-        {/* Pain Points Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+        {/* Zigzag Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-6 sm:gap-8">
           {painPoints.map((point, index) => (
             <div
               key={index}
-              className="card-gradient p-6 sm:p-8 hover-lift flex flex-col"
+              className={`
+                card-gradient p-6 sm:p-8 hover-lift flex flex-col
+                ${index === 0 ? "md:col-span-6" : ""}
+                ${index === 1 ? "md:col-span-4" : ""}
+                ${index === 2 ? "md:col-span-2" : ""}
+                ${index === 3 ? "md:col-span-3" : ""}
+                ${index === 4 ? "md:col-span-3" : ""}
+              `}
             >
               <div className="mb-4 sm:mb-6">
                 <h3 className="text-xl sm:text-2xl font-semibold mb-2 sm:mb-4 text-foreground">
