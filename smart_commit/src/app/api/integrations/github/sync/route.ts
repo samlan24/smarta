@@ -69,17 +69,10 @@ export async function POST(request: NextRequest) {
       );
     }
     const planInfo = await getUserPlan(user.id);
-    console.log("=== PLAN DEBUG ===");
-    console.log("User ID:", user.id);
-    console.log("Plan Info:", planInfo);
-    console.log("Features:", planInfo?.features);
-    console.log("GitHub Sync Repos:", planInfo?.features?.github_sync_repos);
-    console.log("Plan ID:", planInfo?.planId);
-    console.log("Repositories requested:", repositories.length);
-    console.log("===================");
+
 
     const maxRepos = planInfo?.features.github_sync_repos || 1;
-    console.log('Max repos calculated:', maxRepos);
+
 
     if (repositories.length > maxRepos) {
       return NextResponse.json(
