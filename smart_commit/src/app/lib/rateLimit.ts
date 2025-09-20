@@ -11,6 +11,7 @@ interface RateLimitResult {
   reset_time?: string
   limit_type?: 'hourly' | 'daily' | 'monthly'
   plan?: string
+  upgrade_required?: boolean;
 }
 
 interface UsageLogParams {
@@ -22,17 +23,17 @@ interface UsageLogParams {
   requestSize?: number
   responseSize?: number
   errorMessage?: string
-  ipAddress?: string
-  userAgent?: string
+  ipAddress?: string | null  // Allow null values
+  userAgent?: string | null  // Allow null values
 }
 
 /**
- * Check rate limits for commit generation endpoint
+ * Check rate limits for commit generation endpoint (plan-aware)
  */
 export async function checkCommitGenerationLimits(userId: string): Promise<RateLimitResult> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.rpc('check_commit_generation_limits', {
+  const { data, error } = await supabase.rpc('check_commit_generation_limits_v2', {
     p_user_id: userId,
   })
 
@@ -45,7 +46,7 @@ export async function checkCommitGenerationLimits(userId: string): Promise<RateL
 }
 
 /**
- * Check rate limits for other endpoints with configurable limits
+ * Check rate limits for other endpoints with plan-aware limits
  */
 export async function checkEndpointRateLimits(
   userId: string,
@@ -59,18 +60,50 @@ export async function checkEndpointRateLimits(
 ): Promise<RateLimitResult> {
   const supabase = await createClient()
 
+  // Get user's plan-specific rate limits
+  const { getPlanRateLimits, getUserPlan } = await import('./planManager')
+  const planInfo = await getUserPlan(userId)
+
+  if (!planInfo) {
+    return { allowed: false, error: 'Unable to determine user plan' }
+  }
+
+  // Determine rate limits based on plan
+  let hourlyLimit, dailyLimit
+
+  if (endpoint.includes('templates')) {
+    hourlyLimit = planInfo.features.rate_limits.templates_hourly
+    dailyLimit = hourlyLimit * 4 // Rough daily estimate
+  } else if (endpoint.includes('analytics')) {
+    hourlyLimit = planInfo.features.rate_limits.analytics_hourly
+    dailyLimit = hourlyLimit * 8 // Analytics can be more frequent during work hours
+  } else {
+    // Use provided limits or defaults
+    hourlyLimit = planInfo.planId === 'free' ?
+      (options.hourlyLimitFree || 50) :
+      (options.hourlyLimitPro || 200)
+    dailyLimit = planInfo.planId === 'free' ?
+      (options.dailyLimitFree || 200) :
+      (options.dailyLimitPro || 1000)
+  }
+
   const { data, error } = await supabase.rpc('check_endpoint_rate_limits', {
     p_user_id: userId,
     p_endpoint: endpoint,
-    p_hourly_limit_free: options.hourlyLimitFree || 50,
-    p_hourly_limit_pro: options.hourlyLimitPro || 200,
-    p_daily_limit_free: options.dailyLimitFree || 200,
-    p_daily_limit_pro: options.dailyLimitPro || 1000,
+    p_hourly_limit_free: hourlyLimit,
+    p_hourly_limit_pro: hourlyLimit,
+    p_daily_limit_free: dailyLimit,
+    p_daily_limit_pro: dailyLimit,
   })
 
   if (error) {
     console.error('Error checking endpoint rate limits:', error)
     return { allowed: false, error: 'Rate limit check failed' }
+  }
+
+  // Add upgrade_required flag for free users hitting limits
+  if (!data.allowed && planInfo.planId === 'free') {
+    data.upgrade_required = true
   }
 
   return data
@@ -107,12 +140,17 @@ export async function logApiUsage(params: UsageLogParams): Promise<string | null
  * Helper to extract request metadata for logging
  */
 export function extractRequestMetadata(request: NextRequest) {
+  // NextRequest doesn't have ip property directly, use headers instead
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const realIp = request.headers.get('x-real-ip');
+  const cfConnectingIp = request.headers.get('cf-connecting-ip'); // Cloudflare
+
+  const ipAddress = forwardedFor ?? realIp ?? cfConnectingIp ?? "";
+  const userAgent = request.headers.get('user-agent') ?? "";
+
   return {
-    ipAddress:
-      request.headers.get("x-forwarded-for") ||
-      request.headers.get("x-real-ip") ||
-      "",
-    userAgent: request.headers.get("user-agent") || "",
+    ipAddress,
+    userAgent,
   };
 }
 

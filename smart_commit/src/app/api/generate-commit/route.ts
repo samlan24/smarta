@@ -5,6 +5,11 @@ import GeminiClient from "../../lib/GeminiClient";
 import { AnalyticsParser } from "../../lib/analytics-parser";
 import { createClient } from "../../lib/supabase/server";
 import { checkCommitGenerationLimits } from "../../lib/rateLimit";
+import {
+  extractRequestMetadata,
+  logApiUsage as logApiUsageNew,
+} from "../../lib/rateLimit";
+import { metadata } from "@/app/layout";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -42,6 +47,7 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+    const metadata = extractRequestMetadata(request);
 
     const rateLimitResult = await checkCommitGenerationLimits(userId);
     if (!rateLimitResult.allowed) {
@@ -54,8 +60,7 @@ export async function POST(request: NextRequest) {
         tokensUsed: 0,
         success: false,
         errorMessage: rateLimitResult.error,
-        ipAddress: request.headers.get("x-forwarded-for") ?? "",
-        userAgent: request.headers.get("User-Agent") ?? "",
+        ...metadata,
       });
 
       return NextResponse.json(
@@ -63,6 +68,8 @@ export async function POST(request: NextRequest) {
           error: rateLimitResult.error,
           reset_time: rateLimitResult.reset_time,
           limit_type: rateLimitResult.limit_type,
+          upgrade_required: rateLimitResult.upgrade_required || false,
+          remaining: rateLimitResult.remaining_monthly,
         },
         { status: 429 }
       );
@@ -126,8 +133,7 @@ export async function POST(request: NextRequest) {
         responseSize,
         tokensUsed,
         success: true,
-        ipAddress: request.headers.get("x-forwarded-for") ?? "",
-        userAgent: request.headers.get("User-Agent") ?? "",
+        ...metadata,
       });
     }
 
@@ -147,6 +153,8 @@ export async function POST(request: NextRequest) {
       metadata: {
         tokensUsed,
         responseTime,
+        remaining_commits: rateLimitResult.remaining_monthly || 0
+
       },
     });
   } catch (error) {
@@ -165,8 +173,7 @@ export async function POST(request: NextRequest) {
         tokensUsed: 0,
         success: false,
         errorMessage,
-        ipAddress: request.headers.get("x-forwarded-for") ?? "",
-        userAgent: request.headers.get("User-Agent") ?? "",
+        ...metadata
       });
     }
 
