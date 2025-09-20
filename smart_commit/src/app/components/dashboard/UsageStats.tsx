@@ -1,13 +1,23 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface UsageData {
   subscription: {
     plan: string;
-    usageCount: number;
-    usageLimit: number;
-    resetDate: string;
+    usageCount: number; // or usage_count depending on your API
+    usageLimit: number; // or usage_limit
+    resetDate: string; // or reset_date
     status: string;
+  };
+  planInfo?: {
+    // Add the new planInfo
+    planName: string;
+    features: {
+      commitGenerations: number;
+      templates: number;
+      analyticsDays: number;
+      githubRepos: number;
+    };
   };
   stats: {
     totalRequests: number;
@@ -16,6 +26,8 @@ interface UsageData {
     successRate: number;
     remainingQuota: number;
   };
+  chartData?: any[];
+  recentCalls?: any[];
 }
 
 export function UsageStats() {
@@ -28,25 +40,30 @@ export function UsageStats() {
 
   const fetchUsage = async () => {
     try {
-      const response = await fetch('/api/usage');
+      const response = await fetch("/api/usage");
       const data = await response.json();
       setUsage(data);
     } catch (error) {
-      console.error('Failed to fetch usage:', error);
+      console.error("Failed to fetch usage:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div className="animate-pulse bg-gray-200 h-32 rounded"></div>;
+  if (loading)
+    return <div className="animate-pulse bg-gray-200 h-32 rounded"></div>;
   if (!usage) return <div>Failed to load usage stats</div>;
 
-  const usagePercentage = (usage.subscription.usageCount / usage.subscription.usageLimit) * 100;
+  const usagePercentage =
+    (usage.subscription.usageCount / usage.subscription.usageLimit) * 100;
   const resetDate = new Date(usage.subscription.resetDate).toLocaleDateString();
+
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 mb-0">
-      <h3 className="text-lg font-semibold mb-4 text-gray-800">Usage Overview</h3>
+      <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        Usage Overview
+      </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 p-4 rounded-lg">
@@ -64,19 +81,25 @@ export function UsageStats() {
 
         <div className="bg-green-50 p-4 rounded-lg">
           <h4 className="text-sm font-medium text-gray-600">Total Requests</h4>
-          <p className="text-2xl font-bold text-green-600">{usage.stats.totalRequests}</p>
+          <p className="text-2xl font-bold text-green-600">
+            {usage.stats.totalRequests}
+          </p>
           <p className="text-xs text-gray-500 mt-1">All time</p>
         </div>
 
         <div className="bg-purple-50 p-4 rounded-lg">
           <h4 className="text-sm font-medium text-gray-600">Success Rate</h4>
-          <p className="text-2xl font-bold text-purple-600">{usage.stats.successRate}%</p>
+          <p className="text-2xl font-bold text-purple-600">
+            {usage.stats.successRate}%
+          </p>
           <p className="text-xs text-gray-500 mt-1">API calls</p>
         </div>
 
         <div className="bg-orange-50 p-4 rounded-lg">
           <h4 className="text-sm font-medium text-gray-600">Current Plan</h4>
-          <p className="text-2xl font-bold text-orange-600 capitalize">{usage.subscription.plan}</p>
+          <p className="text-2xl font-bold text-orange-600 capitalize">
+            {usage.subscription.plan}
+          </p>
           <p className="text-xs text-gray-500 mt-1">Resets {resetDate}</p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 // lib/planManager.ts
-import { createClient } from './supabase/server';
+import { createClient } from "./supabase/server";
 
 export interface PlanFeatures {
   commit_generations_monthly: number;
@@ -35,45 +35,64 @@ export interface PlanInfo {
 export async function getUserPlan(userId: string): Promise<PlanInfo | null> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
+  // First get the user subscription
+  const { data: subscription, error: subError } = await supabase
     .from('user_subscriptions')
-    .select(`
-      plan,
-      usage_count,
-      usage_limit,
-      reset_date,
-      subscription_plans(
-        name,
-        features
-      )
-    `)
+    .select('*')
     .eq('user_id', userId)
     .eq('status', 'active')
     .single();
 
-  if (error || !data || !data.subscription_plans || data.subscription_plans.length === 0) {
-    // Return default free plan
-    return {
-      planId: 'free',
-      planName: 'Free',
-      features: getDefaultFreePlanFeatures(),
-      usage_count: 0,
-      usage_limit: 500,
-      reset_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-    };
+  if (subError || !subscription) {
+    console.error('Failed to get user subscription:', { userId, error: subError });
+
+    // Try to create a default subscription
+    await createDefaultSubscription(userId);
+    return null;
   }
 
-  // Handle subscription_plans as array and get the first (should be only) item
-  const planData = data.subscription_plans[0] as { name: string; features: PlanFeatures };
+  // Then get the plan details
+  const { data: plan, error: planError } = await supabase
+    .from('subscription_plans')
+    .select('name, features')
+    .eq('id', subscription.plan)
+    .single();
+
+  if (planError || !plan) {
+    console.error('Failed to get plan details:', { planId: subscription.plan, error: planError });
+    return null;
+  }
 
   return {
-    planId: data.plan,
-    planName: planData.name,
-    features: planData.features,
-    usage_count: data.usage_count,
-    usage_limit: data.usage_limit,
-    reset_date: data.reset_date
+    planId: subscription.plan,
+    planName: plan.name,
+    features: plan.features as PlanFeatures,
+    usage_count: subscription.usage_count,
+    usage_limit: subscription.usage_limit,
+    reset_date: subscription.reset_date
   };
+}
+
+// Add this helper function to create default subscriptions
+async function createDefaultSubscription(userId: string) {
+  const supabase = await createClient();
+
+  try {
+    const { error } = await supabase.from("user_subscriptions").insert({
+      user_id: userId,
+      plan: "free",
+      status: "active",
+      usage_count: 0,
+      usage_limit: 500,
+      reset_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    });
+
+    if (error) {
+      console.error("Failed to create default subscription:", error);
+    }
+  } catch (err) {
+    console.error("Error creating default subscription:", err);
+  }
 }
 
 /**
@@ -92,7 +111,7 @@ export async function checkFeatureAccess(
 }> {
   const planInfo = await getUserPlan(userId);
   if (!planInfo) {
-    return { allowed: false, error: 'Unable to determine plan' };
+    return { allowed: false, error: "Unable to determine plan" };
   }
 
   const featureLimit = planInfo.features[feature];
@@ -103,25 +122,29 @@ export async function checkFeatureAccess(
   }
 
   // Handle boolean features
-  if (typeof featureLimit === 'boolean') {
+  if (typeof featureLimit === "boolean") {
     return {
       allowed: featureLimit,
-      error: !featureLimit ? `${feature} not available in ${planInfo.planName} plan` : undefined,
-      upgrade_required: !featureLimit && planInfo.planId === 'free'
+      error: !featureLimit
+        ? `${feature} not available in ${planInfo.planName} plan`
+        : undefined,
+      upgrade_required: !featureLimit && planInfo.planId === "free",
     };
   }
 
   // Handle numeric features that need current usage check
-  if (feature === 'commit_templates') {
+  if (feature === "commit_templates") {
     const currentUsage = await getCurrentTemplateCount(userId);
     const allowed = currentUsage + requestedAmount <= (featureLimit as number);
 
     return {
       allowed,
-      error: !allowed ? `Template limit reached (${featureLimit} templates for ${planInfo.planName} plan)` : undefined,
-      upgrade_required: !allowed && planInfo.planId === 'free',
+      error: !allowed
+        ? `Template limit reached (${featureLimit} templates for ${planInfo.planName} plan)`
+        : undefined,
+      upgrade_required: !allowed && planInfo.planId === "free",
       current_usage: currentUsage,
-      limit: featureLimit as number
+      limit: featureLimit as number,
     };
   }
 
@@ -131,9 +154,7 @@ export async function checkFeatureAccess(
 /**
  * Check monthly usage limits (for commit generations)
  */
-export async function checkMonthlyUsageLimit(
-  userId: string
-): Promise<{
+export async function checkMonthlyUsageLimit(userId: string): Promise<{
   allowed: boolean;
   error?: string;
   upgrade_required?: boolean;
@@ -143,7 +164,7 @@ export async function checkMonthlyUsageLimit(
 }> {
   const planInfo = await getUserPlan(userId);
   if (!planInfo) {
-    return { allowed: false, error: 'Unable to determine plan' };
+    return { allowed: false, error: "Unable to determine plan" };
   }
 
   const monthlyLimit = planInfo.features.commit_generations_monthly;
@@ -154,10 +175,10 @@ export async function checkMonthlyUsageLimit(
     return {
       allowed: false,
       error: `Monthly commit generation limit reached (${monthlyLimit} commits for ${planInfo.planName} plan)`,
-      upgrade_required: planInfo.planId === 'free',
+      upgrade_required: planInfo.planId === "free",
       remaining: 0,
       used,
-      limit: monthlyLimit
+      limit: monthlyLimit,
     };
   }
 
@@ -165,7 +186,7 @@ export async function checkMonthlyUsageLimit(
     allowed: true,
     remaining,
     used,
-    limit: monthlyLimit
+    limit: monthlyLimit,
   };
 }
 
@@ -174,7 +195,11 @@ export async function checkMonthlyUsageLimit(
  */
 export async function getPlanRateLimits(
   userId: string,
-  limitType: 'generate_commit_hourly' | 'generate_commit_daily' | 'templates_hourly' | 'analytics_hourly'
+  limitType:
+    | "generate_commit_hourly"
+    | "generate_commit_daily"
+    | "templates_hourly"
+    | "analytics_hourly"
 ): Promise<number> {
   const planInfo = await getUserPlan(userId);
   if (!planInfo) {
@@ -198,14 +223,20 @@ export async function getAnalyticsLimits(userId: string): Promise<{
     return {
       maxDays: defaultFeatures.analytics_days,
       maxRepos: defaultFeatures.analytics_repos,
-      canExport: defaultFeatures.export_data
+      canExport: defaultFeatures.export_data,
     };
   }
 
   return {
-    maxDays: planInfo.features.analytics_days === -1 ? 365 : planInfo.features.analytics_days,
-    maxRepos: planInfo.features.analytics_repos === -1 ? 999 : planInfo.features.analytics_repos,
-    canExport: planInfo.features.export_data
+    maxDays:
+      planInfo.features.analytics_days === -1
+        ? 365
+        : planInfo.features.analytics_days,
+    maxRepos:
+      planInfo.features.analytics_repos === -1
+        ? 999
+        : planInfo.features.analytics_repos,
+    canExport: planInfo.features.export_data,
   };
 }
 
@@ -216,9 +247,9 @@ async function getCurrentTemplateCount(userId: string): Promise<number> {
   const supabase = await createClient();
 
   const { count } = await supabase
-    .from('user_templates')
-    .select('*', { count: 'exact' })
-    .eq('user_id', userId);
+    .from("user_templates")
+    .select("*", { count: "exact" })
+    .eq("user_id", userId);
 
   return count || 0;
 }
@@ -239,7 +270,7 @@ function getDefaultFreePlanFeatures(): PlanFeatures {
       generate_commit_hourly: 100,
       generate_commit_daily: 100,
       templates_hourly: 100,
-      analytics_hourly: 100
-    }
+      analytics_hourly: 100,
+    },
   };
 }

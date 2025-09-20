@@ -1,39 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { validateApiKey } from "../../../lib/auth";
 import { createClient } from "../../../lib/supabase/server";
-import { checkFeatureAccess } from "../../../lib/planManager";
-import { checkEndpointRateLimits, extractRequestMetadata, ENDPOINT_LIMITS } from "../../../lib/rateLimit";
+import { checkFeatureAccess, getUserPlan } from "../../../lib/planManager";
+import { checkEndpointRateLimits, ENDPOINT_LIMITS } from "../../../lib/rateLimit";
 
 export async function GET(request: NextRequest) {
   try {
-    // Get API key from Authorization header
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Missing or invalid Authorization header" },
-        { status: 401 }
-      );
+    const supabase = await createClient();
+
+    // Get authenticated user from session
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const apiKey = authHeader.replace("Bearer ", "");
-
-    // Validate API key
-    const authResult = await validateApiKey(apiKey);
-    if (!authResult.valid) {
-      return NextResponse.json({ error: authResult.error }, { status: 401 });
-    }
-
-    if (!authResult.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 }
-      );
-    }
-
-    const userId = authResult.userId;
-    const metadata = extractRequestMetadata(request);
+    // Rate limiting
     const rateLimitResult = await checkEndpointRateLimits(
-      userId,
+      user.id,
       "templates-get",
       ENDPOINT_LIMITS.TEMPLATES
     );
@@ -47,12 +30,12 @@ export async function GET(request: NextRequest) {
         { status: 429 }
       );
     }
-    const supabase = await createClient();
 
+    // Get templates
     const { data: templates, error } = await supabase
       .from("user_templates")
       .select("id, name, message, created_at")
-      .eq("user_id", userId)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -62,7 +45,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ templates });
+    // Get plan info
+    const planInfo = await getUserPlan(user.id);
+
+    return NextResponse.json({
+      templates,
+      planInfo: planInfo ? {
+        planName: planInfo.planName,
+        templateLimit: planInfo.features.commit_templates
+      } : null
+    });
+
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },
@@ -73,34 +66,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Get API key from Authorization header
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { error: "Missing or invalid Authorization header" },
-        { status: 401 }
-      );
+    const supabase = await createClient();
+
+    // Get authenticated user from session
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const apiKey = authHeader.replace("Bearer ", "");
-
-    // Validate API key
-    const authResult = await validateApiKey(apiKey);
-    if (!authResult.valid) {
-      return NextResponse.json({ error: authResult.error }, { status: 401 });
-    }
-
-    if (!authResult.userId) {
-      return NextResponse.json(
-        { error: "Invalid authentication" },
-        { status: 401 }
-      );
-    }
-
-    const userId = authResult.userId;
-    const metadata = extractRequestMetadata(request);
+    // Rate limiting
     const rateLimitResult = await checkEndpointRateLimits(
-      userId,
+      user.id,
       "templates-create",
       ENDPOINT_LIMITS.TEMPLATES
     );
@@ -114,6 +91,22 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
+
+    // Check plan limits
+    const templateCheck = await checkFeatureAccess(user.id, 'commit_templates', 1);
+    if (!templateCheck.allowed) {
+      return NextResponse.json(
+        {
+          error: templateCheck.error,
+          upgrade_required: templateCheck.upgrade_required,
+          current_usage: templateCheck.current_usage,
+          limit: templateCheck.limit,
+          feature: "templates",
+        },
+        { status: templateCheck.upgrade_required ? 402 : 429 }
+      );
+    }
+
     const { name, message } = await request.json();
 
     // Validation
@@ -138,31 +131,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = await createClient();
-
-    // Check template count limit
-    const templateCheck = await checkFeatureAccess(
-      userId,
-      "commit_templates",
-      1
-    );
-    if (!templateCheck.allowed) {
-      return NextResponse.json(
-        {
-          error: templateCheck.error,
-          upgrade_required: templateCheck.upgrade_required,
-          current_usage: templateCheck.current_usage,
-          limit: templateCheck.limit,
-          feature: "templates",
-        },
-        { status: templateCheck.upgrade_required ? 402 : 429 }
-      );
-    }
-
+    // Create template
     const { data: template, error } = await supabase
       .from("user_templates")
       .insert({
-        user_id: userId,
+        user_id: user.id,
         name: name.trim(),
         message: message.trim(),
       })
@@ -171,7 +144,6 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       if (error.code === "23505") {
-        // Unique constraint violation
         return NextResponse.json(
           { error: "Template name already exists" },
           { status: 409 }
@@ -184,6 +156,7 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ template });
+
   } catch (error) {
     return NextResponse.json(
       { error: "Internal server error" },

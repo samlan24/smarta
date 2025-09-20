@@ -15,26 +15,43 @@ export function TemplateManager() {
   const [showNewTemplate, setShowNewTemplate] = useState(false);
   const [newTemplate, setNewTemplate] = useState({ name: "", message: "" });
   const [error, setError] = useState<string | null>(null);
+  const [planInfo, setPlanInfo] = useState<{
+    planName: string;
+    templateLimit: number;
+  } | null>(null);
 
   const fetchTemplates = async () => {
-    try {
-      const response = await fetch("/api/dashboard/templates");
-      const data = await response.json();
-      if (data.templates) {
-        setTemplates(data.templates);
-      }
-    } catch (error) {
-      console.error("Failed to fetch templates:", error);
-      setError("Failed to load templates");
+  try {
+
+    const response = await fetch("/api/users/templates");
+
+
+    const data = await response.json();
+
+
+    if (data.templates) {
+      setTemplates(data.templates);
+
     }
-  };
+
+    // Check if planInfo exists in response
+    if (data.planInfo) {
+
+      setPlanInfo({
+        planName: data.planInfo.planName,
+        templateLimit: data.planInfo.templateLimit,
+      });
+    } else {
+
+    }
+
+  } catch (error) {
+
+    setError("Failed to load templates");
+  }
+};
 
   const createTemplate = async () => {
-    if (!newTemplate.name.trim() || !newTemplate.message.trim()) {
-      setError("Name and message are required");
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
@@ -46,6 +63,18 @@ export function TemplateManager() {
       });
 
       const data = await response.json();
+
+      // Handle plan limit errors
+      if (response.status === 402) {
+        setError(
+          `${data.error} ${
+            data.upgrade_required
+              ? "Upgrade to Pro for unlimited templates."
+              : ""
+          }`
+        );
+        return;
+      }
 
       if (!response.ok) {
         throw new Error(data.error || "Failed to create template");
@@ -67,6 +96,7 @@ export function TemplateManager() {
     if (!confirm(`Delete template "${name}"?`)) return;
 
     try {
+      // Use dashboard endpoint for consistency
       const response = await fetch(
         `/api/dashboard/templates/${encodeURIComponent(name)}`,
         {
@@ -95,12 +125,26 @@ export function TemplateManager() {
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 h-fit">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Commit Templates
-        </h3>
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">
+            Commit Templates
+          </h3>
+          {planInfo && (
+            <p className="text-sm text-gray-600">
+              {templates.length}/
+              {planInfo.templateLimit === -1 ? "∞" : planInfo.templateLimit}{" "}
+              templates used
+              {planInfo.planName && ` (${planInfo.planName} plan)`}
+            </p>
+          )}
+        </div>
         <button
           onClick={() => setShowNewTemplate(true)}
-          disabled={templates.length >= 20}
+          disabled={
+            !!planInfo &&
+            planInfo.templateLimit !== -1 &&
+            templates.length >= planInfo.templateLimit
+          }
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add Template
@@ -239,11 +283,22 @@ export function TemplateManager() {
         )}
       </div>
 
-      {templates.length >= 20 && (
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">
-          Maximum templates reached (20/20). Delete some to create new ones.
-        </div>
-      )}
+      {planInfo &&
+        planInfo.templateLimit !== -1 &&
+        templates.length >= planInfo.templateLimit && (
+          <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg text-orange-800 text-sm">
+            Template limit reached ({templates.length}/{planInfo.templateLimit}
+            ).
+            {planInfo.planName === "Free" && (
+              <span className="ml-1">
+                <button className="underline text-orange-600 hover:text-orange-800">
+                  Upgrade to Pro
+                </button>{" "}
+                for unlimited templates.
+              </span>
+            )}
+          </div>
+        )}
     </div>
   );
 }
