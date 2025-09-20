@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/app/lib/supabase/server";
 import { GitHubService } from "@/app/lib/github";
+import {
+  checkEndpointRateLimits,
+  ENDPOINT_LIMITS,
+} from "../../../../lib/rateLimit";
+import { makeGitHubAPICall } from "../../../../lib/githubRateLimit";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,6 +18,28 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkEndpointRateLimits(
+      user.id,
+      "github-sync",
+      {
+        hourlyLimitFree: 3,
+        hourlyLimitPro: 20,
+        dailyLimitFree: 5,
+        dailyLimitPro: 100,
+      }
+    );
+
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: rateLimitResult.error,
+          reset_time: rateLimitResult.reset_time,
+          limit_type: rateLimitResult.limit_type,
+        },
+        { status: 429 }
+      );
     }
 
     const { repositories, syncDays = 30 } = await request.json();
@@ -74,32 +101,41 @@ export async function POST(request: NextRequest) {
     const allRepoDetails = new Map();
     for (const repoFullName of repositories) {
       try {
-        const response = await fetch(
-          `https://api.github.com/repos/${repoFullName}`,
-          {
-            headers: {
-              Authorization: `Bearer ${integration.access_token}`,
-              Accept: "application/vnd.github.v3+json",
-              "User-Agent": "SmartCommit-App",
-            },
-          }
+        const repoDetails = await makeGitHubAPICall<any>(
+          () =>
+            fetch(`https://api.github.com/repos/${repoFullName}`, {
+              headers: {
+                Authorization: `Bearer ${integration.access_token}`,
+                Accept: "application/vnd.github.v3+json",
+                "User-Agent": "SmartCommit-App",
+              },
+            }),
+          "core"
         );
 
-        if (response.ok) {
-          const repoDetails = await response.json();
-          allRepoDetails.set(repoFullName, {
-            repo_name: repoDetails.name,
-            repo_full_name: repoDetails.full_name,
-            description: repoDetails.description,
-            language: repoDetails.language,
-            is_private: repoDetails.private,
-            stars: repoDetails.stargazers_count || 0,
-            forks: repoDetails.forks_count || 0,
-            last_commit_at: repoDetails.pushed_at,
-          });
-        }
+        allRepoDetails.set(repoFullName, {
+          repo_name: repoDetails.name,
+          repo_full_name: repoDetails.full_name,
+          description: repoDetails.description,
+          language: repoDetails.language,
+          is_private: repoDetails.private,
+          stars: repoDetails.stargazers_count || 0,
+          forks: repoDetails.forks_count || 0,
+          last_commit_at: repoDetails.pushed_at,
+        });
       } catch (error) {
         console.error(`Failed to fetch details for ${repoFullName}:`, error);
+
+        // If it's a GitHub rate limit error, stop the entire sync operation
+        if (error instanceof Error && error.message.includes("rate limit")) {
+          return NextResponse.json(
+            {
+              error:
+                "GitHub API rate limit exceeded during repository sync. Please try again later.",
+            },
+            { status: 429 }
+          );
+        }
       }
     }
 
@@ -162,10 +198,13 @@ export async function POST(request: NextRequest) {
         }
       }
 
-       if (repositories.length === 1 && failedRepos.length === 1) {
-        return NextResponse.json({
-          error: failedRepos[0].error
-        }, { status: 400 });
+      if (repositories.length === 1 && failedRepos.length === 1) {
+        return NextResponse.json(
+          {
+            error: failedRepos[0].error,
+          },
+          { status: 400 }
+        );
       }
 
       // Aggregate totals from repoStats

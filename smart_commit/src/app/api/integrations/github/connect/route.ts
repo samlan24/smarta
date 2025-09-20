@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/app/lib/supabase/server';
+import { checkEndpointRateLimits, ENDPOINT_LIMITS } from '../../../../lib/rateLimit';
+import { makeGitHubAPICall } from '../../../../lib/githubRateLimit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +12,18 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const rateLimitResult = await checkEndpointRateLimits(user.id, 'github-integration', ENDPOINT_LIMITS.INTEGRATIONS);
+if (!rateLimitResult.allowed) {
+  return NextResponse.json(
+    {
+      error: rateLimitResult.error,
+      reset_time: rateLimitResult.reset_time,
+      limit_type: rateLimitResult.limit_type
+    },
+    { status: 429 }
+  );
+}
 
     // Get GitHub provider token from user metadata
 // Get GitHub provider token from user metadata
@@ -22,19 +36,31 @@ if (!githubToken) {
 }
 
     // Fetch GitHub user info
-    const githubResponse = await fetch('https://api.github.com/user', {
+    let githubUser;
+try {
+  githubUser = await makeGitHubAPICall<any>(
+    () => fetch('https://api.github.com/user', {
       headers: {
         'Authorization': `Bearer ${githubToken}`,
         'Accept': 'application/vnd.github.v3+json',
         'User-Agent': 'SmartCommit/1.0'
       }
-    });
+    }),
+    'core'
+  );
+} catch (error) {
+  console.error('GitHub API error:', error);
 
-    if (!githubResponse.ok) {
-      return NextResponse.json({ error: 'Failed to fetch GitHub user info' }, { status: 400 });
-    }
+  if (error instanceof Error && error.message.includes('rate limit')) {
+    return NextResponse.json({
+      error: 'GitHub API rate limit exceeded. Please try again later.'
+    }, { status: 429 });
+  }
 
-    const githubUser = await githubResponse.json();
+  return NextResponse.json({
+    error: 'Failed to fetch GitHub user info'
+  }, { status: 400 });
+}
 
     // Check if integration already exists
     const { data: existingIntegration } = await supabase

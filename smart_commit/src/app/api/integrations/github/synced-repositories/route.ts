@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/app/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import {
+  checkEndpointRateLimits,
+  ENDPOINT_LIMITS,
+} from "../../../../lib/rateLimit";
 
-// Helper function to calculate commit stats for a repo
 // Helper function to calculate commit stats for a repo
 async function calculateCommitStats(
   supabase: SupabaseClient,
@@ -59,6 +62,22 @@ export async function GET(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkEndpointRateLimits(
+      user.id,
+      "synced-repositories",
+      ENDPOINT_LIMITS.INTEGRATIONS
+    );
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: rateLimitResult.error,
+          reset_time: rateLimitResult.reset_time,
+          limit_type: rateLimitResult.limit_type,
+        },
+        { status: 429 }
+      );
     }
 
     // Fetch synced repositories from database
