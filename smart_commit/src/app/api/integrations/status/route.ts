@@ -1,31 +1,57 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/app/lib/supabase/server';
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/app/lib/supabase/server";
+import {
+  checkEndpointRateLimits,
+  ENDPOINT_LIMITS,
+} from "../../../lib/rateLimit";
 
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient();
-    
+
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimitResult = await checkEndpointRateLimits(
+      user.id,
+      "integrations-status",
+      ENDPOINT_LIMITS.INTEGRATIONS
+    );
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        {
+          error: rateLimitResult.error,
+          reset_time: rateLimitResult.reset_time,
+          limit_type: rateLimitResult.limit_type,
+        },
+        { status: 429 }
+      );
     }
 
     // Get all integrations for the user
     const { data: integrations, error } = await supabase
-      .from('git_integrations')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_active', true);
+      .from("git_integrations")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("is_active", true);
 
     if (error) {
-      console.error('Error fetching integrations:', error);
-      return NextResponse.json({ error: 'Failed to fetch integrations' }, { status: 500 });
+      console.error("Error fetching integrations:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch integrations" },
+        { status: 500 }
+      );
     }
 
     // Format response by platform
     const result: Record<string, any> = {};
-    
+
     for (const integration of integrations || []) {
       result[integration.platform] = {
         id: integration.id,
@@ -34,14 +60,16 @@ export async function GET(request: NextRequest) {
         avatar_url: integration.avatar_url,
         connected_at: integration.connected_at,
         last_sync_at: integration.last_sync_at,
-        is_active: integration.is_active
+        is_active: integration.is_active,
       };
     }
 
     return NextResponse.json(result);
-
   } catch (error) {
-    console.error('Integration status API error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error("Integration status API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

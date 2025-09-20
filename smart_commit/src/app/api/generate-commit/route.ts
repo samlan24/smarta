@@ -4,6 +4,7 @@ import { logApiUsage } from "../../lib/usage-tracker";
 import GeminiClient from "../../lib/GeminiClient";
 import { AnalyticsParser } from "../../lib/analytics-parser";
 import { createClient } from "../../lib/supabase/server";
+import { checkCommitGenerationLimits } from "../../lib/rateLimit";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -35,6 +36,38 @@ export async function POST(request: NextRequest) {
     }
     userId = authResult.userId;
 
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Invalid authentication" },
+        { status: 401 }
+      );
+    }
+
+    const rateLimitResult = await checkCommitGenerationLimits(userId);
+    if (!rateLimitResult.allowed) {
+      // Log the rate limit hit with your existing system
+      await logApiUsage({
+        userId,
+        endpoint: "/api/generate-commit",
+        requestSize: 0,
+        responseSize: 0,
+        tokensUsed: 0,
+        success: false,
+        errorMessage: rateLimitResult.error,
+        ipAddress: request.headers.get("x-forwarded-for") ?? "",
+        userAgent: request.headers.get("User-Agent") ?? "",
+      });
+
+      return NextResponse.json(
+        {
+          error: rateLimitResult.error,
+          reset_time: rateLimitResult.reset_time,
+          limit_type: rateLimitResult.limit_type,
+        },
+        { status: 429 }
+      );
+    }
+
     // Parse request body
     const body = await request.json();
     const { diff, options = {} } = body;
@@ -64,18 +97,18 @@ export async function POST(request: NextRequest) {
       try {
         const supabase = await createClient();
         const { data: analyticsData, error: analyticsError } = await supabase
-          .from('commit_analytics')
+          .from("commit_analytics")
           .insert({
             user_id: userId,
-            files_changed: analytics.filesChanged, 
+            files_changed: analytics.filesChanged,
             lines_added: analytics.linesAdded,
             lines_deleted: analytics.linesDeleted,
             commit_type: AnalyticsParser.extractCommitType(commitMessage),
             repository_name: AnalyticsParser.extractRepositoryName(diff),
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
           });
       } catch (analyticsError) {
-        console.error('Failed to store analytics:', analyticsError);
+        console.error("Failed to store analytics:", analyticsError);
         // Don't fail the main request if analytics fails
       }
     }
