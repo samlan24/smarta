@@ -52,7 +52,7 @@ export async function GET() {
     const nowUTC = new Date();
     nowUTC.setUTCHours(0, 0, 0, 0);
 
-    // Start of month in UTC
+
     const startOfMonthUTC = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), 1));
 
     // This month’s logs
