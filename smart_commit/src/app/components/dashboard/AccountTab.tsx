@@ -189,7 +189,7 @@ export function AccountTab({ user }: AccountTabProps) {
                   value={deleteConfirmText}
                   onChange={(e) => setDeleteConfirmText(e.target.value)}
                   placeholder="Type DELETE here"
-                  className="w-full p-2 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  className="w-full p-2 border text-gray-900 border-red-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 />
                 <div className="flex gap-2">
                   <button
