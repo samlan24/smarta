@@ -18,6 +18,7 @@ interface UsageData {
 export function BillingTab({ user }: BillingTabProps) {
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchUsageData = async () => {
@@ -64,10 +65,32 @@ export function BillingTab({ user }: BillingTabProps) {
   const requestLimit = usage.subscription.usageLimit;
   const resetDate = new Date(usage.subscription.resetDate).toLocaleDateString();
 
-  const handleUpgrade = () => {
-    // Implement your upgrade logic (redirect to Stripe, etc.)
-    console.log("Upgrade clicked");
+   const handleUpgradeClick = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: "pro",
+        }),
+      });
+
+      const { checkoutUrl } = await response.json();
+
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error("Failed to create checkout session");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="space-y-6">
@@ -115,7 +138,7 @@ export function BillingTab({ user }: BillingTabProps) {
                 <li>• Custom commit styles</li>
               </ul>
               <button
-                onClick={handleUpgrade}
+                onClick={handleUpgradeClick}
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Upgrade to Pro - $9/month
