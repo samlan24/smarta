@@ -67,6 +67,10 @@ export async function GET() {
     last30DaysUTC.setUTCDate(last30DaysUTC.getUTCDate() - 30);
     last30DaysUTC.setUTCHours(0, 0, 0, 0);
 
+    // Debug logs
+    console.log("Monthly logs count:", monthlyLogs?.length);
+    console.log("Recent logs count:", usageLogs?.length);
+
     // Stats
     const totalRequests = usageLogs?.length || 0;
     const monthlyRequests = monthlyLogs?.length || 0;
@@ -150,6 +154,7 @@ export async function GET() {
       },
       chartData,
       recentCalls,
+      rawLogs: monthlyLogs, // Temporary debug
     });
   } catch (error) {
     console.error("Usage API error:", error);
