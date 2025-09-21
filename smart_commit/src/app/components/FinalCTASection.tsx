@@ -49,7 +49,7 @@ const FinalCTASection = () => (
           <Link href="/docs">
           <Button className="btn-hero text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 group w-full sm:w-auto">
             <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
-            Install Now – 50 Free Commits
+            Install Now and get 50 Free Commits
             <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2 group-hover:translate-x-1 transition-transform" />
           </Button>
           </Link>
