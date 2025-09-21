@@ -114,6 +114,13 @@ export async function DELETE() {
     await supabaseAdmin.from("user_profiles").delete().eq("user_id", user.id);
     console.log("Deleted user profile");
 
+    await supabaseAdmin.from("user_templates").delete().eq("user_id", user.id);
+    console.log("Deleted user profile");
+
+    await supabaseAdmin.from("user_usage_summary").delete().eq("user_id", user.id);
+    console.log("Deleted user profile");
+
+
     // Delete the auth user using admin client
     const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
 
