@@ -9,7 +9,7 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    // Get the auth token from request headers
+
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
       return NextResponse.json(
