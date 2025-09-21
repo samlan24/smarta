@@ -1,9 +1,16 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { User, Mail, Calendar, Trash2, AlertTriangle } from 'lucide-react';
+import { createBrowserClient } from "@supabase/ssr";
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
 
 interface AccountTabProps {
-  user: any; // Replace with your User type
+  user: any;
+  subscription: any; // Add subscription prop
 }
 
 interface UserProfile {
@@ -20,7 +27,7 @@ interface UserProfile {
   email: string; // From auth.users
 }
 
-export function AccountTab({ user }: AccountTabProps) {
+export function AccountTab({ user, subscription }: AccountTabProps) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -45,6 +52,51 @@ export function AccountTab({ user }: AccountTabProps) {
     fetchProfile();
   }, []);
 
+  const canDeleteAccount = () => {
+    if (!subscription) return true;
+
+    const now = new Date();
+    const periodEnd = subscription.period_end ? new Date(subscription.period_end) : null;
+
+    // Can delete if subscription is expired or not active
+    return (
+      subscription.status === "expired" ||
+      (subscription.status === "cancelled" && periodEnd && now > periodEnd) ||
+      subscription.plan === "free"
+    );
+  };
+
+  const handleSubscriptionAction = async () => {
+    try {
+      // Get fresh session client-side
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        alert("Please log in to manage your subscription");
+        return;
+      }
+
+      const response = await fetch("/api/customer-portal", {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.open(data.url, "_blank");
+      } else {
+        alert(`API Error: ${data.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Portal error:", error);
+      alert("Unable to open subscription portal");
+    }
+  };
+
   const handleDeleteAccount = async () => {
     if (deleteConfirmText !== 'DELETE') {
       return;
@@ -53,23 +105,35 @@ export function AccountTab({ user }: AccountTabProps) {
     setIsDeleting(true);
 
     try {
-      // Implement your account deletion logic here
-      const response = await fetch('/api/user/account/delete', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
 
-      if (!response.ok) {
-        throw new Error('Failed to delete account');
+      if (!session?.access_token) {
+        alert("Please log in to delete your account");
+        return;
       }
 
-      // Redirect to goodbye page or home
-      window.location.href = '/';
+      const response = await fetch('/api/account/delete', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (response.ok) {
+        await supabase.auth.signOut();
+        window.location.href = '/';
+      } else {
+        const data = await response.json();
+        alert(`Error: ${data.error || "Failed to delete account"}`);
+      }
     } catch (error) {
-      console.error('Error deleting account:', error);
-      alert('Failed to delete account. Please try again.');
+      console.error('Delete account error:', error);
+      alert('Unable to delete account');
     } finally {
       setIsDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -112,7 +176,7 @@ export function AccountTab({ user }: AccountTabProps) {
             <Mail size={16} className="text-gray-400" />
             <div>
               <p className="text-sm text-gray-600">Email</p>
-              <p className="font-medium text-gray-600">{profile.email || 'Not available'}</p>
+              <p className="font-medium text-gray-600">{user?.email || profile.email || 'Not available'}</p>
             </div>
           </div>
 
@@ -131,7 +195,9 @@ export function AccountTab({ user }: AccountTabProps) {
             <div>
               <p className="text-sm text-gray-600">Member Since</p>
               <p className="font-medium text-gray-600">
-                {profile.created_at
+                {user?.created_at
+                  ? new Date(user.created_at).toLocaleDateString()
+                  : profile.created_at
                   ? new Date(profile.created_at).toLocaleDateString()
                   : 'Not available'
                 }
@@ -148,60 +214,87 @@ export function AccountTab({ user }: AccountTabProps) {
 
       {/* Danger Zone */}
       <div className="border border-red-200 rounded-lg p-4 bg-red-50">
-        <h3 className="font-semibold text-red-900 mb-2 flex items-center gap-2">
+        <h3 className="font-semibold text-red-900 mb-4 flex items-center gap-2">
           <AlertTriangle size={20} />
           Danger Zone
         </h3>
 
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-medium text-red-900 mb-2">Delete Account</h4>
-            <p className="text-sm text-red-700 mb-3">
-              Permanently delete your account and all associated data. This action cannot be undone.
-            </p>
-
-            {!showDeleteConfirm ? (
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
-              >
-                <Trash2 size={16} />
-                Delete Account
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-red-900">
-                  Type "DELETE" to confirm account deletion:
+        {!canDeleteAccount() ? (
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-red-900 mb-2">Delete Account</h4>
+              <div className="bg-red-100 border border-red-300 rounded-lg p-4 mb-3">
+                <p className="text-red-800 mb-3">
+                  {subscription?.status === "cancelled"
+                    ? `Your subscription is cancelled but you still have access until ${new Date(
+                        subscription.period_end
+                      ).toLocaleDateString()}. Account deletion will be available after your subscription period ends.`
+                    : subscription?.status === "active"
+                    ? "You must cancel your active subscription before deleting your account."
+                    : "You must resolve your subscription status before deleting your account."}
                 </p>
-                <input
-                  type="text"
-                  value={deleteConfirmText}
-                  onChange={(e) => setDeleteConfirmText(e.target.value)}
-                  placeholder="Type DELETE here"
-                  className="w-full p-2 border text-gray-900 border-red-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleDeleteAccount}
-                    disabled={deleteConfirmText !== 'DELETE' || isDeleting}
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowDeleteConfirm(false);
-                      setDeleteConfirmText('');
-                    }}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
+                <button
+                  onClick={handleSubscriptionAction}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  {subscription?.status === "cancelled"
+                    ? "View Subscription Details"
+                    : "Manage Subscription"}
+                </button>
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-red-900 mb-2">Delete Account</h4>
+              <p className="text-sm text-red-700 mb-3">
+                Permanently delete your account and all associated data. This action cannot be undone.
+              </p>
+
+              {!showDeleteConfirm ? (
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  Delete Account
+                </button>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-red-900">
+                    Type "DELETE" to confirm account deletion:
+                  </p>
+                  <input
+                    type="text"
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="Type DELETE here"
+                    className="w-full p-2 border text-gray-900 border-red-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleDeleteAccount}
+                      disabled={deleteConfirmText !== 'DELETE' || isDeleting}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowDeleteConfirm(false);
+                        setDeleteConfirmText('');
+                      }}
+                      className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

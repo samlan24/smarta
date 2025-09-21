@@ -1,16 +1,19 @@
 "use client";
-import { useState } from 'react';
-import { X, CreditCard, User } from 'lucide-react';
-import { BillingTab } from './BillingTab';
-import { AccountTab } from './AccountTab';
+import { useState, useEffect } from "react";
+import { X, CreditCard, User } from "lucide-react";
+import { BillingTab } from "./BillingTab";
+import { AccountTab } from "./AccountTab";
 
 interface SettingsModalProps {
-  user: any; // Replace with your User type
+  user: any;
+   subscription: any;
   onClose: () => void;
 }
 
 export function SettingsModal({ user, onClose }: SettingsModalProps) {
-  const [activeTab, setActiveTab] = useState<'billing' | 'account'>('billing');
+  const [activeTab, setActiveTab] = useState<"billing" | "account">("billing");
+  const [subscription, setSubscription] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -38,11 +41,11 @@ export function SettingsModal({ user, onClose }: SettingsModalProps) {
         {/* Tabs */}
         <div className="flex border-b border-gray-200">
           <button
-            onClick={() => setActiveTab('billing')}
+            onClick={() => setActiveTab("billing")}
             className={`flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'billing'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+              activeTab === "billing"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -52,11 +55,11 @@ export function SettingsModal({ user, onClose }: SettingsModalProps) {
           </button>
 
           <button
-            onClick={() => setActiveTab('account')}
+            onClick={() => setActiveTab("account")}
             className={`flex-1 px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === 'account'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+              activeTab === "account"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
             }`}
           >
             <div className="flex items-center justify-center gap-2">
@@ -68,8 +71,16 @@ export function SettingsModal({ user, onClose }: SettingsModalProps) {
 
         {/* Tab Content */}
         <div className="p-6 max-h-[60vh] overflow-y-auto">
-          {activeTab === 'billing' && <BillingTab user={user} />}
-          {activeTab === 'account' && <AccountTab user={user} />}
+          {activeTab === "billing" && (
+            <BillingTab
+              user={user}
+              subscription={subscription}
+              loading={loading}
+            />
+          )}
+          {activeTab === "account" && (
+            <AccountTab user={user} subscription={subscription} />
+          )}
         </div>
       </div>
     </div>
