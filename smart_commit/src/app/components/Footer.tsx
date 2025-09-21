@@ -43,6 +43,7 @@ const Footer = () => {
               Automate commit messages, track commit quality, and unlock workflow analytics—all seamlessly integrated with your git workflow.
             </p>
 
+
             {/* Social links */}
             <div className="flex space-x-4">
               {socialLinks.map((social, index) => (
