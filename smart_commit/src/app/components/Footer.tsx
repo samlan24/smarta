@@ -39,7 +39,7 @@ const Footer = () => {
               <span className="text-xl font-bold">Cmarta-commit</span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">
-              The all-in-one AI-powered productivity suite for developers.
+              The AI-powered productivity suite for developers.
               Automate commit messages, track commit quality, and unlock workflow analytics—all seamlessly integrated with your git workflow.
             </p>
 
