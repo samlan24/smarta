@@ -55,7 +55,7 @@ g7h8i9j more changes`,
             Code Quality and Productivity Pain Points
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-full sm:max-w-3xl mx-auto leading-relaxed">
-            Poor commit practices and lack of visibility slow you down. But you don’t have to settle for guesswork or manual discipline.
+            Poor commit practices and lack of visibility slowing you down. But you don’t have to settle for guesswork or manual discipline.
           </p>
         </div>
 
