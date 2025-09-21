@@ -54,7 +54,7 @@ export function AccountTab({ user }: AccountTabProps) {
 
     try {
       // Implement your account deletion logic here
-      const response = await fetch('/api/account/delete', {
+      const response = await fetch('/api/user/account/delete', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
       });
