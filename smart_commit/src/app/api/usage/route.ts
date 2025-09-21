@@ -48,16 +48,24 @@ export async function GET() {
       .order("created_at", { ascending: false })
       .limit(100);
 
-    // This month’s logs
-    const startOfMonth = new Date();
-    startOfMonth.setDate(1);
-    startOfMonth.setHours(0, 0, 0, 0);
+    // Use UTC for all date calculations
+    const nowUTC = new Date();
+    nowUTC.setUTCHours(0, 0, 0, 0);
 
+    // Start of month in UTC
+    const startOfMonthUTC = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), 1));
+
+    // This month’s logs
     const { data: monthlyLogs } = await supabase
       .from("usage_logs")
       .select("*")
       .eq("user_id", user.id)
-      .gte("created_at", startOfMonth.toISOString());
+      .gte("created_at", startOfMonthUTC.toISOString());
+
+    // Last 30 days in UTC
+    const last30DaysUTC = new Date();
+    last30DaysUTC.setUTCDate(last30DaysUTC.getUTCDate() - 30);
+    last30DaysUTC.setUTCHours(0, 0, 0, 0);
 
     // Stats
     const totalRequests = usageLogs?.length || 0;
@@ -70,11 +78,8 @@ export async function GET() {
       totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 100;
 
     // Chart data (last 14 days)
-    const last30Days = new Date();
-    last30Days.setDate(last30Days.getDate() - 30);
-
     const recentLogs =
-      usageLogs?.filter((log) => new Date(log.created_at) >= last30Days) || [];
+      usageLogs?.filter((log) => new Date(log.created_at) >= last30DaysUTC) || [];
 
     const dailyUsage = recentLogs.reduce((acc, log) => {
       const logDate = new Date(log.created_at);
@@ -91,7 +96,8 @@ export async function GET() {
     const chartData = [];
     for (let i = 13; i >= 0; i--) {
       const date = new Date();
-      date.setDate(date.getDate() - i);
+      date.setUTCDate(date.getUTCDate() - i);
+      date.setUTCHours(0, 0, 0, 0);
       const dateKey = date.toISOString().split("T")[0];
 
       chartData.push({
