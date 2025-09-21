@@ -33,7 +33,7 @@ const HeroSection = () => {
                 "Track productivity with detailed analytics",
                 "Sync your GitHub repos for instant insights",
                 "Works with your workflow (git add → cmarta-commit → git push)",
-                "50 free commits included",
+
               ].map((point, index) => (
                 <div
                   key={index}
