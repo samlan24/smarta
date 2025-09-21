@@ -22,7 +22,7 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl">
-              All-in-one CLI & dashboard for developers and teams. Instantly generate conventional commit messages, track your commit quality, and unlock actionable insights into your codebase—all seamlessly integrated with GitHub.
+              A CLI & dashboard for developers and teams. Instantly generate conventional commit messages, track your commit quality, and unlock actionable insights into your codebase—all seamlessly integrated with GitHub.
             </p>
 
             {/* Bullet Points */}
