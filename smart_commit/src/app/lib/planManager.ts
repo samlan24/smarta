@@ -116,7 +116,7 @@ export async function checkFeatureAccess(
 
   const featureLimit = planInfo.features[feature];
 
-  // Handle unlimited features (-1)
+
   if (featureLimit === -1) {
     return { allowed: true };
   }
