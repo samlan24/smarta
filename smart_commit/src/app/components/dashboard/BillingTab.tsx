@@ -1,7 +1,6 @@
 "use client";
 import { CreditCard, Crown } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import Link from "next/link";
 
 interface BillingTabProps {
   user: any; // Replace with your User type
@@ -64,6 +63,12 @@ export function BillingTab({ user }: BillingTabProps) {
   const monthlyRequests = usage.subscription.usageCount;
   const requestLimit = usage.subscription.usageLimit;
   const resetDate = new Date(usage.subscription.resetDate).toLocaleDateString();
+
+  const handleUpgrade = () => {
+    // Implement your upgrade logic (redirect to Stripe, etc.)
+    console.log("Upgrade clicked");
+  };
+
   return (
     <div className="space-y-6">
       {/* Current Plan */}
@@ -109,14 +114,12 @@ export function BillingTab({ user }: BillingTabProps) {
                 <li>• Advanced templates</li>
                 <li>• Custom commit styles</li>
               </ul>
-              <Link href="/upgrade">
               <button
-
+                onClick={handleUpgrade}
                 className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Upgrade to Pro - $9/month
               </button>
-              </Link>
             </div>
           </div>
         </div>
