@@ -59,7 +59,7 @@ Conventional Commits: <span class="code-string">95%</span>`,
             Clean Commits. Actionable Analytics.
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-full sm:max-w-3xl mx-auto leading-relaxed">
-            Go beyond automation—track your commit quality, get insights into your workflow, and help your team ship better code.
+            Go beyond automation—track your commit quality, get insights into your workflow, and ship better code.
           </p>
         </div>
 
