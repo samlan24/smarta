@@ -15,7 +15,7 @@ const HeroSection = () => {
           {/* Left side - Content */}
           <div className="space-y-6 sm:space-y-8">
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-snug sm:leading-tight">
-              Supercharge Developer Productivity
+              Productivity
               <span className="bg-gradient-primary bg-clip-text text-transparent block">
                 AI Commits & Code Analytics
               </span>
