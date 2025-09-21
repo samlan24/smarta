@@ -144,17 +144,6 @@ export function AccountTab({ user }: AccountTabProps) {
       {/* Account Actions */}
       <div className="space-y-4">
         <h3 className="font-semibold text-gray-900">Account Actions</h3>
-
-        {/* Export Data */}
-        <div className="border rounded-lg p-4">
-          <h4 className="font-medium text-gray-900 mb-2">Export Your Data</h4>
-          <p className="text-sm text-gray-600 mb-3">
-            Download a copy of your templates and usage data
-          </p>
-          <button className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-            Export Data
-          </button>
-        </div>
       </div>
 
       {/* Danger Zone */}
