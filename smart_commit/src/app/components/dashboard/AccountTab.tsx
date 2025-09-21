@@ -114,7 +114,7 @@ export function AccountTab({ user, subscription }: AccountTabProps) {
         return;
       }
 
-      const response = await fetch('/api/account/delete', {
+      const response = await fetch('/api/user/account/delete', {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${session.access_token}`,
