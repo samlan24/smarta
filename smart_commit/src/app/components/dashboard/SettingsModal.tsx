@@ -6,7 +6,6 @@ import { AccountTab } from "./AccountTab";
 
 interface SettingsModalProps {
   user: any;
-   subscription: any;
   onClose: () => void;
 }
 
@@ -14,6 +13,24 @@ export function SettingsModal({ user, onClose }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<"billing" | "account">("billing");
   const [subscription, setSubscription] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const response = await fetch("/api/usage");
+        if (response.ok) {
+          const data = await response.json();
+          setSubscription(data.subscription);
+        }
+      } catch (error) {
+        console.error("Failed to fetch subscription:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubscription();
+  }, []);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
