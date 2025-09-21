@@ -40,60 +40,60 @@ export async function GET() {
       .eq("user_id", user.id)
       .single();
 
-    // Last 100 usage logs
-    const { data: usageLogs } = await supabase
-      .from("usage_logs")
+    // Query commit analytics instead of usage logs
+    const { data: commitAnalytics } = await supabase
+      .from("commit_analytics")
       .select("*")
       .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(100);
+      .order("timestamp", { ascending: false });
 
     // Use UTC for all date calculations
     const nowUTC = new Date();
     nowUTC.setUTCHours(0, 0, 0, 0);
 
-
     const startOfMonthUTC = new Date(Date.UTC(nowUTC.getUTCFullYear(), nowUTC.getUTCMonth(), 1));
 
-    // This month’s logs
-    const { data: monthlyLogs } = await supabase
-      .from("usage_logs")
-      .select("*")
-      .eq("user_id", user.id)
-      .gte("created_at", startOfMonthUTC.toISOString());
+    // This month’s logs - using UTC
+    const monthlyCommitAnalytics = commitAnalytics?.filter((entry) =>
+      new Date(entry.timestamp) >= startOfMonthUTC
+    ) || [];
 
     // Last 30 days in UTC
     const last30DaysUTC = new Date();
     last30DaysUTC.setUTCDate(last30DaysUTC.getUTCDate() - 30);
     last30DaysUTC.setUTCHours(0, 0, 0, 0);
 
+    const last30DaysCommitAnalytics = commitAnalytics?.filter((entry) =>
+      new Date(entry.timestamp) >= last30DaysUTC
+    ) || [];
+
     // Debug logs
-    console.log("Monthly logs count:", monthlyLogs?.length);
-    console.log("Recent logs count:", usageLogs?.length);
+    console.log("Monthly logs count:", monthlyCommitAnalytics?.length);
+    console.log("Recent logs count:", commitAnalytics?.length);
 
     // Stats
-    const totalRequests = usageLogs?.length || 0;
-    const monthlyRequests = monthlyLogs?.length || 0;
+    const totalRequests = commitAnalytics?.length || 0;
+    const monthlyRequests = monthlyCommitAnalytics?.length || 0;
+    // Tokens are not stored in commit_analytics, so we estimate based on lines changed
     const totalTokens =
-      usageLogs?.reduce((sum, log) => sum + (log.tokens_used || 0), 0) || 0;
-    const successfulRequests =
-      usageLogs?.filter((log) => log.success).length || 0;
-    const successRate =
-      totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 100;
+      commitAnalytics?.reduce(
+        (sum, entry) => sum + (entry.lines_added || 0) + (entry.lines_deleted || 0),
+        0
+      ) || 0;
+    // For success rate, since we don't have failure logs, assume 100% for now
+    const successRate = 100;
 
     // Chart data (last 14 days)
-    const recentLogs =
-      usageLogs?.filter((log) => new Date(log.created_at) >= last30DaysUTC) || [];
-
-    const dailyUsage = recentLogs.reduce((acc, log) => {
-      const logDate = new Date(log.created_at);
-      const dateKey = logDate.toISOString().split("T")[0];
+    const dailyUsage = last30DaysCommitAnalytics.reduce((acc, entry) => {
+      const entryDate = new Date(entry.timestamp);
+      const dateKey = entryDate.toISOString().split("T")[0];
 
       if (!acc[dateKey]) {
         acc[dateKey] = { date: dateKey, requests: 0, tokens: 0 };
       }
       acc[dateKey].requests += 1;
-      acc[dateKey].tokens += log.tokens_used || 0;
+      // Estimate tokens: 1 token per line changed
+      acc[dateKey].tokens += (entry.lines_added || 0) + (entry.lines_deleted || 0);
       return acc;
     }, {} as Record<string, { date: string; requests: number; tokens: number }>);
 
@@ -115,15 +115,14 @@ export async function GET() {
       });
     }
 
-    // Recent calls table data
-    const recentCalls =
-      usageLogs?.slice(0, 10).map((log) => ({
-        id: log.id,
-        created_at: log.created_at,
-        tokens_used: log.tokens_used || 0,
-        success: log.success,
-        request_size: log.request_size || 0,
-      })) || [];
+    // Recent calls table data - we don't have token info per commit, so we use lines changed
+    const recentCalls = commitAnalytics?.slice(0, 10).map((entry) => ({
+      id: entry.id,
+      created_at: entry.timestamp,
+      tokens_used: (entry.lines_added || 0) + (entry.lines_deleted || 0),
+      success: true, // Assume all are successful
+      request_size: 0, // Not stored
+    })) || [];
 
     return NextResponse.json({
       subscription: {
@@ -154,7 +153,7 @@ export async function GET() {
       },
       chartData,
       recentCalls,
-      rawLogs: monthlyLogs, // Temporary debug
+      rawLogs: monthlyCommitAnalytics, // Temporary debug
     });
   } catch (error) {
     console.error("Usage API error:", error);

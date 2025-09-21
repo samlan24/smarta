@@ -26,20 +26,19 @@ export async function logApiUsage({
   try {
     const supabase = await createClient()
 
-    // Direct insertion instead of RPC
+    // Use your database function to log usage
     const { error } = await supabase
-      .from('usage_logs')
-      .insert({
-        user_id: userId,
-        api_key_id: apiKeyId || null,
-        endpoint,
-        request_size: requestSize,
-        response_size: responseSize,
-        tokens_used: tokensUsed,
-        success,
-        error_message: errorMessage || null,
-        ip_address: ipAddress || null,
-        user_agent: userAgent || null
+      .rpc('log_api_usage', {
+        p_user_id: userId,
+        p_api_key_id: apiKeyId || null,
+        p_endpoint: endpoint,
+        p_request_size: requestSize,
+        p_response_size: responseSize,
+        p_tokens_used: tokensUsed,
+        p_success: success,
+        p_error_message: errorMessage || null,
+        p_ip_address: ipAddress || null,
+        p_user_agent: userAgent || null
       })
 
     if (error) {
