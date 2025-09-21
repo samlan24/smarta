@@ -14,6 +14,8 @@ export async function GET() {
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    // Plan info + rate limiting
     const planInfo = await getUserPlan(user.id);
     const rateLimitResult = await checkEndpointRateLimits(
       user.id,
@@ -31,22 +33,22 @@ export async function GET() {
       );
     }
 
-    // Get user subscription info
+    // Subscription info
     const { data: subscription } = await supabase
       .from("user_subscriptions")
       .select("*")
       .eq("user_id", user.id)
       .single();
 
-    // Get usage logs for stats
+    // Last 100 usage logs
     const { data: usageLogs } = await supabase
       .from("usage_logs")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(100); // Last 100 requests
+      .limit(100);
 
-    // Get this month's usage
+    // This month’s logs
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
@@ -57,7 +59,7 @@ export async function GET() {
       .eq("user_id", user.id)
       .gte("created_at", startOfMonth.toISOString());
 
-    // Calculate stats
+    // Stats
     const totalRequests = usageLogs?.length || 0;
     const monthlyRequests = monthlyLogs?.length || 0;
     const totalTokens =
@@ -67,16 +69,14 @@ export async function GET() {
     const successRate =
       totalRequests > 0 ? (successfulRequests / totalRequests) * 100 : 100;
 
-    // Group by date for chart (last 30 days)
+    // Chart data (last 14 days)
     const last30Days = new Date();
     last30Days.setDate(last30Days.getDate() - 30);
 
     const recentLogs =
       usageLogs?.filter((log) => new Date(log.created_at) >= last30Days) || [];
 
-    // In your /api/usage endpoint, replace the chart data logic:
     const dailyUsage = recentLogs.reduce((acc, log) => {
-      // Use consistent date handling
       const logDate = new Date(log.created_at);
       const dateKey = logDate.toISOString().split("T")[0];
 
@@ -86,23 +86,34 @@ export async function GET() {
       acc[dateKey].requests += 1;
       acc[dateKey].tokens += log.tokens_used || 0;
       return acc;
-    }, {});
+    }, {} as Record<string, { date: string; requests: number; tokens: number }>);
 
-    // Ensure we get the last 14 days regardless of data gaps
     const chartData = [];
     for (let i = 13; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const dateKey = date.toISOString().split("T")[0];
 
-      chartData.push(
-        dailyUsage[dateKey] || {
-          date: dateKey,
-          requests: 0,
-          tokens: 0,
-        }
-      );
+      chartData.push({
+        date: dateKey,
+        requests: dailyUsage[dateKey]?.requests || 0,
+        tokens: dailyUsage[dateKey]?.tokens || 0,
+        displayDate: date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }),
+      });
     }
+
+    // Recent calls table data
+    const recentCalls =
+      usageLogs?.slice(0, 10).map((log) => ({
+        id: log.id,
+        created_at: log.created_at,
+        tokens_used: log.tokens_used || 0,
+        success: log.success,
+        request_size: log.request_size || 0,
+      })) || [];
 
     return NextResponse.json({
       subscription: {
@@ -132,7 +143,7 @@ export async function GET() {
           (subscription?.usage_limit || 100) - (subscription?.usage_count || 0),
       },
       chartData,
-      recentCalls: usageLogs?.slice(0, 10) || [],
+      recentCalls,
     });
   } catch (error) {
     console.error("Usage API error:", error);
