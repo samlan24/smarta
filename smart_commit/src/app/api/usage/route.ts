@@ -74,17 +74,35 @@ export async function GET() {
     const recentLogs =
       usageLogs?.filter((log) => new Date(log.created_at) >= last30Days) || [];
 
+    // In your /api/usage endpoint, replace the chart data logic:
     const dailyUsage = recentLogs.reduce((acc, log) => {
-      const date = new Date(log.created_at).toISOString().split("T")[0];
-      if (!acc[date]) {
-        acc[date] = { date, requests: 0, tokens: 0 };
+      // Use consistent date handling
+      const logDate = new Date(log.created_at);
+      const dateKey = logDate.toISOString().split("T")[0];
+
+      if (!acc[dateKey]) {
+        acc[dateKey] = { date: dateKey, requests: 0, tokens: 0 };
       }
-      acc[date].requests += 1;
-      acc[date].tokens += log.tokens_used || 0;
+      acc[dateKey].requests += 1;
+      acc[dateKey].tokens += log.tokens_used || 0;
       return acc;
     }, {});
 
-    const chartData = Object.values(dailyUsage).slice(-14); // Last 14 days
+    // Ensure we get the last 14 days regardless of data gaps
+    const chartData = [];
+    for (let i = 13; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const dateKey = date.toISOString().split("T")[0];
+
+      chartData.push(
+        dailyUsage[dateKey] || {
+          date: dateKey,
+          requests: 0,
+          tokens: 0,
+        }
+      );
+    }
 
     return NextResponse.json({
       subscription: {
