@@ -1,59 +1,59 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react";
 
 interface ApiKey {
-  id: string
-  api_key: string
-  name: string
-  is_active: boolean
-  last_used_at: string | null
-  created_at: string
+  id: string;
+  api_key: string;
+  name: string;
+  is_active: boolean;
+  last_used_at: string | null;
+  created_at: string;
 }
 
 export function ApiKeyManager() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [showNewKey, setShowNewKey] = useState<string | null>(null)
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showNewKey, setShowNewKey] = useState<string | null>(null);
 
   const fetchApiKeys = async () => {
     try {
-      const response = await fetch('/api/user/api-key')
-      const data = await response.json()
+      const response = await fetch("/api/user/api-key");
+      const data = await response.json();
       if (data.apiKeys) {
-        setApiKeys(data.apiKeys)
+        setApiKeys(data.apiKeys);
       }
     } catch (error) {
-      console.error('Failed to fetch API keys:', error)
+      console.error("Failed to fetch API keys:", error);
     }
-  }
+  };
 
   const generateNewKey = async () => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/user/api-key', {
-        method: 'POST',
-      })
-      const data = await response.json()
+      const response = await fetch("/api/user/api-key", {
+        method: "POST",
+      });
+      const data = await response.json();
 
       if (data.apiKey) {
-        setShowNewKey(data.apiKey.api_key)
-        await fetchApiKeys()
+        setShowNewKey(data.apiKey.api_key);
+        await fetchApiKeys();
       }
     } catch (error) {
-      console.error('Failed to generate API key:', error)
+      console.error("Failed to generate API key:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchApiKeys()
-  }, [])
+    fetchApiKeys();
+  }, []);
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-  }
+    navigator.clipboard.writeText(text);
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6 h-fit">
@@ -64,13 +64,15 @@ export function ApiKeyManager() {
           disabled={isLoading}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
         >
-          {isLoading ? 'Generating...' : 'Generate New Key'}
+          {isLoading ? "Generating..." : "Generate New Key"}
         </button>
       </div>
 
       {showNewKey && (
         <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-          <h4 className="font-semibold text-green-800 mb-2">New API Key Generated!</h4>
+          <h4 className="font-semibold text-green-800 mb-2">
+            New API Key Generated!
+          </h4>
           <div className="flex items-center gap-2">
             <code className="flex-1 p-2 bg-white border rounded font-mono text-sm text-gray-800">
               {showNewKey}
@@ -96,7 +98,10 @@ export function ApiKeyManager() {
 
       <div className="space-y-3">
         {apiKeys.map((key) => (
-          <div key={key.id} className="flex items-center justify-between p-3 border rounded-lg">
+          <div
+            key={key.id}
+            className="flex items-center justify-between p-3 border rounded-lg"
+          >
             <div>
               <div className="font-medium">{key.name}</div>
               <div className="text-sm text-gray-500">
@@ -109,7 +114,7 @@ export function ApiKeyManager() {
               </div>
             </div>
             <div className="text-sm text-gray-400">
-              sk_****{key.api_key.slice(-8)}
+              {key.api_key ? `sk_****${key.api_key.slice(-8)}` : "No API key"}
             </div>
           </div>
         ))}
@@ -121,5 +126,5 @@ export function ApiKeyManager() {
         )}
       </div>
     </div>
-  )
+  );
 }
