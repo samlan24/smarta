@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     const apiKey = authHeader.replace("Bearer ", "");
 
-    // Validate API key
+
     const authResult = await validateApiKey(apiKey);
     if (!authResult.valid) {
       return NextResponse.json({ error: authResult.error }, { status: 401 });
