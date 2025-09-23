@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { validateApiKey } from "../../lib/auth";
-import { logApiUsage } from "../../lib/usage-tracker";
 import GeminiClient from "../../lib/GeminiClient";
 import { AnalyticsParser } from "../../lib/analytics-parser";
 import { createClient } from "../../lib/supabase/server";
 import { checkCommitGenerationLimits } from "../../lib/rateLimit";
 import {
   extractRequestMetadata,
-  logApiUsage as logApiUsageNew,
+  logApiUsage,
 } from "../../lib/rateLimit";
 import { metadata } from "@/app/layout";
 
