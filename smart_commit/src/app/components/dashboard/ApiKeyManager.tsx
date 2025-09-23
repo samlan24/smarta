@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 interface ApiKey {
   id: string;
-  api_key: string;
+  api_key: string | null;
   name: string;
   is_active: boolean;
   last_used_at: string | null;
