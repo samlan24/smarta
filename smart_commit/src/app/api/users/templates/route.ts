@@ -1,22 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "../../../lib/supabase/server";
+import { validateApiKey } from "../../../lib/auth";   // ✅ use this
 import { checkFeatureAccess, getUserPlan } from "../../../lib/planManager";
 import { checkEndpointRateLimits, ENDPOINT_LIMITS } from "../../../lib/rateLimit";
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Get authenticated user from session
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // 🔑 Extract API key
+    const authHeader = request.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Missing or invalid Authorization header" }, { status: 401 });
     }
+
+    const apiKey = authHeader.replace("Bearer ", "");
+    const authResult = await validateApiKey(apiKey);
+
+    if (!authResult.valid || !authResult.userId) {
+      return NextResponse.json({ error: authResult.error || "Unauthorized" }, { status: 401 });
+    }
+
+    const userId = authResult.userId;
+    const supabase = await createClient();
 
     // Rate limiting
     const rateLimitResult = await checkEndpointRateLimits(
-      user.id,
+      userId,
       "templates-get",
       ENDPOINT_LIMITS.TEMPLATES
     );
@@ -31,38 +39,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get templates
+    // Fetch templates
     const { data: templates, error } = await supabase
       .from("user_templates")
       .select("id, name, message, created_at")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
     if (error) {
-      return NextResponse.json(
-        { error: "Failed to fetch templates" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Failed to fetch templates" }, { status: 500 });
     }
 
-    // Get plan info
-    const planInfo = await getUserPlan(user.id);
+    // Fetch plan info
+    const planInfo = await getUserPlan(userId);
 
     return NextResponse.json({
-      templates,
+      templates: templates || [],
       planInfo: planInfo ? {
         planName: planInfo.planName,
-        templateLimit: planInfo.features.commit_templates
-      } : null
+        templateLimit: planInfo.features.commit_templates,
+      } : null,
     });
 
   } catch (error) {
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    console.error("Templates GET error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
 
 export async function POST(request: NextRequest) {
   try {
