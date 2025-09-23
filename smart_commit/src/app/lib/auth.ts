@@ -4,7 +4,7 @@ export async function validateApiKey(apiKey: string) {
   try {
     const supabase = await createClient()
 
-    // Use your database function to get user by API key
+    // Use your database function to get user by their API key
     const { data, error } = await supabase
       .rpc('get_user_by_api_key', { p_api_key: apiKey })
 
