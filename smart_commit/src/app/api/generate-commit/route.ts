@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
   let requestSize = 0;
 
   try {
-    // Get API key from Authorization header
+    // Get API key from  the Authorization header
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
