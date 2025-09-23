@@ -1,6 +1,6 @@
 import { createClient } from "../lib/supabase/server";
 
-// Temporary debug version
+// Tempor debug version
 export async function validateApiKey(apiKey: string) {
   try {
     const supabase = await createClient();
