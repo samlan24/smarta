@@ -15,7 +15,7 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Plan info + rate limiting
+    // Plan info and rate limiting
     const planInfo = await getUserPlan(user.id);
     const rateLimitResult = await checkEndpointRateLimits(
       user.id,
