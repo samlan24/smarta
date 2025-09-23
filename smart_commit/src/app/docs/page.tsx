@@ -32,7 +32,6 @@ export default function DocsPage() {
     { id: "installation", title: "Installation" },
     { id: "getting-started", title: "Getting Started" },
     { id: "basic-usage", title: "Basic Usage" },
-    { id: "template-system", title: "Template System" },
     { id: "dashboard", title: "Dashboard" },
     { id: "cli-commands", title: "CLI Commands" },
     { id: "configuration", title: "Configuration" },
@@ -331,7 +330,7 @@ cmarta-commit`}</CodeBlock>
 ❯ Commit with this message
   Edit the message
   Generate a new message
-  Save as template
+
   Cancel`}</pre>
                     </div>
                   </div>
@@ -353,89 +352,11 @@ cmarta-commit`}</CodeBlock>
                         <strong>Generate a new message</strong>: Creates a new
                         AI-generated message
                       </li>
-                      <li>
-                        <strong>Save as template</strong>: Saves the message for
-                        future reuse
-                      </li>
+
                       <li>
                         <strong>Cancel</strong>: Exits without committing
                       </li>
                     </ul>
-                  </div>
-                </div>
-              </section>
-
-              {/* Template System */}
-              <section
-                data-section="template-system"
-                id="template-system"
-                className="mb-12"
-              >
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">
-                  Template System
-                </h2>
-                <p className="text-gray-700 mb-8">
-                  Templates allow you to save frequently used commit messages
-                  for instant reuse, saving API usage and time.
-                </p>
-
-                <div className="space-y-8">
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      Save a Template
-                    </h3>
-                    <p className="text-gray-700 mb-4">
-                      During the commit flow, select "Save as template" and
-                      provide a name:
-                    </p>
-                    <div className="bg-gray-100 p-4 rounded-lg">
-                      <pre className="text-sm text-gray-800">{`? Enter template name: api-fix
-✅ Template "api-fix" saved!`}</pre>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      List Your Templates
-                    </h3>
-                    <CodeBlock>cmarta-commit templates</CodeBlock>
-                    <p className="text-gray-700 mt-4">Output:</p>
-                    <div className="bg-gray-100 p-4 rounded-lg">
-                      <pre className="text-sm text-gray-800">{`📋 Saved Templates:
-  api-fix: fix: resolve API validation error
-  feature-add: feat: add new user endpoint
-  hotfix: fix: critical security patch`}</pre>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      Use a Template
-                    </h3>
-                    <CodeBlock>cmarta-commit use-template api-fix</CodeBlock>
-                    <p className="text-gray-700 mt-4">This will:</p>
-                    <ol className="list-decimal list-inside space-y-1 text-gray-700 mt-2">
-                      <li>Stage your changes (if needed)</li>
-                      <li>Use the saved template message</li>
-                      <li>Prompt for confirmation</li>
-                    </ol>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      Quick Template Commit
-                    </h3>
-                    <p className="text-gray-700 mb-4">
-                      Auto-commit with a template:
-                    </p>
-                    <CodeBlock>cmarta-commit use-template api-fix -y</CodeBlock>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      Delete a Template
-                    </h3>
-                    <CodeBlock>cmarta-commit delete-template api-fix</CodeBlock>
                   </div>
                 </div>
               </section>
@@ -495,18 +416,6 @@ cmarta-commit`}</CodeBlock>
                       <li>Secure key display</li>
                     </ul>
                   </div>
-
-                  <div className="bg-white p-6 rounded-lg shadow-sm border">
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      Template Management
-                    </h3>
-                    <ul className="space-y-2 text-gray-700">
-                      <li>Create and edit templates</li>
-                      <li>Quick copy to clipboard</li>
-                      <li>Usage statistics</li>
-                      <li>Template organization</li>
-                    </ul>
-                  </div>
                 </div>
               </section>
 
@@ -545,23 +454,6 @@ cmarta-commit --auto
 cmarta-commit -a -y`}</CodeBlock>
                       </div>
                     </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                      Template Commands
-                    </h3>
-                    <CodeBlock>{`# List all templates
-cmarta-commit templates
-
-# Use a specific template
-cmarta-commit use-template <name>
-
-# Use template with auto-commit
-cmarta-commit use-template <name> -y
-
-# Delete a template
-cmarta-commit delete-template <name>`}</CodeBlock>
                   </div>
 
                   <div>
@@ -679,7 +571,7 @@ cmarta-commit -a`}</CodeBlock>
                         <ul className="list-disc list-inside space-y-1 text-orange-700 mt-2">
                           <li>Check your usage in the dashboard</li>
                           <li>Consider upgrading your plan</li>
-                          <li>Use templates for routine commits</li>
+
                         </ul>
                       </div>
                     </div>
@@ -737,10 +629,7 @@ cmarta-commit -a`}</CodeBlock>
                         Best Practices
                       </h4>
                       <ul className="space-y-2 text-blue-700">
-                        <li>
-                          <strong>Use Templates</strong>: Save common patterns
-                          as templates
-                        </li>
+
                         <li>
                           <strong>Stage Relevant Changes</strong>: Only stage
                           files you want to commit
