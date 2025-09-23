@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
   let userId: string | null = null;
 
   try {
-    // Get API key from Authorization header
+    // Get API key from Authorizing header
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
