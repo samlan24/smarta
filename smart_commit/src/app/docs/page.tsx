@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Terminal } from "lucide-react";
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState("installation");
@@ -63,7 +64,7 @@ export default function DocsPage() {
             <div className="flex items-center space-x-3 sm:space-x-4">
               <div className="bg-blue-600 p-2 rounded-lg">
                 <span className="text-white font-bold text-lg sm:text-xl">
-                  C_C
+                  <Terminal className="w-5 h-5 text-primary-foreground" />
                 </span>
               </div>
               <div>
