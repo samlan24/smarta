@@ -2,7 +2,6 @@
 import { UsageStats } from "./UsageStats";
 import { UsageChart } from "./UsageChart";
 import { ApiKeyManager } from "./ApiKeyManager";
-import { TemplateManager } from "./TemplateManager";
 import { RecentCalls } from "./RecentCalls";
 import CodeChangesChart from './CodeChangesChart';
 import FileActivityChart from './FileActivityChart';
@@ -61,17 +60,6 @@ export function DashboardContent({ activeTab }: DashboardContentProps) {
             </div>
             <UsageStats />
             <UsageChart />
-          </div>
-        );
-
-      case 'templates':
-        return (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Templates</h2>
-              <p className="text-gray-600 mb-6">Manage your commit message templates and styles</p>
-            </div>
-            <TemplateManager />
           </div>
         );
 

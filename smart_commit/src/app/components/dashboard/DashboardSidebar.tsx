@@ -49,12 +49,6 @@ const tabs = [
     description: 'API usage and billing information'
   },
   {
-    id: 'templates',
-    name: 'Templates',
-    icon: FileText,
-    description: 'Commit message templates and preferences'
-  },
-  {
     id: 'integrations',
     name: 'Git Integrations',
     icon: Github,
