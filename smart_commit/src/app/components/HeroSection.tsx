@@ -19,9 +19,6 @@ const HeroSection = () => {
               <span className="bg-gradient-primary bg-clip-text text-transparent block">
                 & Code Analytics
               </span>
-              <span className="text-xl sm:text-2xl lg:text-3xl font-normal block mt-4 text-muted-foreground">
-                CLI tool and dashboard for smarter Git workflows
-              </span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl">
