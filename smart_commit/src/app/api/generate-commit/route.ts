@@ -4,18 +4,15 @@ import GeminiClient from "../../lib/GeminiClient";
 import { AnalyticsParser } from "../../lib/analytics-parser";
 import { createClient } from "../../lib/supabase/server";
 import { checkCommitGenerationLimits } from "../../lib/rateLimit";
-import {
-  extractRequestMetadata,
-  logApiUsage,
-} from "../../lib/rateLimit";
-import { metadata } from "@/app/layout";
+import { extractRequestMetadata, logApiUsage } from "../../lib/rateLimit";
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   let userId: string | null = null;
+  let requestSize = 0;
 
   try {
-    // Get API key from Authorizing header
+    // Get API key from Authorization header
     const authHeader = request.headers.get("Authorization");
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
@@ -25,7 +22,6 @@ export async function POST(request: NextRequest) {
     }
 
     const apiKey = authHeader.replace("Bearer ", "");
-
 
     const authResult = await validateApiKey(apiKey);
     if (!authResult.valid) {
@@ -46,20 +42,27 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
-    const metadata = extractRequestMetadata(request);
+
+    const requestMetadata = extractRequestMetadata(request);
+
+    // Parse request body early to get sizes
+    const body = await request.json();
+    const { diff, options = {} } = body;
+
+    requestSize = JSON.stringify(body).length;
 
     const rateLimitResult = await checkCommitGenerationLimits(userId);
     if (!rateLimitResult.allowed) {
-      // Log the rate limit hit with your existing system
+      // Log the rate limit hit with actual request size
       await logApiUsage({
         userId,
         endpoint: "/api/generate-commit",
-        requestSize: 0,
+        requestSize,
         responseSize: 0,
-        tokensUsed: 0,
+        tokensUsed: Math.ceil(requestSize / 4),
         success: false,
         errorMessage: rateLimitResult.error,
-        ...metadata,
+        ...requestMetadata,
       });
 
       return NextResponse.json(
@@ -73,10 +76,6 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-
-    // Parse request body
-    const body = await request.json();
-    const { diff, options = {} } = body;
 
     if (!diff || typeof diff !== "string") {
       return NextResponse.json(
@@ -119,9 +118,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const requestSize = diff.length;
     const responseSize = commitMessage.length;
-    const tokensUsed = Math.ceil((requestSize + responseSize) / 4); // Rough estimate
+    const finalTokensUsed = Math.ceil((requestSize + responseSize) / 4);
 
     // Log successful usage
     if (typeof userId === "string") {
@@ -130,9 +128,9 @@ export async function POST(request: NextRequest) {
         endpoint: "/api/generate-commit",
         requestSize,
         responseSize,
-        tokensUsed,
+        tokensUsed: finalTokensUsed,
         success: true,
-        ...metadata,
+        ...requestMetadata,
       });
     }
 
@@ -150,10 +148,9 @@ export async function POST(request: NextRequest) {
         totalDeletions: analysis.stats.totalDeletions,
       },
       metadata: {
-        tokensUsed,
+        tokensUsed: finalTokensUsed,
         responseTime,
-        remaining_commits: rateLimitResult.remaining_monthly || 0
-
+        remaining_commits: rateLimitResult.remaining_monthly || 0,
       },
     });
   } catch (error) {
@@ -162,17 +159,29 @@ export async function POST(request: NextRequest) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
 
+    // Calculate request size for error logging
+    let errorRequestSize = requestSize;
+    if (errorRequestSize === 0) {
+      try {
+        const body = await request.clone().json();
+        errorRequestSize = JSON.stringify(body).length;
+      } catch {
+        errorRequestSize = 0;
+      }
+    }
+
     // Log failed usage if we have userId
     if (typeof userId === "string") {
+      const requestMetadata = extractRequestMetadata(request);
       await logApiUsage({
         userId,
         endpoint: "/api/generate-commit",
-        requestSize: 0,
+        requestSize: errorRequestSize,
         responseSize: 0,
-        tokensUsed: 0,
+        tokensUsed: Math.ceil(errorRequestSize / 4),
         success: false,
         errorMessage,
-        ...metadata
+        ...requestMetadata,
       });
     }
 
