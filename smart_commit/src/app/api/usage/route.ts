@@ -40,7 +40,7 @@ export async function GET() {
       .eq("user_id", user.id)
       .single();
 
-    // Query usage_logs instead of commit_analytics
+    // Query usage_logs
     const { data: usageLogs } = await supabase
       .from("usage_logs")
       .select("*")
