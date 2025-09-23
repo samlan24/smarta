@@ -15,14 +15,20 @@ const HeroSection = () => {
           {/* Left side - Content */}
           <div className="space-y-6 sm:space-y-8">
             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold leading-snug sm:leading-tight">
-              Productivity
+              AI-Powered Commits
               <span className="bg-gradient-primary bg-clip-text text-transparent block">
-                AI Commits & Code Analytics
+                & Code Analytics
+              </span>
+              <span className="text-xl sm:text-2xl lg:text-3xl font-normal block mt-4 text-muted-foreground">
+                CLI tool and dashboard for smarter Git workflows
               </span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-full lg:max-w-2xl">
-              A CLI & dashboard for developers and teams. Instantly generate conventional commit messages, track your commit quality, and unlock actionable insights into your codebase—all seamlessly integrated with GitHub.
+              A CLI & dashboard for developers and teams. Instantly generate
+              conventional commit messages, track your commit quality, and
+              unlock actionable insights into your codebase—all seamlessly
+              integrated with GitHub.
             </p>
 
             {/* Bullet Points */}
@@ -33,7 +39,6 @@ const HeroSection = () => {
                 "Track productivity with detailed analytics",
                 "Sync your GitHub repos for instant insights",
                 "Works with your workflow (git add → cmarta-commit → git push)",
-
               ].map((point, index) => (
                 <div
                   key={index}
@@ -50,19 +55,19 @@ const HeroSection = () => {
             {/* CTAs */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
               <Link href="/docs">
-              <Button className="btn-hero group w-full sm:w-auto">
-                <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
-                Install Cmarta-commit
-              </Button>
+                <Button className="btn-hero group w-full sm:w-auto">
+                  <Download className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
+                  Install Cmarta-commit
+                </Button>
               </Link>
               <Link href="/auth/signin">
-              <Button
-                variant="secondary"
-                className="btn-hero group w-full sm:w-auto"
-              >
-                <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
-                View Analytics Demo
-              </Button>
+                <Button
+                  variant="secondary"
+                  className="btn-hero group w-full sm:w-auto"
+                >
+                  <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 group-hover:scale-110 transition-transform" />
+                  View Analytics Demo
+                </Button>
               </Link>
             </div>
           </div>
