@@ -25,7 +25,7 @@ export async function validateApiKey(apiKey: string) {
 
     return {
       valid: true,
-      userId: userData.user_id,
+       userId: userData.result_user_id,
       subscriptionStatus: userData.subscription_status
     }
   } catch (error) {
