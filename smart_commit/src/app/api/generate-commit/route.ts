@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     // Parse request body early to get sizes
     const body = await request.json();
-    const { diff, options = {} } = body;
+    const { diff, options = {}, repositoryName } = body;
 
     requestSize = JSON.stringify(body).length;
 
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     // Parse git diff for analytics
     const analytics = AnalyticsParser.parseGitDiff(diff);
     const commitType = AnalyticsParser.extractCommitType(commitMessage);
-    const repositoryName = AnalyticsParser.extractRepositoryName(diff);
+
 
     // Store analytics data
     if (typeof userId === "string") {
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
             lines_added: analytics.linesAdded,
             lines_deleted: analytics.linesDeleted,
             commit_type: AnalyticsParser.extractCommitType(commitMessage),
-            repository_name: AnalyticsParser.extractRepositoryName(diff),
+            repository_name: repositoryName || 'unknown',
             timestamp: new Date().toISOString(),
           });
       } catch (analyticsError) {
