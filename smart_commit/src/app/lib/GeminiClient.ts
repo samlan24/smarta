@@ -127,7 +127,7 @@ class GeminiClient {
 - Scope should be specific and relevant
 - Body should explain what and why the change matters, not how
 - Prioritize clarity and brevity
-- Keep body concise - maximum 2 -3 lines total
+- Keep body concise - maximum 1 line total
 
 ## Special Instructions:`;
 
