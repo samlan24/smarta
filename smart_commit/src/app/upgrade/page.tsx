@@ -239,7 +239,7 @@ export default function UpgradePage() {
               )}
             </Button>
             <p className="text-sm text-muted-foreground mt-3">
-              30-day money-back guarantee • Cancel anytime
+              • Cancel anytime
             </p>
           </Card>
         </div>
