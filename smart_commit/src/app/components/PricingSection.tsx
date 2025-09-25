@@ -24,7 +24,7 @@ const PricingSection = () => {
     {
       name: "Pro",
       icon: Crown,
-      price: "$9.99",
+      price: "$7.99",
       period: "/month",
       description:
         "Unlock advanced analytics & unlimited productivity features",

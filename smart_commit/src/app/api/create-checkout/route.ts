@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
             },
             product_options: {
               name: "Commit Pro",
-              description: "Pro subscription - 200 commits per month + unlimited templates and analytics",
+              description: "Pro subscription - 200 commits per month + unlimited analytics",
               redirect_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?upgrade=success`,
             },
           },
