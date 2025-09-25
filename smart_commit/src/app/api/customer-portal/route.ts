@@ -9,7 +9,6 @@ const supabase = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
       return NextResponse.json(
@@ -31,6 +30,8 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
+    console.log("User ID:", user.id);
+    console.log("Looking for subscription for user:", user.id);
 
     // Get user's subscription from the new table structure
     const { data: subscription, error } = await supabase
@@ -39,12 +40,16 @@ export async function GET(request: NextRequest) {
       .eq("user_id", user.id)
       .single();
 
+    console.log("Subscription query result:", { subscription, error });
+
     if (error || !subscription?.lemon_squeezy_id) {
       return NextResponse.json(
         { error: "No active subscription found" },
         { status: 404 }
       );
     }
+
+    console.log("Lemon Squeezy ID:", subscription.lemon_squeezy_id);
 
     // Get customer portal URL from LemonSqueezy
     const portalUrl = await getCustomerPortalUrl(subscription.lemon_squeezy_id);
